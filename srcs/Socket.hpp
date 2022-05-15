@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/12 14:32:01 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/14 20:46:11 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/15 18:20:47 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,51 +15,53 @@
 #pragma once
 
 #include "Webserv.hpp"
+#include <vector>
 
 using namespace std;
 
 class Socket {
 	private:
-		int	server_fd;
+		int	sockfd;
 		struct sockaddr_in sockAddr; // in represents IP Network address.
 		// i can consider here using struct sockaddr_storage instead of sockaddr_in
 		// in order to cover both IPv4 and IPv6 address. In that case, i might have to use
 		// inet_pton function in order to translate IP address in numbers-and-dots notation
 		const int PORT;
+		vector<struct kevent> ev;
 
 	public:
 		Socket();
 
 		void	create_socket(struct addrinfo *AddrInfo) {
-			if ((server_fd = socket(AddrInfo->ai_family, AddrInfo->ai_socktype, AddrInfo->ai_protocol)) < 0)
+			if ((sockfd = socket(AddrInfo->ai_family, AddrInfo->ai_socktype, AddrInfo->ai_protocol)) < 0)
 				throw ...;
+			// put it into the non-blocking mode
+			fcntl(sockfd, F_SETFL, O_NONBLOCK); // but it might be considered as an old way
 		}
 
 		void	name_socket(struct *AddrInfo) {
-			if (bind(server_fd, AddrInfo->ai_addr, AddrInfo->ai_addrlen) < 0)
+			if (bind(sockfd, AddrInfo->ai_addr, AddrInfo->ai_addrlen) < 0)
 				throw ...;
 		}
 		
 		void	wait_connection() {
-			if (listen(server_fd, 42) < 0)
+			if (listen(sockfd, 20) < 0)
 				throw ...;
 		}
 
 		int		newConnection() {
 			int	newConnection;
 			socklen_t	addrlen = sizeof(sockAddr);
-			if ((newConnection = accept(server_fd, (struct sockaddr *) &sockAddr, (socklen_t *) &addrlen)) < 0)
+			if ((newConnection = accept(sockfd, (struct sockaddr *) &sockAddr, (socklen_t *) &addrlen)) < 0)
 				throw ...;
 			return (newConnection);
 		}
 
 		void	receiveData(int connection) {
-			char	buf[9999];
-			int fd = read(connection, buf, 9999);
-			std::cout <<
+			
 		}
 
-		void	sendData(int connection, string s) {
+		void	sendData(int sockfd, string s) {
 			send(connection, s.c_str(), s.size(), 0);
 		}
 
@@ -79,3 +81,6 @@ class Socket {
 			inet_ntop(AF_INET6, &(sa6.sin6_addr), ip6, INET6_ADDRSTRLEN);
 		}
 };
+
+//* NOTE
+//* In order to use poll, i'll use vector for struct pollfd
