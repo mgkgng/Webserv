@@ -6,7 +6,7 @@
 #    By: jrathelo <student.42nice.fr>               +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/25 15:25:19 by jrathelo          #+#    #+#              #
-#    Updated: 2022/05/16 11:15:00 by jrathelo         ###   ########.fr        #
+#    Updated: 2022/05/16 15:21:13 by jrathelo         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -48,13 +48,13 @@ SRC_DIR = src
 OUTS = objs
 
 # Source Files
-SRC = 
+SRC = main.cpp config-parsing/JSON.cpp
 SRC_PLUS_PATH = $(addprefix $(SRC_DIR)/, $(SRC))
 
 # Output Files
 OUT = $(subst $(SRC_DIR)/, $(OUTS)/, $(patsubst %.cpp, %.opp, $(SRC_PLUS_PATH)))
 
-NAME = container
+NAME = webserv
 
 CC = c++
 CFLAGS = -Wall -Wextra -Werror -std=c++98 -g #-fsanitize=address
@@ -73,7 +73,7 @@ $(OUT): $(OUTS)/%.opp : $(SRC_DIR)/%.cpp
 	@$(CC) $(CFLAGS) -c $< -o $@ $(INCLUDES)
 
 re: fclean
-	make $(NAME)
+	@make $(NAME)
 
 fclean: clean
 	@echo "$(_RED)Cleaning output files$(_COLOR_RESET)"
