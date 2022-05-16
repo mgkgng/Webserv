@@ -6,12 +6,13 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/15 18:13:42 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/16 13:13:46 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include <iostream>
 #include <istream>
 #include <string>
 
