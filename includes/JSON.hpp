@@ -13,6 +13,7 @@ class JSON {
 		typedef std::map<std::string, JSON>							object_box;
 
 		JSON();
+		JSON(std::ifstream & file);
 		JSON(std::string path);
 		JSON(const JSON & json);
 		~JSON();
@@ -22,15 +23,19 @@ class JSON {
 		const boolean_box getBooleans() const;
 		const object_box getObjects() const;
 	private:
-		string_box		strings;
-		number_box		numbers;
-		boolean_box		booleans;
-		object_box		objects;
+		string_box					strings;
+		number_box					numbers;
+		boolean_box					booleans;
+		object_box					objects;
+		std::vector<std::string>	nulls;
 		
 		std::vector<std::string>	keys;
 
 		void		skipwhitespace(std::ifstream & file);
 		std::string	parsestring(std::ifstream & file);
+		int			isbooleantrue(std::ifstream & file);
+		int			isbooleanfalse(std::ifstream & file);
+		int			isnull(std::ifstream & file);
 
 
 		struct InvalidPath: public std::exception { const char * what () const throw () { return "No file was found from the given path"; } };

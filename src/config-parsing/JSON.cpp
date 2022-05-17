@@ -66,6 +66,73 @@ std::string JSON::parsestring(std::ifstream & file) {
 	return str;
 }
 
+int JSON::isbooleanfalse(std::ifstream & file) {
+	char c = file.peek();
+	if (tolower(c) == 'a') {
+		file.get(c);
+		c = file.peek();
+		if (tolower(c) == 'l') {
+			file.get(c);
+			c = file.peek();
+			if (tolower(c) == 's') {
+				file.get(c);
+				c = file.peek();
+				if (tolower(c) == 'e') {
+					file.get(c);
+					c = file.peek();
+					if (isspace(c) || c == ',' || c == '}') {
+						return (1);
+					}
+				}
+			}
+		}
+	}
+	file.close();
+	throw InvalidJSONWrongValueType();
+}
+
+int JSON::isbooleantrue(std::ifstream & file) {
+	char c = file.peek();
+	if (c == 'r') {
+		file.get(c);
+		c = file.peek();
+		if (c == 'u') {
+			file.get(c);
+			c = file.peek();
+			if (c == 'e') {
+				file.get(c);
+				c = file.peek();
+				if (isspace(c) || c == ',' || c == '}') {
+					return (1);
+				}
+			}
+		}
+	}
+	file.close();
+	throw InvalidJSONWrongValueType();
+}
+
+int JSON::isnull(std::ifstream & file) {
+	char c = file.peek();
+	if (c == 'u') {
+		file.get(c);
+		c = file.peek();
+		if (c == 'l') {
+			file.get(c);
+			c = file.peek();
+			if (c == 'l') {
+				file.get(c);
+				c = file.peek();
+				if (isspace(c) || c == ',' || c == '}') {
+					return (1);
+				}
+			}
+		}
+	}
+	file.close();
+	throw InvalidJSONWrongValueType();
+}
+
 JSON::JSON(std::string path) {
 	std::ifstream	file;
 	char			c;
@@ -110,19 +177,29 @@ JSON::JSON(std::string path) {
 				}
 				skipwhitespace(file);
 				file.get(c);
-				switch (tolower(c)) {
+				switch (c) {
 					case '"':
 						this->strings.insert(std::pair<std::string, std::string>(str, parsestring(file)));
 						file.get(c);
 						break;
 					case '{':
+						// this->objects.insert(std::pair<std::string, JSON>(str, JSON(file)));
 						break;
 					case 't':
+						if (isbooleantrue(file) == 1) {
+							this->booleans.insert(std::pair<std::string, bool>(str, true));
+						}
 						break;
 					case 'f':
+						if (isbooleanfalse(file) == 1) {
+							this->booleans.insert(std::pair<std::string, bool>(str, false));
+						}
 						break;
-					// case 'n':
-					// 	break;
+					case 'n':
+						if (isnull(file) == 1) {
+							this->nulls.push_back(str);
+						}
+						break;
 					default:
 						if (c == '-' || isdigit(c)) {
 
@@ -144,10 +221,15 @@ JSON::JSON(std::string path) {
 			throw InvalidJSONWrongRootType();
 		}
 	}
+	file.close();
 }
 
 JSON::~JSON() { }
 
 const JSON::string_box JSON::getStrings() const {
 	return this->strings;
+}
+
+const JSON::boolean_box JSON::getBooleans() const {
+	return this->booleans;
 }
