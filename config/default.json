@@ -1,0 +1,7 @@
+{
+	"host": "localhost",
+	"port": 1337,
+	"server_name": null,
+	"root": ".",
+	"404": null
+}

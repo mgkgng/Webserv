@@ -80,6 +80,10 @@ long double JSON::parsenumber(std::ifstream & file, char c) {
 	std::string temp;
 	bool hasdot = false;
 	temp.push_back(c);
+	if (c == '0' && isdigit(file.peek())) {
+		file.close();
+		throw ;
+	}
 	c = file.peek();
 	while ((isdigit(c) || c == '.') && !file.eof()) {
 		temp.push_back(c);
@@ -97,6 +101,24 @@ long double JSON::parsenumber(std::ifstream & file, char c) {
 		} else {
 			file.get(c);
 			c = file.peek();
+		}
+	}
+	if (tolower(c) == 'e') {
+		temp.push_back(c);
+		file.get(c);
+		c = file.peek();
+		if (c == '+' || c == '-') {
+			temp.push_back(c);
+			file.get(c);
+			c = file.peek();
+			while (isdigit(c) && !file.eof()) {
+				temp.push_back(c);
+				file.get(c);
+				c = file.peek();
+			}
+		} else {
+			file.close();
+			throw ;
 		}
 	}
 	if (!isspace(c) && file.eof()) {
@@ -199,9 +221,11 @@ JSON::JSON(std::ifstream & file) {
 		throw ErrorReadingFile();
 	}
 	skipwhitespace(file);
-	char c = file.get();
+	char c = file.peek();
 	bool notdone = true;
 	while (c != '}' && !file.eof()) {
+		skipwhitespace(file);
+		file.get(c);
 		if (c == '}') {
 			if (notdone == true) {
 				file.close();

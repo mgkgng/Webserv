@@ -1,0 +1,36 @@
+{
+	"index": "index.html",
+	"root": "./www/static/",
+	"allowed_methods": "GET POST",
+	"route index": {
+		"path": "/",
+		"autoindex": false
+	},
+	"server0": {
+		"host": "example.org",
+		"port": 1234,
+		"server_name": null,
+		"route error 404": {
+			"error": 404,
+			"path": "/404",
+			"index": "404.html"
+		},
+		"route error 401": {
+			"error": 401,
+			"redirect": "/404",
+			"response_code": 301
+		}
+	},
+	"server1": {
+		"host": "example.com",
+		"port": 2468,
+		"server_name": "other server",
+		"client_body_size": "10M",
+		"root": ".",
+		"route static": {
+			"path": "/static",
+			"autoindex": true
+		}
+	}
+
+}
