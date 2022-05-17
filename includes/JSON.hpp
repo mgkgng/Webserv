@@ -13,7 +13,6 @@ class JSON {
 		typedef std::map<std::string, JSON>							object_box;
 
 		JSON();
-		JSON(std::ifstream & file);
 		JSON(std::string path);
 		JSON(const JSON & json);
 		~JSON();
@@ -31,6 +30,7 @@ class JSON {
 		
 		std::vector<std::string>	keys;
 
+		JSON(std::ifstream & file);
 		void		skipwhitespace(std::ifstream & file);
 		std::string	parsestring(std::ifstream & file);
 		int			isbooleantrue(std::ifstream & file);

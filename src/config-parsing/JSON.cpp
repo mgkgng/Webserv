@@ -211,7 +211,7 @@ JSON::JSON(std::string path) {
 				}
 				skipwhitespace(file);
 				file.get(c);
-				if (c == ',') { notdone = true; file.get(c); } else {notdone = false;}
+				if (c == ',') { notdone = true; } else {notdone = false;}
 			}
 			if (!file.eof()) {
 				file.close();
