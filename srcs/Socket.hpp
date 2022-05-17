@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/12 14:32:01 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/16 14:58:41 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/17 15:53:07 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,15 +18,18 @@
 #include <vector>
 
 #define PORT "8080"
+#define BACKLOG 20
 
 using namespace std;
 
-class Socket {
+class Server {
 	private:
 		int						sockfd;
 		struct addrinfo 		*info;
-		vector<struct kevent>	ev;
-
+		struct sockaddr			*sockaddr;
+		vector<struct kevent>	chlist;
+		vector<struct kevent>	evlist;
+		
 		void	init_addrinfo() {
 			struct addrinfo hints;
 			int				status;
@@ -40,13 +43,28 @@ class Socket {
 				exit(EXIT_FAILURE);
 			}
 		}
+
+		void	init_sockaddr() {
+			sockaddr->sa_data = ;
+			sockaddr->sa_family = info->ai_family;
+		}
  
-		void	create_socket() {
+		void	init_server() {
 			if ((sockfd = socket(info->ai_family, info->ai_socktype, info->ai_protocol)) < 0) {
 				cerr << "socket error." << endl;
 				exit(EXIT_FAILURE);
 			}
 			fcntl(sockfd, F_SETFL, O_NONBLOCK); // Non-blocking mode, but it might be considered as an old way
+		
+			if (bind(sockfd, info->ai_addr, info->ai_addrlen) < 0) {
+				cerr << "bind error." << endl;
+				exit(EXIT_FAILURE);
+			}
+
+			if (listen(sockfd, BACKLOG) < 0) {
+				cerr << "listen error." << endl;
+				exit(EXIT_FAILURE);
+			}
 		}
 
 		void	terminate() {
@@ -54,41 +72,37 @@ class Socket {
 		}
 
 	public:
-		Socket() {
+		Server() {
 			init_addrinfo();
-			create_socket();
+			init_server();
 		}
-		~Socket() {
+		~Server() {
 			terminate();
 		}
 
-
-		void	name_socket() {
-			if (bind(sockfd, info->ai_addr, info->ai_addrlen) < 0) {
-				cerr << "bind error." << endl;
-				exit(EXIT_FAILURE);
-			}
-		}
-		
-		void	wait_connection() {
-			if (listen(sockfd, 20) < 0) {
-				cerr << "listen error." << endl;
-				exit(EXIT_FAILURE);
-			}
-				
-		}
-
-		int		newConnection() {
-			int	newConnection;
-			socklen_t	addrlen = sizeof(sockAddr);
+		void		acceptConnection() {
+			int		newConnection;
+			socklen_t	addrlen = sizeof(info->ai_family); // try to check it 
 			if ((newConnection = accept(sockfd, (struct sockaddr *) &sockAddr, (socklen_t *) &addrlen)) < 0) {
 				cerr << "accept error." << endl;
 				exit(EXIT_FAILURE);
 			}
-			
-			return (newConnection);
+			struct kevent	ev;
+			EV_SET(&ev, newConnection, EVFILT_READ, EV_ADD, 0, 0, 0);
+			chlist.push_back(ev);
 		}
 
+		void	multiplexing() {
+			int kq;
+
+			if ((kq = kqueue()) < 0) {
+				cerr << "kqueue error." << endl;
+				exit(EXIT_FAILURE);
+			}
+
+			
+		}
+		
 		void	receiveData(int connection) {
 			
 		}
