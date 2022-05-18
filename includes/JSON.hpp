@@ -25,10 +25,10 @@ class JSON {
 		const std::vector<std::string> getNulls() const;
 		const std::vector<std::string> getKeys() const;
 
-	protected: 
+	protected:
+		// Recursive Constructor (Should never be called outside of same constructor)
 		JSON(std::ifstream & file);
-	
-	private:
+
 		// Data
 		string_box					strings;
 		number_box					numbers;
