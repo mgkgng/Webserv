@@ -1,4 +1,6 @@
 #include <Webserv.hpp>
+#include <JSON.hpp>
+#include <iostream>
 
 
 Webserv::Server::Server() {
@@ -58,6 +60,18 @@ void	Webserv::Server::addCodeHandler(const Webserv::HandleCode & handlecode) {
 	this->codehandlers.push_back(handlecode);
 }
 
-// std::vector<Webserv::Server>	Webserv::makeServersFromJSON(const JSON & json) {
-
-// }
+std::vector<Webserv::Server>	Webserv::makeServersFromJSON(const JSON & json) {
+	JSON::object_box::iterator it;
+	JSON::object_box temp = json.getObjects();
+	for (it = temp.begin(); it != temp.end(); it++) {
+		if ((*it).first.compare(0, 6, "server") == 0) {
+			std::cout << (*it).first << std::endl;
+		} else if ((*it).first.compare(0, 5, "route") == 0) {
+			std::cout << (*it).first << std::endl;
+		} else {
+			throw Webserv::InvalidJSONObjectIdentifier();
+		}
+	}
+	std::vector<Webserv::Server> ret;
+	return (ret);
+}

@@ -91,6 +91,8 @@ namespace Webserv {
 
 	std::vector<Server> makeServersFromJSON(const JSON & json);
 
+	struct InvalidJSONObjectIdentifier: public std::exception { const char * what () const throw () { return "JSON objects should start with route or server"; } };
+
 	static const unsigned int arr[] = {
 		100, // Continue
 		101, // Switching Protocols

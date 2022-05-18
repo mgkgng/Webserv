@@ -262,7 +262,7 @@ JSON::JSON(std::ifstream & file) {
 				file.get(c);
 				break;
 			case '{':
-				this->objects.insert(std::pair<std::string, JSON>(str, JSON(file)));
+				this->objects.push_back(std::pair<std::string, JSON>(str, JSON(file)));
 				break;
 			case 't':
 				if (isbooleantrue(file) == 1) {
@@ -347,7 +347,7 @@ JSON::JSON(std::string path) {
 						file.get(c);
 						break;
 					case '{':
-						this->objects.insert(std::pair<std::string, JSON>(str, JSON(file)));
+						this->objects.push_back(std::pair<std::string, JSON>(str, JSON(file)));
 						break;
 					case 't':
 						if (isbooleantrue(file) == 1) {

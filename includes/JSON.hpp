@@ -11,7 +11,7 @@ class JSON {
 		typedef std::map<std::string, std::string>					string_box;
 		typedef std::map<std::string, long double>					number_box;
 		typedef std::map<std::string, bool>							boolean_box;
-		typedef std::map<std::string, JSON>							object_box;
+		typedef std::vector<std::pair<std::string, JSON> >			object_box;
 
 		JSON();
 		JSON(std::string path);

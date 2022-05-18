@@ -1,4 +1,5 @@
 #include <JSON.hpp>
+#include <Webserv.hpp>
 
 #include <iostream>
 #include <algorithm>
@@ -35,6 +36,7 @@
 int main() {
 	try {
 		JSON test = JSON("config/example.json");
+		Webserv::makeServersFromJSON(test);
 		// printjsondata(test, 0);
 	} catch (std::exception & e) {
 		std::cout << e.what() << std::endl;
