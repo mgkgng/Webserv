@@ -5,7 +5,7 @@
 #include <vector>
 #include <JSON.hpp>
 
-namespace webserv {
+namespace Webserv {
 	class Route {
 		public:
 			Route();
@@ -38,19 +38,23 @@ namespace webserv {
 
 	class HandleCode {
 		public:
-			HandleCode(int code, std::string route);
-			HandleCode(const HandleCode & HandleCode);
+			HandleCode(int code, Route route);
+			HandleCode(const HandleCode & handlecode);
 			~HandleCode();
-			HandleCode & operator=(const HandleCode & code);
+			HandleCode & operator=(const HandleCode & handlecode);
 
-			int				getCode() const;
-			std::string 	getRoute() const;
+			unsigned int	getCode() const;
+			Route			getRoute() const;
+			unsigned int	getResponseCode() const;
 		private:
 			// The HTTP code that is defined
-			int							code;
+			unsigned int			code;
+
+			// code that is sent to the user
+			unsigned int			responsecode;
 
 			// The Route to redirect the if the code is encountered
-			std::string					route;
+			Route					route;
 
 			// exception, code not recognized
 			struct InvalidHTTPCode: public std::exception { const char * what () const throw () { return "Invalid Code"; } };
@@ -59,29 +63,30 @@ namespace webserv {
 	class Server {
 		public:
 			Server();
+			Server(std::string servername, std::string host, unsigned int port, bool isdefault);
 			Server(const Server & server);
 			~Server();
 			Server & operator=(const Server & server);
 			
-			std::string		getErrorLogFilePath() const;
-			int				getErrorLogLevel() const;
-			std::string		getpidFilePath() const;
-			std::string		getAccessLogFilePath() const;
-			std::string		getServerName() const;
-			std::string 	getHost() const;
-			unsigned int	getPort() const;
-			bool			getisDefault() const;
+			std::string				getServerName() const;
+			std::string 			getHost() const;
+			unsigned int			getPort() const;
+			bool					getIsDefault() const;
+			std::vector<Route>		getRoutes() const;
+			std::vector<HandleCode>	getHandleCode() const;
+			void					addRoute(const Route & route);
+			void					addCodeHandler(const HandleCode & handlecode);
 			
 		private:
 			// Information about the server, such as its name, it's host and port, and if it's the default server for the port or not
-			std::string					serverName;
+			std::string					servername;
 			std::string					host;
 			unsigned int				port;
-			bool						isDefault;
+			bool						isdefault;
 
 			// routes and error redirections associated with the server 
 			std::vector<Route>			routes;
-			std::vector<HandleCode>			errorRoutes;
+			std::vector<HandleCode>		codehandlers;
 	};
 
 	std::vector<Server> makeServersFromJSON(const JSON & json);
@@ -151,7 +156,6 @@ namespace webserv {
 		511  // Network Authentication Required
 	};
 	static const std::vector<unsigned int> validHTTPCodes (arr, arr + sizeof(arr) / sizeof(arr[0]) );
-
 };
 
 #endif

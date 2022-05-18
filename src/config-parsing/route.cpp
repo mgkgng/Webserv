@@ -1,9 +1,9 @@
-#include <webserver.hpp>
+#include <Webserv.hpp>
 
 //default
-webserv::Route::Route() { }
+Webserv::Route::Route() { }
 
-webserv::Route::Route(bool islistingdirectory, std::string index, std::string root, unsigned int clientmaxbodysize, std::vector<std::string> allowedHTTPmethods) {
+Webserv::Route::Route(bool islistingdirectory, std::string index, std::string root, unsigned int clientmaxbodysize, std::vector<std::string> allowedHTTPmethods) {
 	this->islistingdirectory = islistingdirectory;
 	this->index = index;
 	this->root = root;
@@ -11,7 +11,7 @@ webserv::Route::Route(bool islistingdirectory, std::string index, std::string ro
 	this->allowedHTTPmethods = allowedHTTPmethods;
 }
 
-webserv::Route::Route(const Route & route) {
+Webserv::Route::Route(const Route & route) {
 	this->islistingdirectory = route.getListingDirectory();
 	this->index = route.getIndex();
 	this->root = route.getRoot();
@@ -19,9 +19,9 @@ webserv::Route::Route(const Route & route) {
 	this->allowedHTTPmethods = route.getAllowedHTTPMethods();
 }
 
-webserv::Route::~Route() { }
+Webserv::Route::~Route() { }
 
-webserv::Route & webserv::Route::operator=(const Route & route) {
+Webserv::Route & Webserv::Route::operator=(const Route & route) {
 	this->islistingdirectory = route.getListingDirectory();
 	this->index = route.getIndex();
 	this->root = route.getRoot();
@@ -30,22 +30,22 @@ webserv::Route & webserv::Route::operator=(const Route & route) {
 	return (*this);
 }
 
-bool			webserv::Route::getListingDirectory() const {
+bool			Webserv::Route::getListingDirectory() const {
 	return (this->islistingdirectory);
 }
 
-std::string		webserv::Route::getIndex() const {
+std::string		Webserv::Route::getIndex() const {
 	return (this->index);
 }
 
-std::string		webserv::Route::getRoot() const {
+std::string		Webserv::Route::getRoot() const {
 	return (this->root);
 }
 
-std::vector<std::string> webserv::Route::getAllowedHTTPMethods() const {
+std::vector<std::string> Webserv::Route::getAllowedHTTPMethods() const {
 	return (this->allowedHTTPmethods);
 }
 
-unsigned int	webserv::Route::getClientMaxBodySize() const {
+unsigned int	Webserv::Route::getClientMaxBodySize() const {
 	return (this->clientmaxbodysize);
 }
