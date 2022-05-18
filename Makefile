@@ -6,7 +6,7 @@
 #    By: jrathelo <student.42nice.fr>               +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/25 15:25:19 by jrathelo          #+#    #+#              #
-#    Updated: 2022/05/18 10:17:35 by jrathelo         ###   ########.fr        #
+#    Updated: 2022/05/18 11:10:07 by jrathelo         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -48,7 +48,9 @@ SRC_DIR = src
 OUTS = objs
 
 # Source Files
-SRC = main.cpp config-parsing/JSON.cpp
+SRC = main.cpp																				\
+		config-parsing/JSON.cpp config-parsing/route.cpp
+
 SRC_PLUS_PATH = $(addprefix $(SRC_DIR)/, $(SRC))
 
 # Output Files
