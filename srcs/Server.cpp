@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/18 12:37:21 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/18 20:06:45 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/18 21:56:34 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,28 +79,46 @@ void	Server::loopConnection() {
 					throw SystemCallError("kevent error.");
 				//conn_delete(fd); -> what is this?
 			} else if (evlist[i].ident == local_s??) {
-				if ((fd = accept(evlist[i].ident, info->ai_addr, &info->ai_addr)) < 0)
+				if ((fd = accept(evlist[i].ident, info->ai_addr, &info->ai_addrlen)) < 0)
 					throw SystemCallError("accept error.");
 				fcntl(fd, F_SETFL, O_NONBLOCK); // Non-blocking mode, but it might be considered as an old way
 				if (conn_add(fd) == 0) {
 					EV_SET(&evSet, fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
 					if (kevent(kq, &evSet, 1, NULL, 0 NULL) == -1)
-						throw SystemCallError("kevet error.")
-					send_msg(fd, "Welcome!\n");
+						throw SystemCallError("kevet error.");
+					sendData(fd, "Welcome!\n");
 				} else {
 					cout << "connection refused." << endl;
 					close(fd);
 				}
-			} else if (evlist[i].filter == EVFILT_READ) {
-				recv_msg(evlist[i].ident);
-			}
-			// do something;
+			} else if (evlist[i].filter == EVFILT_READ)
+				recvData(evlist[i].ident);
 		}
 	}
 }
 
+void	Server::launch() {
+	while (true) {
+		cout << ".........WAITING FOR CONNECTION..........." << endl;
+
+		cout << "Connection accepted " << endl;
+		
+	}
+}
+
 void	Server::sendData(int sockfd, string s) {
-	send(connection, s.c_str(), s.size(), 0);
+	send(sockfd, s.c_str(), s.size(), 0);
+	// here i 
+}
+
+void	Server::recvData(int sockfd) {
+	char	buf[2049];
+	int		ret;
+	
+	ret = recv(sockfd, buf, 2048, 0);
+	if (ret < 0)
+		return ;
+	buf[ret] = '\0';
 }
 
 void	someExampleCode() {

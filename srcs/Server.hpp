@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/12 14:32:01 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/18 20:01:35 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/18 21:50:12 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,6 @@ class Server {
 	private:
 		int						sockfd;
 		struct addrinfo 		*info;
-		struct sockaddr_un	*sockaddr;
 		vector<struct kevent>	chlist;
 		vector<struct kevent>	evlist;
 		
@@ -43,8 +42,10 @@ class Server {
 		void	acceptConnection();
 		void	loopConnection();
 		void	sendData(int sockfd, string s);
-
+		void	recvData(int sockfd);
+		void	launch();
 		void	someExampleCode();
+		void	acceptConnection();
 	
 
 		class SystemCallError : public std::exception {
