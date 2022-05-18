@@ -223,6 +223,10 @@ JSON::JSON(std::ifstream & file) {
 	skipwhitespace(file);
 	char c = file.peek();
 	bool notdone = true;
+	if (c == '}') {
+		notdone = false;
+		file.get(c);
+	}
 	while (c != '}' && !file.eof()) {
 		skipwhitespace(file);
 		file.get(c);
@@ -392,6 +396,15 @@ JSON::JSON(const JSON & json) {
 	this->keys = json.getKeys();
 	this->numbers = json.getNumbers();
 	this->nulls = json.getNulls();
+}
+
+JSON & JSON::operator=(const JSON & json) {
+	this->strings = json.getStrings();
+	this->objects = json.getObjects();
+	this->keys = json.getKeys();
+	this->numbers = json.getNumbers();
+	this->nulls = json.getNulls();
+	return (*this);
 }
 
 JSON::~JSON() { }
