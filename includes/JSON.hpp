@@ -26,7 +26,7 @@ class JSON {
 		const std::vector<std::string> getKeys() const;
 
 	protected:
-		// Recursive Constructor (Should never be called outside of same constructor)
+		// Recursive Constructor (Should never be called outside of string constructor)
 		JSON(std::ifstream & file);
 
 		// Data
