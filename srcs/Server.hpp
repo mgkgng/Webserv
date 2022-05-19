@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/12 14:32:01 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/19 14:18:37 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/19 18:06:44 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 
 #include "Webserv.hpp"
 #include "sys/un.h"
+#include "unistd.h"
 #include <vector>
 
 #define PORT "8080"
@@ -46,12 +47,14 @@ class Server {
 		void	broadcastMsg(string s);
 		void	broadcastErr(string s);
 		void	acceptConnection();
+		void	disconnect(vector<struct kevent>::iterator ev);
 		void	registerEvents();
 		void	sendData(int sockfd, string s);
 		void	recvData(int sockfd);
 		void	launch(Server *server);
 		void	someExampleCode();
-		void	acceptConnection();
+
+		bool	to_connect(int n);
 	
 		class SystemCallError : public std::exception {
 			private:

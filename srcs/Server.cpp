@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/18 12:37:21 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/19 14:31:54 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/19 18:29:11 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,7 @@ void	Server::init_server() {
 }
 
 void	Server::terminate() {
+	close(kq);
 	freeaddrinfo(info);
 }
 
@@ -78,46 +79,50 @@ void	Server::acceptConnection() {
 	broadcastMsg("Connection accpeted.");
 	struct kevent	ev;
 	EV_SET(&ev, newConnection, EVFILT_READ, EV_ADD, 0, 0, NULL);
+	if (kevent(kq, &ev, 1, NULL, 0, NULL) == -1)
+		throw SystemCallError("kevet error.");
 	chlist.push_back(ev);
-
-				if ((fd = accept(evlist[i].ident, info->ai_addr, &info->ai_addrlen)) < 0)
-				throw SystemCallError("accept error.");
-			if (conn_add(fd) == 0) {
-				EV_SET(&evSet, fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
-				if (kevent(kq, &evSet, 1, NULL, 0 NULL) == -1)
-					throw SystemCallError("kevet error.");
-				sendData(fd, "Welcome!\n");
-			} else {
-				broadcastMsg("Connection refused.");
-				close(fd);
-			}
+	// i don't know when to refuse the connection.
 }
+
+void	Server::disconnect(vector<struct kevent>::iterator ev) {
+	struct kevent newEvent;
+	EV_SET(&newEvent, ev->ident, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+	if (kevent(kq, &newEvent, 1, NULL, 0, NULL) < 0)
+		throw SystemCallError("kevent error.");
+	chlist.erase(ev);
+	broadcastMsg("disconnect");
+}	
 
 void	Server::registerEvents() {
 	int nev, fd;
 	struct timespec timeout;
-	struct kevent evSet;
+	struct kevent nkev;
 
 	nev = kevent(kq, &chlist[0], chlist.size(), &evlist[0], evlist.size(), &timeout);
-	if (nev <= 0) // not sure of !nev for now
+	if (nev < 0) // not sure of !nev for now
 		throw SystemCallError("kqueue error.");
-	for (int i = 0; i < nev; i++) {
-		if (evlist[i].flags & EV_EOF) {
-			broadcastMsg("disconnect");
-			fd = evlist[i].ident;
-			EV_SET(&evSet, fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-			if (kevent(kq, &evSet, 1, NULL, 0, NULL) < 0)
-				throw SystemCallError("kevent error.");
-			//conn_delete(fd); -> what is this?
+	vector<struct kevent>::iterator it = evlist.begin();
+	for (int i = 0; i < nev && it != evlist.end(); i++) {
+		if (it->flags & EV_EOF) {
+			try {
+				disconnect(it++);
+			} catch (SystemCallError &e) {
+				broadcastErr(e.what());
+				return ;
+			}
 		} else if (evlist[i].ident == sockfd) {
 			try {
 				acceptConnection();
+				it++;
 			} catch (SystemCallError &e) {
 				broadcastErr(e.what());
 				return ; // maybe exit or something. think about hierarchy of functions
 			}
-		} else if (evlist[i].filter == EVFILT_READ)
+		} else if (evlist[i].filter == EVFILT_READ) {
 			recvData(evlist[i].ident);
+			it++;
+		}
 	}
 }
 
