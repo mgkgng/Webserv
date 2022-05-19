@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/12 14:32:01 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/18 21:50:12 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/19 14:18:37 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,14 @@ using namespace std;
 class Server {
 	private:
 		int						sockfd;
+		int						kq;
 		struct addrinfo 		*info;
-		vector<struct kevent>	chlist;
-		vector<struct kevent>	evlist;
+		vector<struct kevent>	chlist; // all
+		vector<struct kevent>	evlist; // selected 
+		string					receivedData;
+		struct timespec			timeout;
 		
+		void	init_info();
 		void	init_addrinfo();
 		void	init_sockaddr();
 		void	init_server();
@@ -39,15 +43,16 @@ class Server {
 		Server();
 		~Server();
 
+		void	broadcastMsg(string s);
+		void	broadcastErr(string s);
 		void	acceptConnection();
-		void	loopConnection();
+		void	registerEvents();
 		void	sendData(int sockfd, string s);
 		void	recvData(int sockfd);
-		void	launch();
+		void	launch(Server *server);
 		void	someExampleCode();
 		void	acceptConnection();
 	
-
 		class SystemCallError : public std::exception {
 			private:
 				string _msg;
