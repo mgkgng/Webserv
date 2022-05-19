@@ -68,16 +68,6 @@
     text-shadow: 1px 2px 1px rgba(0, 0, 0, .6);
   }
 
-  h1:after {
-    display: block;
-    color: #fff;
-    letter-spacing: 1px;
-    font-family: 'Poiret One', sans-serif;
-    content: 'a School 42\'s project';
-    font-size: .4em;
-    text-align: center;
-  }
-
   h2 {
     color: #fff;
     font-family: 'Courier New', Courier, monospace, sans-serif;
