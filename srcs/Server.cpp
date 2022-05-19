@@ -6,13 +6,13 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/18 12:37:21 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/19 18:29:11 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/19 22:08:02 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-Server::Server() {
+Server::Server() : evlist(1) {
 	init_addrinfo();
 	init_server();
 }
@@ -55,6 +55,9 @@ void	Server::init_server() {
 	if ((kq = kqueue()) < 0)
 		throw SystemCallError("kqueue error.");
 
+	chlist.resize(1);
+	EV_SET(&chlist[0], sockfd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+
 }
 
 void	Server::terminate() {
@@ -74,7 +77,7 @@ void	Server::acceptConnection() {
 	int		newConnection;
 	if ((newConnection = accept(sockfd, info->ai_addr, &info->ai_addrlen) < 0))
 		throw SystemCallError("accept error.");
-	fcntl(newConnection, F_SETFL, O_NONBLOCK); // Non-blocking mode, but it might be considered as an old way
+	fcntl(newConnection, F_SETFL, O_NONBLOCK);
 
 	broadcastMsg("Connection accpeted.");
 	struct kevent	ev;
@@ -102,16 +105,15 @@ void	Server::registerEvents() {
 	nev = kevent(kq, &chlist[0], chlist.size(), &evlist[0], evlist.size(), &timeout);
 	if (nev < 0) // not sure of !nev for now
 		throw SystemCallError("kqueue error.");
-	vector<struct kevent>::iterator it = evlist.begin();
-	for (int i = 0; i < nev && it != evlist.end(); i++) {
+	for (vector<struct kevent>::iterator it = evlist.begin(); it != evlist.end(); it++) {
 		if (it->flags & EV_EOF) {
 			try {
-				disconnect(it++);
+				disconnect(it);
 			} catch (SystemCallError &e) {
 				broadcastErr(e.what());
 				return ;
 			}
-		} else if (evlist[i].ident == sockfd) {
+		} else if (it->ident == sockfd) {
 			try {
 				acceptConnection();
 				it++;
@@ -119,9 +121,8 @@ void	Server::registerEvents() {
 				broadcastErr(e.what());
 				return ; // maybe exit or something. think about hierarchy of functions
 			}
-		} else if (evlist[i].filter == EVFILT_READ) {
-			recvData(evlist[i].ident);
-			it++;
+		} else if (it->filter == EVFILT_READ) {
+			recvData((it)->ident);
 		}
 	}
 }
