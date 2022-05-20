@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/12 14:32:01 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/19 22:03:21 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/20 19:12:17 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 
 #define PORT "8080"
 #define BACKLOG 20
+#define EV_SIZE 1024
 
 using namespace std;
 
@@ -29,8 +30,8 @@ class Server {
 		int						sockfd;
 		int						kq;
 		struct addrinfo 		*info;
-		vector<struct kevent>	chlist; // all
-		vector<struct kevent>	evlist; // selected 
+		vector<struct kevent>	chlist;
+		struct kevent			evlist[EV_SIZE]; 
 		string					receivedData;
 		struct timespec			timeout;
 		
@@ -47,11 +48,11 @@ class Server {
 		void	broadcastMsg(string s);
 		void	broadcastErr(string s);
 		void	acceptConnection();
-		void	disconnect(vector<struct kevent>::iterator ev);
+		void	disconnect(int fd);
 		void	registerEvents();
-		void	sendData(int sockfd, string s);
-		void	recvData(int sockfd);
-		void	launch(Server *server);
+		void	sendData(string s);
+		void	recvData(struct kevent ev);
+		void	launch(Server &server);
 		void	someExampleCode();
 
 		bool	to_connect(int n);

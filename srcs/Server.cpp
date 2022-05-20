@@ -6,13 +6,13 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/18 12:37:21 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/19 22:08:02 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/20 19:27:52 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-Server::Server() : evlist(1) {
+Server::Server() : chlist(1) {
 	init_addrinfo();
 	init_server();
 }
@@ -54,10 +54,6 @@ void	Server::init_server() {
 
 	if ((kq = kqueue()) < 0)
 		throw SystemCallError("kqueue error.");
-
-	chlist.resize(1);
-	EV_SET(&chlist[0], sockfd, EVFILT_READ, EV_ADD, 0, 0, NULL);
-
 }
 
 void	Server::terminate() {
@@ -80,54 +76,56 @@ void	Server::acceptConnection() {
 	fcntl(newConnection, F_SETFL, O_NONBLOCK);
 
 	broadcastMsg("Connection accpeted.");
-	struct kevent	ev;
-	EV_SET(&ev, newConnection, EVFILT_READ, EV_ADD, 0, 0, NULL);
-	if (kevent(kq, &ev, 1, NULL, 0, NULL) == -1)
-		throw SystemCallError("kevet error.");
-	chlist.push_back(ev);
-	// i don't know when to refuse the connection.
+	struct kevent	newEvent;
+	EV_SET(&newEvent, newConnection, EVFILT_READ, EV_ADD, 0, 0, NULL);
+	if (kevent(kq, &newEvent, 1, NULL, 0, NULL) == -1)
+		throw SystemCallError("kevent error.");
+	chlist.push_back(newEvent);
 }
 
-void	Server::disconnect(vector<struct kevent>::iterator ev) {
+void	Server::disconnect(int fd) {
 	struct kevent newEvent;
-	EV_SET(&newEvent, ev->ident, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+	EV_SET(&newEvent, sockfd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
 	if (kevent(kq, &newEvent, 1, NULL, 0, NULL) < 0)
 		throw SystemCallError("kevent error.");
-	chlist.erase(ev);
+	
 	broadcastMsg("disconnect");
-}	
+}
 
 void	Server::registerEvents() {
 	int nev, fd;
-	struct timespec timeout;
 	struct kevent nkev;
 
-	nev = kevent(kq, &chlist[0], chlist.size(), &evlist[0], evlist.size(), &timeout);
-	if (nev < 0) // not sure of !nev for now
+	nev = kevent(kq, &chlist[0], chlist.size(), evlist, EV_SIZE, NULL);
+	if (nev <= 0)
 		throw SystemCallError("kqueue error.");
-	for (vector<struct kevent>::iterator it = evlist.begin(); it != evlist.end(); it++) {
-		if (it->flags & EV_EOF) {
+	chlist.clear();
+	for (int i = 0; i < nev; i++) {
+		if (evlist[i].flags & EV_EOF) {
 			try {
-				disconnect(it);
+				disconnect(evlist[i].ident);
+				continue;
 			} catch (SystemCallError &e) {
 				broadcastErr(e.what());
 				return ;
 			}
-		} else if (it->ident == sockfd) {
+		} else if (evlist[i].ident == sockfd) {
 			try {
 				acceptConnection();
-				it++;
 			} catch (SystemCallError &e) {
 				broadcastErr(e.what());
-				return ; // maybe exit or something. think about hierarchy of functions
+				return ;
 			}
-		} else if (it->filter == EVFILT_READ) {
-			recvData((it)->ident);
+		}
+		if (evlist[i].filter == EVFILT_READ) {
+			recvData(evlist[i]);
+		} else if (evlist[i].filter == EVFILT_WRITE) {
+			sendData("Connection is done.\n");
 		}
 	}
 }
 
-void	Server::launch(Config *config) {
+void	Server::launch(Server &server) {
 
 	broadcastMsg("WEBSERV launched.");
 	
@@ -151,22 +149,27 @@ void	Server::launch(Config *config) {
 	}
 }
 
-void	Server::sendData(int sockfd, string s) {
+void	Server::sendData(string s) {
 	send(sockfd, s.c_str(), s.size(), 0);
 }
 
-void	Server::recvData(int sockfd) {
+void	Server::recvData(struct kevent ev) {
 	char	buf[10000];
 	int		ret;
 	
 	ret = recv(sockfd, buf, 9999, 0);
 	if (ret < 0)
 		return ;
-	do {
-		buf[ret] = '\0';
-		receivedData.append(string(buf));
-		ret = recv(sockfd, buf, 9999, 0);
-	} while (ret > 0);
+	if (!ret) {
+		EV_SET(&ev, sockfd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+		EV_SET(&ev, sockfd, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
+		return ;
+	}
+	buf[ret] = '\0';
+	
+	
+	string(buf);
+
 }
 
 void	someExampleCode() {
