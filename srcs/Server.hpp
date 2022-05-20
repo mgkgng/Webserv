@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/12 14:32:01 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/20 19:12:17 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/20 19:44:23 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ class Server {
 		void	disconnect(int fd);
 		void	registerEvents();
 		void	sendData(string s);
-		void	recvData(struct kevent ev);
+		void	recvData(struct kevent &ev);
 		void	launch(Server &server);
 		void	someExampleCode();
 

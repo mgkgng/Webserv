@@ -6,11 +6,12 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/18 12:37:21 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/20 19:27:52 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/20 19:56:49 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "ConnectionData.hpp"
 
 Server::Server() : chlist(1) {
 	init_addrinfo();
@@ -128,7 +129,7 @@ void	Server::registerEvents() {
 void	Server::launch(Server &server) {
 
 	broadcastMsg("WEBSERV launched.");
-	
+
 	try {
 		init_addrinfo();
 		init_server();
@@ -153,23 +154,27 @@ void	Server::sendData(string s) {
 	send(sockfd, s.c_str(), s.size(), 0);
 }
 
-void	Server::recvData(struct kevent ev) {
+void	Server::recvData(struct kevent &ev) {
 	char	buf[10000];
 	int		ret;
-	
+
+
 	ret = recv(sockfd, buf, 9999, 0);
 	if (ret < 0)
 		return ;
 	if (!ret) {
+		ConnectionData& cd = ;
+		cd.RequestDone();
 		EV_SET(&ev, sockfd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
 		EV_SET(&ev, sockfd, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
 		return ;
 	}
 	buf[ret] = '\0';
-	
-	
-	string(buf);
-
+	if (!ev.udata) {
+		ConnectionData cd;
+		cd.putRequestData(string(buf));
+		ev.udata = &cd; // a checker
+	}
 }
 
 void	someExampleCode() {
