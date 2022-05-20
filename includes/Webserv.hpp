@@ -9,7 +9,7 @@ namespace Webserv {
 	class Route {
 		public:
 			Route();
-			Route(bool islistingdirectory, std::string index, std::string root,  unsigned int clientmaxbodysize, std::vector<std::string> allowedHTTPmethods);
+			Route(bool islistingdirectory, std::string index, std::string root, std::string path, std::string clientmaxbodysize, std::vector<std::string> allowedHTTPmethods);
 			Route(const Route & route);
 			~Route();
 			Route & operator=(const Route & route);
@@ -17,8 +17,9 @@ namespace Webserv {
 			bool			getListingDirectory() const;
 			std::string		getIndex() const;
 			std::string		getRoot() const;
+			std::string		getPath() const;
 			std::vector<std::string> getAllowedHTTPMethods() const;
-			unsigned int	getClientMaxBodySize() const;
+			std::string		getClientMaxBodySize() const;
 		private:
 			// is this routes directory listing its contents to the client
 			bool			islistingdirectory;
@@ -29,8 +30,11 @@ namespace Webserv {
 			// root directory to search for files and the like
 			std::string		root;
 
+			// path where the files are exposed on the uri
+			std::string		path;
+
 			// what is the maximum size body that the client is alowed to send to the server
-			unsigned int	clientmaxbodysize;
+			std::string		clientmaxbodysize;
 			
 			//	Allowed http methods for the route
 			std::vector<std::string>	allowedHTTPmethods;
@@ -38,13 +42,13 @@ namespace Webserv {
 
 	class HandleCode {
 		public:
-			HandleCode(int code, Route route);
+			HandleCode(int code, Route route, int responsecode);
 			HandleCode(const HandleCode & handlecode);
 			~HandleCode();
 			HandleCode & operator=(const HandleCode & handlecode);
 
 			unsigned int	getCode() const;
-			Route			getRoute() const;
+			Route 			getRoute() const;
 			unsigned int	getResponseCode() const;
 		private:
 			// The HTTP code that is defined
@@ -63,19 +67,17 @@ namespace Webserv {
 	class Server {
 		public:
 			Server();
-			Server(std::string servername, std::string host, unsigned int port, bool isdefault);
+			Server(std::string servername, std::string host, unsigned int port, bool isdefault, std::map<std::string, Route> routes, std::map<std::string, HandleCode> codes);
 			Server(const Server & server);
 			~Server();
 			Server & operator=(const Server & server);
 			
-			std::string				getServerName() const;
-			std::string 			getHost() const;
+			std::string			getServerName() const;
+			std::string			getHost() const;
 			unsigned int			getPort() const;
 			bool					getIsDefault() const;
-			std::vector<Route>		getRoutes() const;
-			std::vector<HandleCode>	getHandleCode() const;
-			void					addRoute(const Route & route);
-			void					addCodeHandler(const HandleCode & handlecode);
+			std::map<std::string, Route>		getRoutes() const;
+			std::map<std::string, HandleCode>	getHandleCode() const;
 			
 		private:
 			// Information about the server, such as its name, it's host and port, and if it's the default server for the port or not
@@ -85,13 +87,41 @@ namespace Webserv {
 			bool						isdefault;
 
 			// routes and error redirections associated with the server 
-			std::vector<Route>			routes;
-			std::vector<HandleCode>		codehandlers;
+			std::map<std::string, Route>			routes;
+			std::map<std::string, HandleCode>		codehandlers;
 	};
 
-	std::vector<Server> makeServersFromJSON(const JSON & json);
+	typedef struct sbh_s {
+		//server
+		std::string		servername;
+		std::string		host;
+		unsigned int	port;
 
-	struct InvalidJSONObjectIdentifier: public std::exception { const char * what () const throw () { return "JSON objects should start with route or server"; } };
+		//code
+		unsigned int	code;
+		std::string		redirect;
+		unsigned int	responsecode;
+		
+		// Route
+		bool			islistingdirectory;
+		std::string		index;
+		std::string		root;
+		std::string		path;
+		std::string		clientmaxbodysize;
+		std::string		allowedHTTPmethods;
+	}	sbh_t;
+
+	sbh_t	getInformation(const JSON & json);
+	sbh_t defaultInformation();
+	Route 	generateRoute(const JSON & json, sbh_t sinfo);
+	HandleCode  generateHandleCode(const JSON & json, sbh_t sinfo, std::map<std::string, Route> & routes);
+	std::vector<Server>  makeServersFromJSONHelper(const JSON & json, sbh_t sinfo, std::map<std::string, Route> & routes, std::map<std::string, HandleCode> & codes);
+	std::vector<Server>  makeServersFromJSON(const JSON & json);
+
+	struct InvalidJSONObjectIdentifier: public std::exception { const char * what () const throw () { return "JSON objects should start with route, code or server"; } };
+	struct InvalidJSONObjectInRoute: public std::exception { const char * what () const throw () { return "Don't define JSON objects inside a route"; } };
+	struct InvalidJSONObjectInHandleCode: public std::exception { const char * what () const throw () { return "Don't define JSON objects inside a code"; } };
+	struct InvalidJSONHandleCodeInvalidRoute: public std::exception { const char * what () const throw () { return "Code needs to have a valid route to redirect towards"; } };
 
 	static const unsigned int arr[] = {
 		100, // Continue

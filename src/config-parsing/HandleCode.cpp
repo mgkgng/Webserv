@@ -11,11 +11,17 @@ Webserv::HandleCode::HandleCode(const HandleCode & handlecode) {
 	this->responsecode = handlecode.getResponseCode();
 }
 
+Webserv::HandleCode::HandleCode(int code, Webserv::Route route, int responsecode) {
+	this->code = code;
+	this->route = route;
+	this->responsecode = responsecode;
+}
+
 Webserv::HandleCode::~HandleCode() {
 
 }
 
-Webserv::HandleCode & Webserv::HandleCode::operator=(const HandleCode & handlecode) {
+Webserv::HandleCode &  Webserv::HandleCode::operator=(const HandleCode & handlecode) {
 	this->code = handlecode.getCode();
 	this->route = handlecode.getRoute();
 	this->responsecode = handlecode.getResponseCode();

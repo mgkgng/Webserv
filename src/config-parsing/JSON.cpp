@@ -392,6 +392,7 @@ JSON::JSON(std::string path) {
 JSON::JSON(const JSON & json) {
 	this->strings = json.getStrings();
 	this->objects = json.getObjects();
+	this->booleans = json.getBooleans();
 	this->keys = json.getKeys();
 	this->numbers = json.getNumbers();
 	this->nulls = json.getNulls();
@@ -400,6 +401,7 @@ JSON::JSON(const JSON & json) {
 JSON & JSON::operator=(const JSON & json) {
 	this->strings = json.getStrings();
 	this->objects = json.getObjects();
+	this->booleans = json.getBooleans();
 	this->keys = json.getKeys();
 	this->numbers = json.getNumbers();
 	this->nulls = json.getNulls();

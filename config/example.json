@@ -10,15 +10,19 @@
 		"host": "example.org",
 		"port": 1234,
 		"server_name": null,
-		"route error 404": {
-			"error": 404,
-			"path": "/404",
-			"index": "404.html"
+		"code 404": {
+			"code": 404,
+			"redirect": "/404"
 		},
-		"route error 401": {
-			"error": 401,
+		"code 401": {
+			"code": 401,
 			"redirect": "/404",
 			"response_code": 301
+		},
+		"route 404": {
+			"index": "404.html",
+			"root": "./var/www",
+			"path": "/404"
 		}
 	},
 	"server1": {
@@ -31,11 +35,5 @@
 			"path": "/static",
 			"autoindex": true
 		}
-	},
-	"server2": {
-
-	},
-	"server": {
-		
 	}
 }

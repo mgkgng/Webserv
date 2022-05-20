@@ -1,12 +1,14 @@
 #include <Webserv.hpp>
+#include <iostream>
 
 //default
 Webserv::Route::Route() { }
 
-Webserv::Route::Route(bool islistingdirectory, std::string index, std::string root, unsigned int clientmaxbodysize, std::vector<std::string> allowedHTTPmethods) {
+Webserv::Route::Route(bool islistingdirectory, std::string index, std::string root, std::string path, std::string clientmaxbodysize, std::vector<std::string> allowedHTTPmethods) {
 	this->islistingdirectory = islistingdirectory;
 	this->index = index;
 	this->root = root;
+	this->path = path;
 	this->clientmaxbodysize = clientmaxbodysize;
 	this->allowedHTTPmethods = allowedHTTPmethods;
 }
@@ -15,16 +17,18 @@ Webserv::Route::Route(const Route & route) {
 	this->islistingdirectory = route.getListingDirectory();
 	this->index = route.getIndex();
 	this->root = route.getRoot();
+	this->path = route.getPath();
 	this->clientmaxbodysize = route.getClientMaxBodySize();
 	this->allowedHTTPmethods = route.getAllowedHTTPMethods();
 }
 
-Webserv::Route::~Route() { }
+Webserv::Route::~Route() {}
 
 Webserv::Route & Webserv::Route::operator=(const Route & route) {
 	this->islistingdirectory = route.getListingDirectory();
 	this->index = route.getIndex();
 	this->root = route.getRoot();
+	this->path = route.getPath();
 	this->clientmaxbodysize = route.getClientMaxBodySize();
 	this->allowedHTTPmethods = route.getAllowedHTTPMethods();
 	return (*this);
@@ -46,6 +50,10 @@ std::vector<std::string> Webserv::Route::getAllowedHTTPMethods() const {
 	return (this->allowedHTTPmethods);
 }
 
-unsigned int	Webserv::Route::getClientMaxBodySize() const {
+std::string	Webserv::Route::getClientMaxBodySize() const {
 	return (this->clientmaxbodysize);
+}
+
+std::string Webserv::Route::getPath() const {
+	return (this->path);
 }
