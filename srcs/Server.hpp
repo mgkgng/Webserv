@@ -6,19 +6,18 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/12 14:32:01 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/21 14:56:35 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/21 21:55:40 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "Webserv.hpp"
-
 #include "ConnectionData.hpp"
+#include "Client.hpp"
 
 #define PORT "8080"
 #define BACKLOG 20
-#define EV_SIZE 1024
 
 using namespace std;
 
@@ -27,16 +26,17 @@ class Server {
 		int						sockfd;
 		int						kq;
 		struct addrinfo 		*info;
-		//vector<struct kevent>	chlist;
-		struct kevent			evlist[EV_SIZE];
-		string					receivedData;
-		struct timespec			timeout;
+		vector<struct kevent>	chlist;
+		vector<struct kevent>	evlist;
+		vector<Client>			clients;
+		bool	quit;
 		
 		void	init_addrinfo() {
 			struct addrinfo hints = {0};
 
 			hints.ai_family = AF_UNSPEC;
 			hints.ai_socktype = SOCK_STREAM;
+			//** A REFAIRE
 
 			assert(getaddrinfo(NULL, PORT, &hints, &info) == 0);
 		}
@@ -61,7 +61,7 @@ class Server {
 		}
 
 	public:
-		Server() {
+		Server() : quit(false) {
 			init_addrinfo();
 			init_server();
 		}
@@ -71,68 +71,80 @@ class Server {
 
 		void	acceptConnection() {
 			int		newConnection = accept(sockfd, info->ai_addr, &info->ai_addrlen);
-			assert (newConnection != -1);
+			assert(newConnection != -1);
 			fcntl(newConnection, F_SETFL, O_NONBLOCK);
-
-			EV_SET(&evSet, newConnection, EVFILT_READ, EV_ADD, 0, 0, NULL);
-			assert(kevent(kq, &evSet, 1, NULL, 0, NULL) == 0);
 			cout << "Connection accpeted." << endl;
-	
-			chlist.push_back(newEvent);
 		}
 	
 		void	registerEvents() {
-			int nev, fd;
-			struct kevent nkev;
+			int evNb, fd;
 
-			nev = kevent(kq, NULL, 0, evlist, EV_SIZE, NULL);
-			assert(nev != -1);
-			for (int i = 0; i < nev; i++) {
+			evlist.clear();
+			evlist.resize(1);
+			evNb = kevent(kq, &chlist[0], chlist.size(), &evlist[0], evlist.size(), NULL);
+			chlist.clear();
+			if (evNb < 0 && errno == EINTR) // protection from CTRL + C (UNIX signal handling)
+				return ;
+			for (int i = 0; i < evNb; i++) {
 				if (evlist[i].flags & EV_EOF) {
 					cout << "disconnect" << endl;
 					close(evlist[i].ident);
+					deleteClient(evlist[i].ident);
 				} else if (evlist[i].ident == sockfd) {
 					acceptConnection();
 				} else if (evlist[i].filter & EVFILT_READ) {
 					recvData(evlist[i]);
-				} else if (evlist[i].filter == EVFILT_WRITE) {
-					sendData("Connection is done.\n");
-				}	
+				} else if (evlist[i].filter & EVFILT_WRITE) {
+					sendData(evlist[i].ident);
+				}
 			}
 		}
 		
-		void	sendData(string s) {
-			send(sockfd, s.c_str(), s.size(), 0);
+		void	sendData(int fd) {
+			Client *client = getClient(fd);
+			// error check
+			send(client->getIdent(), client->getMsg().c_str(), client->getMsg().size(), 0);
 		}
 
 		void	recvData(struct kevent &ev) {
+			Client	*client = getClient(ev.ident);
+			// error check
 			char	buf[10000];
 			int		ret;
 
-
-			ret = recv(sockfd, buf, 9999, 0);
+			ret = recv(ev.ident, buf, 9999, 0);
 			if (ret < 0)
 				return ;
 			if (!ret) {
-				ConnectionData& cd = ;
-				cd.RequestDone();
 				EV_SET(&ev, sockfd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
 				EV_SET(&ev, sockfd, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
 				return ;
 			}
 			buf[ret] = '\0';
-			if (!ev.udata) {
-				ConnectionData cd;
-				cd.putRequestData(string(buf));
-				ev.udata = &cd; // a checker
-			}
+			client->putMsg(string(buf));
 		}
 
 		void	launch(Server &server) {
 			cout << "WEBSERV launched." << endl;
-			while (true) {
+			quit = false;
+			while (!quit) {
 				cout << "......waiting for connection....." << endl;
 				registerEvents();
+			}
+		}
+
+		Client* getClient(int fd) {
+			for (vector<Client>::iterator it = clients.begin(); it != clients.end(); it++) {
+				if (it->isClient(fd))
+					return (it.base());
+			}
+			return (NULL); // comment gerer ca?
+		}
+
+		void	deleteClient(int fd) {
+			for (vector<Client>::iterator it = clients.begin(); it != clients.end(); it++) {
+				if (it->isClient(fd))
+					clients.erase(it);
 			}
 		}
 
