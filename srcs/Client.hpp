@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/21 21:09:45 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/21 21:47:56 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/21 21:58:39 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,9 @@ class Client {
 		string 	requestMsg;
 
 	public:
-		Client();
-		Client(Client const & other) {
-			*this = other;
-		}
+		Client() {}
+		Client(Client const & other) { *this = other; }
+		Client(int fd) : ident(fd) {}
 		~Client();
 
 		Client & operator=(Client const & right) {

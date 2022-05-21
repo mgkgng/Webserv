@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/12 14:32:01 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/21 21:55:40 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/21 22:17:13 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ class Server {
 		vector<struct kevent>	chlist;
 		vector<struct kevent>	evlist;
 		vector<Client>			clients;
-		bool	quit;
+		bool					quit;
 		
 		void	init_addrinfo() {
 			struct addrinfo hints = {0};
@@ -73,6 +73,12 @@ class Server {
 			int		newConnection = accept(sockfd, info->ai_addr, &info->ai_addrlen);
 			assert(newConnection != -1);
 			fcntl(newConnection, F_SETFL, O_NONBLOCK);
+
+			chlist.resize(chlist.size() + 1);
+			EV_SET(chlist.end().base() - 1, newConnection, EVFILT_READ, EV_ADD, 0,0, NULL);
+
+			Client	c = Client(newConnection);
+			clients.push_back(c);
 			cout << "Connection accpeted." << endl;
 		}
 	
@@ -95,7 +101,7 @@ class Server {
 				} else if (evlist[i].filter & EVFILT_READ) {
 					recvData(evlist[i]);
 				} else if (evlist[i].filter & EVFILT_WRITE) {
-					sendData(evlist[i].ident);
+					sendData(evlist[i].ident); // EST-CE QUE POSSIBLE DE WRITE, C'EST UN EVENEMENT?
 				}
 			}
 		}
@@ -104,6 +110,9 @@ class Server {
 			Client *client = getClient(fd);
 			// error check
 			send(client->getIdent(), client->getMsg().c_str(), client->getMsg().size(), 0);
+			chlist.resize(chlist.size() + 1);
+			EV_SET(chlist.end().base() - 1, ev.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+			// should check if it works like this
 		}
 
 		void	recvData(struct kevent &ev) {
@@ -116,8 +125,9 @@ class Server {
 			if (ret < 0)
 				return ;
 			if (!ret) {
-				EV_SET(&ev, sockfd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-				EV_SET(&ev, sockfd, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
+				chlist.resize(chlist.size() + 2);
+				EV_SET(chlist.end().base() - 2, ev.ident, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+				EV_SET(chlist.end().base() - 1, ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
 				return ;
 			}
 			buf[ret] = '\0';
