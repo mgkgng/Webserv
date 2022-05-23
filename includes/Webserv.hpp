@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
+/*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/23 14:50:09 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/05/23 20:45:47 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,21 +14,6 @@
 #define WEBSERVER_HPP
 
 #include <istream>
-
-#include <sys/socket.h> // socket, listen, bind, accept, send, connect, getsockname, setsockopt
-#include <sys/event.h> // kqueue, kevent. poll() and select() are deprecated.
-#include <sys/types.h>
-#include <sys/select.h> // select
-#include <netinet/in.h> // inet_addr
-// inet_addr function seems to be deprecated. We can use inet_pton function instead.
-// pton stands for "presentation to network" 
-
-#include <arpa/inet.h> // htons, htonl, ntohs, ntohl
-#include <fcntl.h> // fcntl
-#include <netdb.h> // getaddrinfo
-
-#include <string>
-#include <vector>
 #include <JSON.hpp>
 
 // C++ libraries
@@ -39,6 +24,7 @@
 #include <cassert>
 #include <cerrno>
 #include <vector>
+#include <thread>
 
 // C libraries
 #include <sys/socket.h> 
@@ -197,6 +183,36 @@ namespace Webserv {
 			void	acceptConnection();
 			void	disconnect(int fd);
 			void	registerEvents();
+			void	sendData(int c_fd);
+			void	recvData(struct kevent &ev);
+	};
+
+	class ServerLaunch {
+		public:
+			ServerLaunch();
+			ServerLaunch(const ServerLaunch & server);
+			~ServerLaunch();
+			ServerLaunch & operator=(const ServerLaunch & server);
+			
+			Client* getClient(int fd);
+			void	launch(std::vector<Server> & servers);
+			
+		private:			
+			int								sockfd;
+			int								kq;
+			struct sockaddr_in				sockaddr;
+			int								addrlen;
+			std::vector<struct kevent>		chlist;
+			std::vector<struct kevent>		evlist;
+			std::vector<Webserv::Client>	clients;
+			bool							quit;
+
+			void	init_addrinfo();
+			void	init_server();
+			void	acceptConnection();
+			void	disconnect(int fd);
+			void	launch();
+			void	start(std::vector<Server> & servers);
 			void	sendData(int c_fd);
 			void	recvData(struct kevent &ev);
 	};
