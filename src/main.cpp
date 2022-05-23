@@ -37,7 +37,8 @@ int main() {
 	try {
 		JSON test = JSON("config/example.json");
 		// printjsondata(test, 0);
-		Webserv::makeServersFromJSON(test);
+		std::vector<Webserv::Server> temp = Webserv::makeServersFromJSON(test);
+		std::cout << "END" << std::endl;
 	} catch (std::exception & e) {
 		std::cout << e.what() << std::endl;
 	}
