@@ -13,7 +13,7 @@ Webserv::HandleCode::HandleCode(int code, Webserv::Route route, int responsecode
 	if (valid == Webserv::validHTTPCodes.end()) {
 		throw InvalidHTTPCode();
 	}
-	std::vector<const unsigned int>::iterator valid = std::find(Webserv::validHTTPCodes.begin(), Webserv::validHTTPCodes.end(), responsecode);
+	valid = std::find(Webserv::validHTTPCodes.begin(), Webserv::validHTTPCodes.end(), responsecode);
 	if (valid == Webserv::validHTTPCodes.end()) {
 		throw InvalidHTTPCode();
 	}
