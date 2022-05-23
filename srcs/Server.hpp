@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/12 14:32:01 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/21 22:17:13 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/23 13:00:27 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "ConnectionData.hpp"
 #include "Client.hpp"
 
-#define PORT "8080"
+#define PORT 8080
 #define BACKLOG 20
 
 using namespace std;
@@ -25,30 +25,29 @@ class Server {
 	private:
 		int						sockfd;
 		int						kq;
-		struct addrinfo 		*info;
+		struct sockaddr_in		sockaddr;
+		int						addrlen;
 		vector<struct kevent>	chlist;
 		vector<struct kevent>	evlist;
 		vector<Client>			clients;
 		bool					quit;
 		
-		void	init_addrinfo() {
-			struct addrinfo hints = {0};
-
-			hints.ai_family = AF_UNSPEC;
-			hints.ai_socktype = SOCK_STREAM;
-			//** A REFAIRE
-
-			assert(getaddrinfo(NULL, PORT, &hints, &info) == 0);
+		void	init_addrinfo() {			
+			bzero(&sockaddr, sizeof(struct sockaddr_in));
+			sockaddr.sin_family = AF_INET;
+			sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+			sockaddr.sin_port = htons(PORT);
+			addrlen = sizeof(sockaddr);
 		}
 		
 		void	init_server() {
-			sockfd = socket(info->ai_family, info->ai_socktype, info->ai_protocol);
+			sockfd = socket(AF_INET, SOCK_STREAM, 0);
 			assert(sockfd != -1);
 
 			bool	option_on = true;
 			assert(setsockopt(sockfd, IPPROTO_TCP, SO_REUSEADDR, &option_on, sizeof(bool)) == 0);
 
-			assert(bind(sockfd, info->ai_addr, info->ai_addrlen) == 0);
+			assert(bind(sockfd, (struct sockaddr *) &sockaddr, sizeof(sockaddr)) == 0);
 			assert(listen(sockfd, BACKLOG) == 0);
 
 			kq = kqueue();
@@ -57,7 +56,6 @@ class Server {
 		
 		void	terminate() {
 			close(kq);
-			freeaddrinfo(info);
 		}
 
 	public:
@@ -70,7 +68,7 @@ class Server {
 		}
 
 		void	acceptConnection() {
-			int		newConnection = accept(sockfd, info->ai_addr, &info->ai_addrlen);
+			int		newConnection = accept(sockfd, (struct sockaddr *) &sockaddr, (socklen_t *) &addrlen);
 			assert(newConnection != -1);
 			fcntl(newConnection, F_SETFL, O_NONBLOCK);
 
@@ -106,12 +104,12 @@ class Server {
 			}
 		}
 		
-		void	sendData(int fd) {
-			Client *client = getClient(fd);
+		void	sendData(int c_fd) {
+			Client *client = getClient(c_fd);
 			// error check
 			send(client->getIdent(), client->getMsg().c_str(), client->getMsg().size(), 0);
 			chlist.resize(chlist.size() + 1);
-			EV_SET(chlist.end().base() - 1, ev.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+			EV_SET(chlist.end().base() - 1, c_fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 			// should check if it works like this
 		}
 
