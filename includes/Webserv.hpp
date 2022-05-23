@@ -1,13 +1,12 @@
-
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   Webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
+/*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/15 18:13:42 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/23 14:50:09 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +30,31 @@
 #include <string>
 #include <vector>
 #include <JSON.hpp>
+
+// C++ libraries
+#include <iostream>
+#include <istream>
+#include <string>
+#include <exception>
+#include <cassert>
+#include <cerrno>
+#include <vector>
+
+// C libraries
+#include <sys/socket.h> 
+#include <sys/event.h>
+#include <sys/types.h>
+#include <sys/time.h>
+
+#include <sys/un.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <fcntl.h> 
+#include <netdb.h>
+
+#define PORT 8080
+#define BACKLOG 20
 
 namespace Webserv {
 	class Route {
@@ -94,6 +118,41 @@ namespace Webserv {
 			struct InvalidHTTPCode: public std::exception { const char * what () const throw () { return "Invalid HTTP code"; } };
 	};
 
+	class Client {
+		private:
+			int				ident;
+			std::string 	requestMsg;
+
+		public:
+			Client() {}
+			Client(Client const & other) { *this = other; }
+			Client(int fd) : ident(fd) {}
+			~Client() {}
+
+			Client & operator=(Client const & right) {
+				this->ident = right.ident;
+				this->requestMsg = right.requestMsg;
+				return (*this);
+			}
+			
+			bool	isClient(int fd) { return (fd == ident) ? true : false; }
+
+			int		getIdent() {
+				return ident;
+			}
+			
+			std::string	getMsg() {
+				return requestMsg;
+			}
+			
+			void	putMsg(std::string s) {
+				if (!requestMsg.length())
+					requestMsg = s;
+				else
+					requestMsg.append(s);
+			}
+	};
+
 	class Server {
 		public:
 			Server();
@@ -108,7 +167,8 @@ namespace Webserv {
 			bool					getIsDefault() const;
 			std::map<std::string, Route>		getRoutes() const;
 			std::map<std::string, HandleCode>	getHandleCode() const;
-			
+			Client* getClient(int fd);
+			void	launch();
 		private:
 			// Information about the server, such as its name, it's host and port, and if it's the default server for the port or not
 			std::string					servername;
@@ -122,8 +182,54 @@ namespace Webserv {
 
 			// Common errors
 			struct PortOutsideOfRange: public std::exception { const char * what () const throw () { return "Port Outside of Range, please chose a value inbetween 0 to 65535"; } };
+			
+			int						sockfd;
+			int						kq;
+			struct sockaddr_in		sockaddr;
+			int						addrlen;
+			std::vector<struct kevent>	chlist;
+			std::vector<struct kevent>	evlist;
+			std::vector<Webserv::Client>			clients;
+			bool					quit;
+
+			void	init_addrinfo();
+			void	init_server();
+			void	acceptConnection();
+			void	disconnect(int fd);
+			void	registerEvents();
+			void	sendData(int c_fd);
+			void	recvData(struct kevent &ev);
 	};
 
+	class ConnectionData {
+		private:
+			std::string	requestData;
+			std::string	responseData;
+			bool	isRequest;
+
+		public:
+			ConnectionData() : isRequest(true) {}
+			ConnectionData(ConnectionData const & other) {
+				*this = other;
+			}
+			~ConnectionData() {}
+			
+			ConnectionData& operator=(ConnectionData const & rhs) {
+				this->requestData = rhs.requestData;
+				this->responseData = rhs.responseData;
+				this->isRequest = rhs.isRequest;
+				return (*this);
+			}
+			
+			std::string	getRequestData() {return requestData;}
+			void	putRequestData(std::string s) {requestData.append(s);}
+			std::string	getResponseData() {return responseData;}
+			void	putResponseData(std::string s) {responseData.append(s);}
+			
+			bool	getIsRequest() {return isRequest;}
+			void	RequestDone() {isRequest = false;}
+	};
+ 
 	typedef struct sbh_s {
 		//server
 		std::string		servername;
