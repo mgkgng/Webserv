@@ -1,17 +1,22 @@
 #include <Webserv.hpp>
 
+#include <algorithm>
 
-// Webserv::HandleCode::HandleCode() {
-
-// }
-
-Webserv::HandleCode::HandleCode(const HandleCode & handlecode) {
+Webserv::HandleCode::HandleCode(const Webserv::HandleCode & handlecode) {
 	this->code = handlecode.getCode();
 	this->route = handlecode.getRoute();
 	this->responsecode = handlecode.getResponseCode();
 }
 
 Webserv::HandleCode::HandleCode(int code, Webserv::Route route, int responsecode) {
+	std::vector<const unsigned int>::iterator valid = std::find(Webserv::validHTTPCodes.begin(), Webserv::validHTTPCodes.end(), code);
+	if (valid == Webserv::validHTTPCodes.end()) {
+		throw InvalidHTTPCode();
+	}
+	std::vector<const unsigned int>::iterator valid = std::find(Webserv::validHTTPCodes.begin(), Webserv::validHTTPCodes.end(), responsecode);
+	if (valid == Webserv::validHTTPCodes.end()) {
+		throw InvalidHTTPCode();
+	}
 	this->code = code;
 	this->route = route;
 	this->responsecode = responsecode;
@@ -21,7 +26,7 @@ Webserv::HandleCode::~HandleCode() {
 
 }
 
-Webserv::HandleCode &  Webserv::HandleCode::operator=(const HandleCode & handlecode) {
+Webserv::HandleCode &  Webserv::HandleCode::operator=(const Webserv::HandleCode & handlecode) {
 	this->code = handlecode.getCode();
 	this->route = handlecode.getRoute();
 	this->responsecode = handlecode.getResponseCode();

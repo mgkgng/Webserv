@@ -19,6 +19,9 @@ Webserv::Server::Server(const Server & server) {
 Webserv::Server::Server(std::string servername, std::string host, unsigned int port, bool isdefault, std::map<std::string, Webserv::Route> routes, std::map<std::string, Webserv::HandleCode> codes) {
 	this->servername = servername;
 	this->host = host;
+	if (port > 65535) {
+		throw PortOutsideOfRange();
+	}
 	this->port = port;
 	this->isdefault = isdefault;
 	this->routes = routes;
@@ -61,7 +64,7 @@ std::map<std::string, Webserv::HandleCode>	Webserv::Server::getHandleCode() cons
 	return (this->codehandlers);
 }
 
-Webserv::sbh_t	Webserv::getInformation(const JSON & json) {
+Webserv::sbh_t	getInformation(const JSON & json) {
 	Webserv::sbh_t ret;
 	try {
 		ret.index = json.getStrings().at("index");
@@ -102,7 +105,7 @@ Webserv::sbh_t	Webserv::getInformation(const JSON & json) {
 	return (ret);
 }
 
-Webserv::sbh_t Webserv::defaultInformation() {
+Webserv::sbh_t defaultInformation() {
 	Webserv::sbh_t ret;
 	ret.index = "index.html";
 	ret.root = ".";
@@ -119,9 +122,9 @@ Webserv::sbh_t Webserv::defaultInformation() {
 	return (ret);
 }
 
-Webserv::Route	Webserv::generateRoute(const JSON & json, Webserv::sbh_t sinfo) {
+Webserv::Route	generateRoute(const JSON & json, Webserv::sbh_t sinfo) {
 	if (json.getObjects().empty() != 1) {
-		throw InvalidJSONObjectInRoute();
+		throw Webserv::InvalidJSONObjectInRoute();
 	}
 	sinfo = getInformation(json);
 	std::vector<std::string> words;
@@ -135,11 +138,11 @@ Webserv::Route	Webserv::generateRoute(const JSON & json, Webserv::sbh_t sinfo) {
 	if (words.empty() != 1) {
 		words.push_back(sinfo.allowedHTTPmethods);
 	}
-	Webserv::Route ret = Route(sinfo.islistingdirectory, sinfo.index, sinfo.root, sinfo.path, sinfo.clientmaxbodysize, words);
+	Webserv::Route ret = Webserv::Route(sinfo.islistingdirectory, sinfo.index, sinfo.root, sinfo.path, sinfo.clientmaxbodysize, words);
 	return (ret);
 }
 
-Webserv::HandleCode	Webserv::generateHandleCode(const JSON & json, Webserv::sbh_t sinfo, std::map<std::string, Webserv::Route> & routes) {
+Webserv::HandleCode	generateHandleCode(const JSON & json, Webserv::sbh_t sinfo, std::map<std::string, Webserv::Route> & routes) {
 	if (json.getObjects().empty() != 1) {
 		throw Webserv::InvalidJSONObjectInHandleCode();
 	}
@@ -153,7 +156,7 @@ Webserv::HandleCode	Webserv::generateHandleCode(const JSON & json, Webserv::sbh_
 	throw Webserv::InvalidJSONHandleCodeInvalidRoute(); // temp solution, should set up default error routes depending on the code.
 }
 
-std::vector<Webserv::Server>	Webserv::makeServersFromJSONHelper(const JSON & json, Webserv::sbh_t sinfo, std::map<std::string, Webserv::Route> & routes, std::map<std::string, Webserv::HandleCode> & codes) {
+std::vector<Webserv::Server>	makeServersFromJSONHelper(const JSON & json, Webserv::sbh_t sinfo, std::map<std::string, Webserv::Route> & routes, std::map<std::string, Webserv::HandleCode> & codes) {
 	std::vector<Webserv::Server> ret;
 	JSON::object_box temp = json.getObjects();
 
@@ -188,11 +191,11 @@ std::vector<Webserv::Server>	Webserv::makeServersFromJSONHelper(const JSON & jso
 	}
 	for (std::vector<Webserv::Server>::iterator it = ret.begin(); it != ret.end(); it++) {
 		if ((*it).getHost() == sinfo.host && (*it).getPort() == sinfo.port) {
-			ret.push_back(Server(sinfo.servername, sinfo.host, sinfo.port, false, routes, codes));
+			ret.push_back(Webserv::Server(sinfo.servername, sinfo.host, sinfo.port, false, routes, codes));
 			return (ret);
 		}
 	} 
-	ret.push_back(Server(sinfo.servername, sinfo.host, sinfo.port, true, routes, codes));
+	ret.push_back(Webserv::Server(sinfo.servername, sinfo.host, sinfo.port, true, routes, codes));
 	return (ret);
 }
 
@@ -203,7 +206,7 @@ std::vector<Webserv::Server>	Webserv::makeServersFromJSON(const JSON & json) {
 	JSON::object_box temp = json.getObjects();
 
 	Webserv::sbh_t sinfo = defaultInformation();
-	sinfo = Webserv::getInformation(json);
+	sinfo = getInformation(json);
 
 	for (JSON::object_box::iterator it = temp.begin(); it != temp.end(); it++) {
 		if ((*it).first.compare(0, 5, "route") == 0) {

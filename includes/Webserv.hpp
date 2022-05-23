@@ -36,8 +36,11 @@ namespace Webserv {
 			// what is the maximum size body that the client is alowed to send to the server
 			std::string		clientmaxbodysize;
 			
-			//	Allowed http methods for the route
+			// Allowed http methods for the route
 			std::vector<std::string>	allowedHTTPmethods;
+
+			// Common errors
+			struct InvalidHTTPMethod: public std::exception { const char * what () const throw () { return "Invalid HTTP method"; } };
 	};
 
 	class HandleCode {
@@ -60,8 +63,8 @@ namespace Webserv {
 			// The Route to redirect the if the code is encountered
 			Route					route;
 
-			// exception, code not recognized
-			struct InvalidHTTPCode: public std::exception { const char * what () const throw () { return "Invalid Code"; } };
+			// Common errors
+			struct InvalidHTTPCode: public std::exception { const char * what () const throw () { return "Invalid HTTP code"; } };
 	};
 
 	class Server {
@@ -89,6 +92,9 @@ namespace Webserv {
 			// routes and error redirections associated with the server 
 			std::map<std::string, Route>			routes;
 			std::map<std::string, HandleCode>		codehandlers;
+
+			// Common errors
+			struct PortOutsideOfRange: public std::exception { const char * what () const throw () { return "Port Outside of Range, please chose a value inbetween 0 to 65535"; } };
 	};
 
 	typedef struct sbh_s {
@@ -110,12 +116,7 @@ namespace Webserv {
 		std::string		clientmaxbodysize;
 		std::string		allowedHTTPmethods;
 	}	sbh_t;
-
-	sbh_t	getInformation(const JSON & json);
-	sbh_t defaultInformation();
-	Route 	generateRoute(const JSON & json, sbh_t sinfo);
-	HandleCode  generateHandleCode(const JSON & json, sbh_t sinfo, std::map<std::string, Route> & routes);
-	std::vector<Server>  makeServersFromJSONHelper(const JSON & json, sbh_t sinfo, std::map<std::string, Route> & routes, std::map<std::string, HandleCode> & codes);
+	
 	std::vector<Server>  makeServersFromJSON(const JSON & json);
 
 	struct InvalidJSONObjectIdentifier: public std::exception { const char * what () const throw () { return "JSON objects should start with route, code or server"; } };
