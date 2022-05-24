@@ -35,6 +35,7 @@
 
 int main() {
 	try {
+		Webserv::ServerLaunch test2;
 		JSON test = JSON("config/example.json");
 		// printjsondata(test, 0);
 		Webserv::makeServersFromJSON(test);

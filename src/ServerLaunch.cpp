@@ -1,18 +1,32 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ServerLaunch.cpp                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/05/24 16:54:33 by min-kang          #+#    #+#             */
+/*   Updated: 2022/05/24 17:00:24 by min-kang         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Webserv.hpp"
 
-Webserv::ServerLaunch::ServerLaunch() {
+using namespace Webserv;
+
+ServerLaunch::ServerLaunch() {
 
 }
 
-Webserv::ServerLaunch::ServerLaunch(const ServerLaunch & other) {
+ServerLaunch::ServerLaunch(ServerLaunch const & other) {
 	*this = other;
 }
 
-Webserv::ServerLaunch::~ServerLaunch() {
+ServerLaunch::~ServerLaunch() {
 	close(kq);
 }
 
-Webserv::ServerLaunch &	Webserv::ServerLaunch::operator=(const ServerLaunch & rhs) {
+ServerLaunch &	ServerLaunch::operator=(ServerLaunch const & rhs) {
 	this->sockfd = rhs.sockfd;
 	this->kq = rhs.kq;
 	this->sockaddr = rhs.sockaddr;
@@ -24,7 +38,7 @@ Webserv::ServerLaunch &	Webserv::ServerLaunch::operator=(const ServerLaunch & rh
 	return (*this);
 }
 
-void	Webserv::ServerLaunch::init_addrinfo() {
+void	ServerLaunch::init_addrinfo() {
 	bzero(&sockaddr, sizeof(struct sockaddr_in));
 	sockaddr.sin_family = AF_INET;
 	sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -32,13 +46,12 @@ void	Webserv::ServerLaunch::init_addrinfo() {
 	addrlen = sizeof(sockaddr);
 }
 		
-void	Webserv::ServerLaunch::init_server() {
+void	ServerLaunch::init_server() {
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	assert(sockfd != -1);
 
-	bool	option_on = true;
-	assert(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option_on, sizeof(bool)) == 0);
-
+	int	option_on = 1;
+	assert(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option_on, sizeof(int)) == 0);
 	assert(bind(sockfd, (struct sockaddr *) &sockaddr, sizeof(sockaddr)) == 0);
 	assert(listen(sockfd, BACKLOG) == 0);
 
@@ -46,7 +59,7 @@ void	Webserv::ServerLaunch::init_server() {
 	assert(kq != -1);
 }
 
-void	Webserv::ServerLaunch::acceptConnection() {
+void	ServerLaunch::acceptConnection() {
 	int	newConnection = accept(sockfd, (struct sockaddr *) &sockaddr, (socklen_t *) &addrlen);
 	assert(newConnection != -1);
 	fcntl(newConnection, F_SETFL, O_NONBLOCK);
@@ -59,25 +72,27 @@ void	Webserv::ServerLaunch::acceptConnection() {
 	std::cout << "Connection accpeted." << std::endl;
 }
 	
-void	Webserv::ServerLaunch::disconnect(int fd) {
+void	ServerLaunch::disconnect(int fd) {
 	std::cout << "disconnect" << std::endl;
 	close(fd);
-	for (std::vector<Webserv::Client>::iterator it = clients.begin(); it != clients.end(); it++)
+	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
 		if (it->isClient(fd))
 			clients.erase(it);
 }
 
-void	Webserv::ServerLaunch::sendData(int c_fd) {
+void	ServerLaunch::sendData(int c_fd) {
 	// should figure out how to know whether i'm going to send data to client or to cgi
+	
+	//* if back to client
 	Client *client = getClient(c_fd);
 	assert(client != NULL);
-	send(client->getIdent(), client->getMsg().c_str(), client->getMsg().size(), 0);
+	send(client->getIdent(), client->getResponseStr().c_str(), client->getMsg().size(), 0);
 	chlist.resize(chlist.size() + 1);
 	EV_SET(chlist.end().base() - 1, c_fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 	// should check if it works like this
 }
 
-void	Webserv::ServerLaunch::recvData(struct kevent &ev) {
+void	ServerLaunch::recvData(struct kevent &ev) {
 	char	buf[10000];
 	int		ret;
 	Client	*client = getClient(ev.ident);
@@ -90,13 +105,14 @@ void	Webserv::ServerLaunch::recvData(struct kevent &ev) {
 		chlist.resize(chlist.size() + 2);
 		EV_SET(chlist.end().base() - 2, ev.ident, EVFILT_READ, EV_DELETE, 0, 0, NULL);
 		EV_SET(chlist.end().base() - 1, ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
+		client->putRequest();
 		return ;
 	}
 	buf[ret] = '\0';
-	client->putMsg(std::string(buf));
+	client->putRequestStr(std::string(buf));
 }
 			
-void	Webserv::ServerLaunch::launch() {
+void	ServerLaunch::launch() {
 	int evNb;
 
 	init_addrinfo();
@@ -127,18 +143,17 @@ void	Webserv::ServerLaunch::launch() {
 	}
 }
 		
-void	Webserv::ServerLaunch::start(std::vector<Server> & servers) {
+void	ServerLaunch::start(std::vector<Server> & servers) {
 	std::vector<std::thread> threads;
+	std::vector<Server>::iterator it_servers = servers.begin();
 	threads.resize(servers.size());
 	for (std::vector<std::thread>::iterator it = threads.begin(); it != threads.end(); it++) {
-
+		launch(servers);
 	}
-
-
 }
 
-Webserv::Client* Webserv::ServerLaunch::getClient(int fd) {
-	for (std::vector<Webserv::Client>::iterator it = clients.begin(); it != clients.end(); it++)
+Client* ServerLaunch::getClient(int fd) {
+	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
 		if (it->isClient(fd))
 			return (it.base());
 	return (NULL);

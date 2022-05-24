@@ -6,12 +6,14 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/23 20:45:47 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/24 17:01:10 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef WEBSERVER_HPP
 #define WEBSERVER_HPP
+
+#include "libft.hpp"
 
 #include <istream>
 #include <JSON.hpp>
@@ -25,6 +27,7 @@
 #include <cerrno>
 #include <vector>
 #include <thread>
+#include <utility>
 
 // C libraries
 #include <sys/socket.h> 
@@ -104,39 +107,62 @@ namespace Webserv {
 			struct InvalidHTTPCode: public std::exception { const char * what () const throw () { return "Invalid HTTP code"; } };
 	};
 
+	class Request {
+		private:
+			std::string	method;
+			std::string	path;
+			std::string	protocol_v;
+			std::map<std::string, std::string>	headers;
+		
+		public:
+			Request();
+			Request(std::string);
+			Request(Request const &);
+			~Request();
+			
+			Request & operator=(Request const &);
+		
+			void	parseRequest(std::string request);
+	};
+
+	class Response {
+		private:
+			std::string protocol_v;
+			std::string status_code;
+			std::string status_message;
+			std::map<std::string, std::string> headers;
+		public:
+			Response();
+			Response(Response const &);
+			~Response();
+
+			Response & operator=(Response const &);
+	};
+
 	class Client {
 		private:
 			int				ident;
-			std::string 	requestMsg;
+			std::string 	requestStr;
+			std::string		responseStr;
+			Request			request;
+			Response		response;
 
 		public:
-			Client() {}
-			Client(Client const & other) { *this = other; }
-			Client(int fd) : ident(fd) {}
-			~Client() {}
+			Client();
+			Client(Client const & other);
+			Client(int fd);
+			~Client();
 
-			Client & operator=(Client const & right) {
-				this->ident = right.ident;
-				this->requestMsg = right.requestMsg;
-				return (*this);
-			}
+			Client & operator=(Client const & rhs);
 			
-			bool	isClient(int fd) { return (fd == ident) ? true : false; }
-
-			int		getIdent() {
-				return ident;
-			}
-			
-			std::string	getMsg() {
-				return requestMsg;
-			}
-			
-			void	putMsg(std::string s) {
-				if (!requestMsg.length())
-					requestMsg = s;
-				else
-					requestMsg.append(s);
-			}
+			bool		isClient(int fd);
+			int			getIdent() const;
+			std::string	getRequestStr() const;
+			std::string	getResponseStr() const;
+			Request		getRequest() const;
+			Response	getResponse() const;
+			void		putRequest();
+			void		putRequestStr(std::string s);
 	};
 
 	class Server {

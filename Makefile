@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: jrathelo <student.42nice.fr>               +#+  +:+       +#+         #
+#    By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/25 15:25:19 by jrathelo          #+#    #+#              #
-#    Updated: 2022/05/23 14:45:58 by jrathelo         ###   ########.fr        #
+#    Updated: 2022/05/24 14:08:43 by min-kang         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -49,7 +49,7 @@ OUTS = objs
 # Source Files
 SRC = main.cpp																				\
 		config-parsing/JSON.cpp config-parsing/Route.cpp config-parsing/Server.cpp			\
-		config-parsing/HandleCode.cpp
+		config-parsing/HandleCode.cpp ServerLaunch.cpp
 
 SRC_PLUS_PATH = $(addprefix $(SRC_DIR)/, $(SRC))
 
