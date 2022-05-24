@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/24 17:01:10 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/24 17:30:34 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,13 +34,13 @@
 #include <sys/event.h>
 #include <sys/types.h>
 #include <sys/time.h>
-
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <fcntl.h> 
 #include <netdb.h>
+#include <pthread.h>
 
 #define PORT 8080
 #define BACKLOG 20
@@ -179,8 +179,8 @@ namespace Webserv {
 			bool					getIsDefault() const;
 			std::map<std::string, Route>		getRoutes() const;
 			std::map<std::string, HandleCode>	getHandleCode() const;
-			Client* getClient(int fd);
-			void	launch();
+
+
 		private:
 			// Information about the server, such as its name, it's host and port, and if it's the default server for the port or not
 			std::string					servername;
@@ -194,23 +194,7 @@ namespace Webserv {
 
 			// Common errors
 			struct PortOutsideOfRange: public std::exception { const char * what () const throw () { return "Port Outside of Range, please chose a value inbetween 0 to 65535"; } };
-			
-			int						sockfd;
-			int						kq;
-			struct sockaddr_in		sockaddr;
-			int						addrlen;
-			std::vector<struct kevent>	chlist;
-			std::vector<struct kevent>	evlist;
-			std::vector<Webserv::Client>			clients;
-			bool					quit;
 
-			void	init_addrinfo();
-			void	init_server();
-			void	acceptConnection();
-			void	disconnect(int fd);
-			void	registerEvents();
-			void	sendData(int c_fd);
-			void	recvData(struct kevent &ev);
 	};
 
 	class ServerLaunch {
@@ -220,8 +204,9 @@ namespace Webserv {
 			~ServerLaunch();
 			ServerLaunch & operator=(const ServerLaunch & server);
 			
-			Client* getClient(int fd);
-			void	launch(std::vector<Server> & servers);
+			static void	thread_launch(void *ptr[2]);
+			void	launch(Server *server);
+			void	start(std::vector<Server> & servers);
 			
 		private:			
 			int								sockfd;
@@ -237,10 +222,12 @@ namespace Webserv {
 			void	init_server();
 			void	acceptConnection();
 			void	disconnect(int fd);
-			void	launch();
 			void	start(std::vector<Server> & servers);
 			void	sendData(int c_fd);
 			void	recvData(struct kevent &ev);
+
+			Client* getClient(int fd);
+
 	};
 
 	class ConnectionData {

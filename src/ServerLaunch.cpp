@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 16:54:33 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/24 17:00:24 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/24 17:35:00 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,10 +86,12 @@ void	ServerLaunch::sendData(int c_fd) {
 	//* if back to client
 	Client *client = getClient(c_fd);
 	assert(client != NULL);
-	send(client->getIdent(), client->getResponseStr().c_str(), client->getMsg().size(), 0);
+	send(client->getIdent(), client->getResponseStr().c_str(), client->getResponseStr().size(), 0);
 	chlist.resize(chlist.size() + 1);
 	EV_SET(chlist.end().base() - 1, c_fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 	// should check if it works like this
+
+	//* if to CGI
 }
 
 void	ServerLaunch::recvData(struct kevent &ev) {
@@ -112,17 +114,21 @@ void	ServerLaunch::recvData(struct kevent &ev) {
 	client->putRequestStr(std::string(buf));
 }
 			
-void	ServerLaunch::launch() {
+void	ServerLaunch::thread_launch(void *ptr[2]) {
+	ServerLaunch	*launch;
+
+	launch = reinterpret_cast<ServerLaunch*>(ptr[0]);
+	launch->launch(reinterpret_cast<Server *>(ptr[1]));
+}
+
+void	ServerLaunch::launch(Server *server) {
 	int evNb;
 
 	init_addrinfo();
 	init_server();
 	std::cout << "WEBSERV launched." << std::endl;
 	quit = false;
-	while (!quit) {
-		std::cout << "......waiting for connection....." << std::endl;
 
-	}	
 	while (!quit) {
 		evlist.clear();
 		evlist.resize(1);
@@ -144,12 +150,13 @@ void	ServerLaunch::launch() {
 }
 		
 void	ServerLaunch::start(std::vector<Server> & servers) {
-	std::vector<std::thread> threads;
+	std::vector<pthread_t> threads;
 	std::vector<Server>::iterator it_servers = servers.begin();
 	threads.resize(servers.size());
-	for (std::vector<std::thread>::iterator it = threads.begin(); it != threads.end(); it++) {
-		launch(servers);
-	}
+	for (std::vector<pthread_t>::iterator it = threads.begin(); it != threads.end(); it++)
+		pthread_create(&(*it), NULL, (void * (*)(void *)) &ServerLaunch::thread_launch, (void *[2]) {this, &(*it_servers++)});
+	for (std::vector<pthread_t>::iterator it = threads.begin(); it != threads.end(); it++)
+		pthread_detach(*it);
 }
 
 Client* ServerLaunch::getClient(int fd) {
