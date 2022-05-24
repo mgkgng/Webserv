@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/24 17:30:34 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/24 22:40:20 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,30 +17,6 @@
 
 #include <istream>
 #include <JSON.hpp>
-
-// C++ libraries
-#include <iostream>
-#include <istream>
-#include <string>
-#include <exception>
-#include <cassert>
-#include <cerrno>
-#include <vector>
-#include <thread>
-#include <utility>
-
-// C libraries
-#include <sys/socket.h> 
-#include <sys/event.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <sys/un.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <fcntl.h> 
-#include <netdb.h>
-#include <pthread.h>
 
 #define PORT 8080
 #define BACKLOG 20
@@ -107,64 +83,6 @@ namespace Webserv {
 			struct InvalidHTTPCode: public std::exception { const char * what () const throw () { return "Invalid HTTP code"; } };
 	};
 
-	class Request {
-		private:
-			std::string	method;
-			std::string	path;
-			std::string	protocol_v;
-			std::map<std::string, std::string>	headers;
-		
-		public:
-			Request();
-			Request(std::string);
-			Request(Request const &);
-			~Request();
-			
-			Request & operator=(Request const &);
-		
-			void	parseRequest(std::string request);
-	};
-
-	class Response {
-		private:
-			std::string protocol_v;
-			std::string status_code;
-			std::string status_message;
-			std::map<std::string, std::string> headers;
-		public:
-			Response();
-			Response(Response const &);
-			~Response();
-
-			Response & operator=(Response const &);
-	};
-
-	class Client {
-		private:
-			int				ident;
-			std::string 	requestStr;
-			std::string		responseStr;
-			Request			request;
-			Response		response;
-
-		public:
-			Client();
-			Client(Client const & other);
-			Client(int fd);
-			~Client();
-
-			Client & operator=(Client const & rhs);
-			
-			bool		isClient(int fd);
-			int			getIdent() const;
-			std::string	getRequestStr() const;
-			std::string	getResponseStr() const;
-			Request		getRequest() const;
-			Response	getResponse() const;
-			void		putRequest();
-			void		putRequestStr(std::string s);
-	};
-
 	class Server {
 		public:
 			Server();
@@ -195,68 +113,6 @@ namespace Webserv {
 			// Common errors
 			struct PortOutsideOfRange: public std::exception { const char * what () const throw () { return "Port Outside of Range, please chose a value inbetween 0 to 65535"; } };
 
-	};
-
-	class ServerLaunch {
-		public:
-			ServerLaunch();
-			ServerLaunch(const ServerLaunch & server);
-			~ServerLaunch();
-			ServerLaunch & operator=(const ServerLaunch & server);
-			
-			static void	thread_launch(void *ptr[2]);
-			void	launch(Server *server);
-			void	start(std::vector<Server> & servers);
-			
-		private:			
-			int								sockfd;
-			int								kq;
-			struct sockaddr_in				sockaddr;
-			int								addrlen;
-			std::vector<struct kevent>		chlist;
-			std::vector<struct kevent>		evlist;
-			std::vector<Webserv::Client>	clients;
-			bool							quit;
-
-			void	init_addrinfo();
-			void	init_server();
-			void	acceptConnection();
-			void	disconnect(int fd);
-			void	start(std::vector<Server> & servers);
-			void	sendData(int c_fd);
-			void	recvData(struct kevent &ev);
-
-			Client* getClient(int fd);
-
-	};
-
-	class ConnectionData {
-		private:
-			std::string	requestData;
-			std::string	responseData;
-			bool	isRequest;
-
-		public:
-			ConnectionData() : isRequest(true) {}
-			ConnectionData(ConnectionData const & other) {
-				*this = other;
-			}
-			~ConnectionData() {}
-			
-			ConnectionData& operator=(ConnectionData const & rhs) {
-				this->requestData = rhs.requestData;
-				this->responseData = rhs.responseData;
-				this->isRequest = rhs.isRequest;
-				return (*this);
-			}
-			
-			std::string	getRequestData() {return requestData;}
-			void	putRequestData(std::string s) {requestData.append(s);}
-			std::string	getResponseData() {return responseData;}
-			void	putResponseData(std::string s) {responseData.append(s);}
-			
-			bool	getIsRequest() {return isRequest;}
-			void	RequestDone() {isRequest = false;}
 	};
  
 	typedef struct sbh_s {

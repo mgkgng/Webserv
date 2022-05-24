@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 16:54:33 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/24 17:35:00 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/24 20:06:49 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,13 +150,17 @@ void	ServerLaunch::launch(Server *server) {
 }
 		
 void	ServerLaunch::start(std::vector<Server> & servers) {
-	std::vector<pthread_t> threads;
-	std::vector<Server>::iterator it_servers = servers.begin();
-	threads.resize(servers.size());
-	for (std::vector<pthread_t>::iterator it = threads.begin(); it != threads.end(); it++)
-		pthread_create(&(*it), NULL, (void * (*)(void *)) &ServerLaunch::thread_launch, (void *[2]) {this, &(*it_servers++)});
-	for (std::vector<pthread_t>::iterator it = threads.begin(); it != threads.end(); it++)
-		pthread_detach(*it);
+	if (servers.size() == 1) {
+		launch(&servers.at(0));
+	} else {
+		std::vector<pthread_t> threads;
+		std::vector<Server>::iterator it_servers = servers.begin();
+		threads.resize(servers.size());
+		for (std::vector<pthread_t>::iterator it = threads.begin(); it != threads.end(); it++)
+			pthread_create(&(*it), NULL, (void * (*)(void *)) &ServerLaunch::thread_launch, (void *[2]) {this, &(*it_servers++)});
+		for (std::vector<pthread_t>::iterator it = threads.begin(); it != threads.end(); it++)
+			pthread_detach(*it);
+	}
 }
 
 Client* ServerLaunch::getClient(int fd) {
