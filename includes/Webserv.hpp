@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/23 14:50:09 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/05/24 12:10:25 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,6 +168,9 @@ namespace Webserv {
 			std::map<std::string, Route>		getRoutes() const;
 			std::map<std::string, HandleCode>	getHandleCode() const;
 			Client* getClient(int fd);
+
+			void	setIsDefault(bool b);
+
 			void	launch();
 		private:
 			// Information about the server, such as its name, it's host and port, and if it's the default server for the port or not

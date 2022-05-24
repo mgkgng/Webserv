@@ -2,11 +2,6 @@
 #include <JSON.hpp>
 #include <iostream>
 
-
-Webserv::Server::Server() {
-
-}
-
 Webserv::Server::Server(const Server & server) {
 	*this = server;
 }
@@ -23,7 +18,7 @@ Webserv::Server::Server(std::string servername, std::string host, unsigned int p
 	this->codehandlers = codes;
 	this->quit = false;
 	init_addrinfo();
-	init_server();
+	//init_server();
 }
 
 Webserv::Server::~Server() {
@@ -155,6 +150,10 @@ void	Webserv::Server::registerEvents() {
 		else if (evlist[i].filter & EVFILT_WRITE)
 			sendData(evlist[i].ident); // EST-CE QUE POSSIBLE DE WRITE, C'EST UN EVENEMENT?
 	}
+}
+
+void	Webserv::Server::setIsDefault(bool b) {
+	this->isdefault = b;
 }
 		
 void	Webserv::Server::launch() {
@@ -343,6 +342,15 @@ std::vector<Webserv::Server>	Webserv::makeServersFromJSON(const JSON & json) {
 			;
 		} else {
 			throw Webserv::InvalidJSONObjectIdentifier();
+		}
+	}
+	for (std::vector<Webserv::Server>::iterator it = ret.begin(); it != ret.end(); it++) {
+		if ((*it).getIsDefault()) {
+			for(std::vector<Webserv::Server>::iterator sit = it + 1; sit != ret.end(); sit++) {
+				if ((*sit).getIsDefault() && (*sit).getHost().compare(0, (*sit).getHost().size(), (*it).getHost()) == 0 && (*sit).getPort() == (*it).getPort()) {
+					(*sit).setIsDefault(false);
+				}
+			}
 		}
 	}
 	return (ret);

@@ -25,6 +25,11 @@
 			"path": "/404"
 		}
 	},
+	"server2": {
+		"host": "example.org",
+		"port": 1234,
+		"server_name": null
+	},
 	"server1": {
 		"host": "example.com",
 		"port": 2468,
