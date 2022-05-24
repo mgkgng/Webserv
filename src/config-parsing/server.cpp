@@ -1,6 +1,8 @@
 #include <Webserv.hpp>
 #include <JSON.hpp>
 #include <iostream>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 Webserv::Server::Server(const Server & server) {
 	*this = server;
@@ -18,7 +20,7 @@ Webserv::Server::Server(std::string servername, std::string host, unsigned int p
 	this->codehandlers = codes;
 	this->quit = false;
 	init_addrinfo();
-	//init_server();
+	init_server();
 }
 
 Webserv::Server::~Server() {
@@ -68,17 +70,18 @@ void	Webserv::Server::init_addrinfo() {
 }
 		
 void	Webserv::Server::init_server() {
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	assert(sockfd != -1);
 
-	bool	option_on = true;
-	assert(setsockopt(sockfd, IPPROTO_TCP, SO_REUSEADDR, &option_on, sizeof(bool)) == 0);
+	int	option_on = 1;
+	assert(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option_on, sizeof(int)) == 0);
 
-	assert(bind(sockfd, (struct sockaddr *) &sockaddr, sizeof(sockaddr)) == 0);
-	assert(listen(sockfd, BACKLOG) == 0);
-
-	kq = kqueue();
-	assert(kq != -1);
+	int temp = bind(sockfd, (struct sockaddr *) &sockaddr, sizeof(sockaddr));
+	if (temp != -1) {
+		assert(listen(sockfd, BACKLOG) == 0);
+		kq = kqueue();
+		assert(kq != -1);
+	}
 }
 
 void	Webserv::Server::acceptConnection() {
