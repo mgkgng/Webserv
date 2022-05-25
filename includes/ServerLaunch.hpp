@@ -6,13 +6,14 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 20:08:08 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/24 22:45:42 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/25 15:29:36 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "Webserv.hpp"
+#include "libft.hpp"
+#include "Client.hpp"
 
 namespace Webserv {
 

@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/24 22:40:20 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/25 15:29:24 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,7 @@
 #define WEBSERVER_HPP
 
 #include "libft.hpp"
-
-#include <istream>
+#include "ServerLaunch.hpp"
 #include <JSON.hpp>
 
 #define PORT 8080
