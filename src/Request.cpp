@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/25 15:42:16 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/25 18:22:55 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,19 +44,31 @@ void	Request::parseRequest(std::string request) {
 
 	// first line parsing
 	getline(iss, line);
-	std::vector<std::string> start_line = ft_split(const_cast<char *>(line.c_str()), " \n");
+	std::vector<std::string> start_line = split(const_cast<char *>(line.c_str()), " \n\r");
 	method = start_line.at(0);
 	path = start_line.at(1);
 	protocol_v = start_line.at(2);
 	
 	// header parsing
 	std::vector<std::string> header_line;
-	while (getline(iss, line) && line != "\n") {
-		header_line = ft_split(const_cast<char *>(line.c_str()), ":");
-		headers.insert(std::pair<std::string, std::string>(header_line.at(0), ft_strtrim(header_line.at(1), " \n")));
+	while (getline(iss, line) && line != "\n\r") { // a voir
+		header_line = split(const_cast<char *>(line.c_str()), ":");
+		headers.insert(std::pair<std::string, std::string>(header_line.at(0), trim(header_line.at(1), " \n\r")));
 	}
 
 	// body parsing
 	while (getline(iss, line))
 		body += line;
+}
+
+std::string Request::getMethod() const {
+	return method;
+}
+
+std::string Request::getBody() const {
+	return body;
+}
+
+std::map<std::string, std::string> Request::getHeader() const {
+	return headers;
 }

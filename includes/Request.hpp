@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 22:40:38 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/25 15:37:05 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/25 17:28:01 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,5 +32,9 @@ class Request {
 		Request & operator=(Request const & rhs);
 		
 		void	parseRequest(std::string);
+		
+		std::string	getMethod() const;
+		std::string	getBody() const;
+		std::map<std::string, std::string> getHeaders() const;
 };
 };

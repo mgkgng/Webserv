@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:42:44 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/24 20:09:58 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/25 18:08:22 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@
 #include <netdb.h>
 #include <pthread.h>
 
-std::vector<std::string> ft_split(char *str, char *sep) {
+std::vector<std::string> split(char *str, char *sep) {
 	char *substr;
 	std::vector<std::string> res;
 
@@ -49,8 +49,10 @@ std::vector<std::string> ft_split(char *str, char *sep) {
 	return (res);
 }
 
-std::string	ft_strtrim(std::string s, std::string set) {
-	int	i;
-	//strtrim
+std::string	trim(std::string s, std::string set) {
+	for (std::string::iterator c = s.begin(); c != s.end() && set.find(*c, 0) != std::string::npos; c++)
+		s.erase(c);
+	for (std::string::iterator c = s.end() - 1; c != s.begin() && set.find(*c, 0) != std::string::npos; c--)
+		s.erase(c);
 	return (s);
 }

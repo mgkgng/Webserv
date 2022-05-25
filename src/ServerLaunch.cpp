@@ -6,13 +6,15 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 16:54:33 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/25 15:31:23 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/25 18:12:01 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerLaunch.hpp"
 
 using namespace Webserv;
+
+class Server;
 
 ServerLaunch::ServerLaunch() {
 
@@ -83,15 +85,18 @@ void	ServerLaunch::disconnect(int fd) {
 void	ServerLaunch::sendData(int c_fd) {
 	// should figure out how to know whether i'm going to send data to client or to cgi
 	
-	//* if back to client
 	Client *client = getClient(c_fd);
+	Request	*r = client->getRequest();
 	assert(client != NULL);
+
+	// * in the case of POST -> cgi 
+	if (client->getRequest()->getMethod() == "POST")
+		std::string statusCode = cgi(r->getHeaders(), r->getBody());
+	
+	//* now back to client
 	send(client->getIdent(), client->getResponseStr().c_str(), client->getResponseStr().size(), 0);
 	chlist.resize(chlist.size() + 1);
 	EV_SET(chlist.end().base() - 1, c_fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-	// should check if it works like this
-
-	//* if to CGI
 }
 
 void	ServerLaunch::recvData(struct kevent &ev) {
@@ -108,6 +113,7 @@ void	ServerLaunch::recvData(struct kevent &ev) {
 		EV_SET(chlist.end().base() - 2, ev.ident, EVFILT_READ, EV_DELETE, 0, 0, NULL);
 		EV_SET(chlist.end().base() - 1, ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
 		client->putRequest();
+		client->clearReponseStr();
 		return ;
 	}
 	buf[ret] = '\0';

@@ -6,13 +6,12 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 20:26:08 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/25 15:29:51 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/25 16:43:33 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "Request.hpp"
 #include "Response.hpp"
 #include "libft.hpp"
 
@@ -23,8 +22,8 @@ class Client {
 		int				ident;
 		std::string 	requestStr;
 		std::string		responseStr;
-		Request			request;
-		Response		response;
+		Request			*request;
+		Response		*response;
 
 	public:
 		Client();
@@ -38,9 +37,13 @@ class Client {
 		int			getIdent() const;
 		std::string	getRequestStr() const;
 		std::string	getResponseStr() const;
-		Request		getRequest() const;
-		Response	getResponse() const;
+		Request		*getRequest() const;
+		Response	*getResponse() const;
 		void		putRequest();
 		void		putRequestStr(std::string s);
+		void		clearRequestStr();
+		void		clearReponseStr();
+		void		destroyRequest();
+		void		destroyResponse();	
 	};
 };

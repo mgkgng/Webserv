@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 14:53:51 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/25 15:31:13 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/25 16:44:15 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,12 +22,13 @@ Client::Client(Client const & other) {
 	*this = other; 
 }
 
-Client::Client(int fd) : ident(fd) {
+Client::Client(int fd) : ident(fd), request(NULL), response(NULL) {
 	
 }
 
 Client::~Client() {
-	
+	delete request;
+	delete response;
 }
 
 Client & Client::operator=(Client const & rhs) {
@@ -49,16 +50,17 @@ std::string	Client::getRequestStr() const {
 	return requestStr;
 }
 
-Request Client::getRequest() const {
+Request* Client::getRequest() const {
 	return request;
 }
 			
-Response Client::getResponse() const {
+Response* Client::getResponse() const {
 	return response;
 }	
 
 void	Client::putRequest() {
-	request.parseRequest(requestStr);
+	request = new Request;
+	request->parseRequest(requestStr);
 }
 
 void	Client::putRequestStr(std::string s) {
@@ -66,4 +68,22 @@ void	Client::putRequestStr(std::string s) {
 		requestStr = s;
 	else
 		requestStr.append(s);
+}
+
+void	Client::clearRequestStr() {
+	requestStr.clear();
+}
+
+void	Client::clearReponseStr() {
+	responseStr.clear();
+}
+
+void	Client::destroyRequest() {
+	delete request;
+	request = NULL;
+}
+
+void	Client::destroyResponse() {
+	delete response;
+	response = NULL;
 }

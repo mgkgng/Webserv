@@ -6,13 +6,14 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 20:25:11 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/25 15:30:17 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/05/25 16:24:12 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "libft.hpp"
+#include "Request.hpp"
 
 namespace Webserv {
 
@@ -27,6 +28,6 @@ class Response {
 		Response(Response const &);
 		~Response();
 		Response & operator=(Response const &);
-		std::string makeResponseStr() const;
+		std::string makeResponseStr(Request const & request);
 };
 };
