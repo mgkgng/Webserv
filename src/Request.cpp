@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/20 15:23:40 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/06/20 19:44:15 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ Request & Request::operator=(Request const & rhs) {
 }
 
 void	Request::parseRequest(std::string request) {
+	(void) request;
 	std::istringstream iss;
 	std::string line;
 
@@ -48,7 +49,7 @@ void	Request::parseRequest(std::string request) {
 	method = start_line.at(0);
 	path = start_line.at(1);
 	protocol_v = start_line.at(2);
-	
+
 	// header parsing
 	std::vector<std::string> header_line;
 	while (getline(iss, line) && line != "\n\r") { // a voir

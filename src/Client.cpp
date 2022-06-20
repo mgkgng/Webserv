@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 14:53:51 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/25 16:44:15 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/06/20 19:48:54 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,10 @@ int		Client::getIdent() const {
 
 std::string	Client::getRequestStr() const {
 	return requestStr;
+}
+
+std::string Client::getResponseStr() const {
+	return responseStr;
 }
 
 Request* Client::getRequest() const {

@@ -57,19 +57,14 @@ void	Server::disconnect(int fd) {
 }
 
 void	Server::sendData(int c_fd) {
-	// should figure out how to know whether i'm going to send data to client or to cgi
 	
 	Client *client;
 	client = getClient(c_fd);
 	assert(client != NULL);
 
-	/*Request	*r = client->getRequest();
+	//Request	*r = client->getRequest();
 
-	if (r->getMethod() == "POST")
-	
-	// * in the case of POST -> cgi 
-	if (r->getMethod() == "POST")
-		std::string statusCode = cgi(r->getHeaders(), r->getBody());*/
+	//std::string statusCode = execute_cgi(r);
 	
 	//* now back to client
 	send(client->getIdent(), client->getResponseStr().c_str(), client->getResponseStr().size(), 0);
@@ -137,9 +132,9 @@ void	Server::launch(Server *server) {
 }
 		
 void	Server::start(std::vector<Server> & servers) {
-	if (servers.size() == 1) {
+	if (servers.size() == 1)
 		launch(&servers.at(0));
-	} else {
+	else {
 		std::vector<pthread_t> threads;
 		std::vector<Server>::iterator it_servers = servers.begin();
 		threads.resize(servers.size());

@@ -7,6 +7,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <map>
+#include "Request.hpp"
+#include "utility.hpp"
 
 using std::string;
 typedef const std::string const_string;
@@ -49,7 +51,7 @@ struct CGI_Environment{
 };
 
 // In the prototype, everything is theorical
-void execute_cgi(const std::map<int, string> &status_code, Request &request, const_string &uri, const_string &cgi, const_string &path)
+void execute_cgi(Request &request)
 {
     int req_fd[2], res_fd[2];
     pipe(res_fd);
