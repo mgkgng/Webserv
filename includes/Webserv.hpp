@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/25 15:29:24 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/06/20 13:10:42 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,10 @@
 #define WEBSERVER_HPP
 
 #include "libft.hpp"
-#include "ServerLaunch.hpp"
 #include <JSON.hpp>
+#include "Client.hpp"
+#include "Request.hpp"
+#include "Response.hpp"
 
 #define PORT 8080
 #define BACKLOG 20
@@ -112,6 +114,36 @@ namespace Webserv {
 			// Common errors
 			struct PortOutsideOfRange: public std::exception { const char * what () const throw () { return "Port Outside of Range, please chose a value inbetween 0 to 65535"; } };
 
+	};
+
+	class ServerLaunch {
+	public:
+		ServerLaunch();
+		ServerLaunch(const ServerLaunch & server);
+		~ServerLaunch();
+		ServerLaunch & operator=(const ServerLaunch & server);
+		
+		static void	thread_launch(void *ptr[2]);
+		void	launch(Server *server);
+		void	start(std::vector<Server> & servers);
+		
+	private:			
+		int								sockfd;
+		int								kq;
+		struct sockaddr_in				sockaddr;
+		int								addrlen;
+		std::vector<struct kevent>		chlist;
+		std::vector<struct kevent>		evlist;
+		std::vector<Client>				clients;
+		bool							quit;
+
+		void	init_addrinfo();
+		void	init_server();
+		void	acceptConnection();
+		void	disconnect(int fd);
+		void	sendData(int c_fd);
+		void	recvData(struct kevent &ev);
+		Client* getClient(int fd);
 	};
  
 	typedef struct sbh_s {

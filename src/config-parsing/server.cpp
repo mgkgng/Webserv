@@ -21,7 +21,6 @@ Webserv::Server::Server(std::string servername, std::string host, unsigned int p
 	this->isdefault = isdefault;
 	this->routes = routes;
 	this->codehandlers = codes;
-	this->quit = false;
 }
 
 Webserv::Server::~Server() {

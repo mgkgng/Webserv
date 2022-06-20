@@ -6,11 +6,11 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 16:54:33 by min-kang          #+#    #+#             */
-/*   Updated: 2022/05/25 18:12:01 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/06/20 13:14:50 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ServerLaunch.hpp"
+#include "Webserv.hpp"
 
 using namespace Webserv;
 
@@ -89,9 +89,9 @@ void	ServerLaunch::sendData(int c_fd) {
 	Request	*r = client->getRequest();
 	assert(client != NULL);
 
-	// * in the case of POST -> cgi 
+	/*// * in the case of POST -> cgi 
 	if (client->getRequest()->getMethod() == "POST")
-		std::string statusCode = cgi(r->getHeaders(), r->getBody());
+		std::string statusCode = cgi(r->getHeaders(), r->getBody());*/
 	
 	//* now back to client
 	send(client->getIdent(), client->getResponseStr().c_str(), client->getResponseStr().size(), 0);
