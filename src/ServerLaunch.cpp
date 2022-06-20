@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ServerLaunch.cpp                                   :+:      :+:    :+:   */
+/*   Server.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 16:54:33 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/20 13:14:50 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/06/20 14:19:45 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,33 +14,7 @@
 
 using namespace Webserv;
 
-class Server;
-
-ServerLaunch::ServerLaunch() {
-
-}
-
-ServerLaunch::ServerLaunch(ServerLaunch const & other) {
-	*this = other;
-}
-
-ServerLaunch::~ServerLaunch() {
-	close(kq);
-}
-
-ServerLaunch &	ServerLaunch::operator=(ServerLaunch const & rhs) {
-	this->sockfd = rhs.sockfd;
-	this->kq = rhs.kq;
-	this->sockaddr = rhs.sockaddr;
-	this->addrlen = rhs.addrlen;
-	this->chlist = rhs.chlist;
-	this->evlist = rhs.evlist;
-	this->clients = rhs.clients;
-	this->quit = rhs.quit;
-	return (*this);
-}
-
-void	ServerLaunch::init_addrinfo() {
+void	Server::init_addrinfo() {
 	bzero(&sockaddr, sizeof(struct sockaddr_in));
 	sockaddr.sin_family = AF_INET;
 	sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -48,7 +22,7 @@ void	ServerLaunch::init_addrinfo() {
 	addrlen = sizeof(sockaddr);
 }
 		
-void	ServerLaunch::init_server() {
+void	Server::init_server() {
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	assert(sockfd != -1);
 
@@ -61,7 +35,7 @@ void	ServerLaunch::init_server() {
 	assert(kq != -1);
 }
 
-void	ServerLaunch::acceptConnection() {
+void	Server::acceptConnection() {
 	int	newConnection = accept(sockfd, (struct sockaddr *) &sockaddr, (socklen_t *) &addrlen);
 	assert(newConnection != -1);
 	fcntl(newConnection, F_SETFL, O_NONBLOCK);
@@ -74,7 +48,7 @@ void	ServerLaunch::acceptConnection() {
 	std::cout << "Connection accpeted." << std::endl;
 }
 	
-void	ServerLaunch::disconnect(int fd) {
+void	Server::disconnect(int fd) {
 	std::cout << "disconnect" << std::endl;
 	close(fd);
 	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
@@ -82,15 +56,19 @@ void	ServerLaunch::disconnect(int fd) {
 			clients.erase(it);
 }
 
-void	ServerLaunch::sendData(int c_fd) {
+void	Server::sendData(int c_fd) {
 	// should figure out how to know whether i'm going to send data to client or to cgi
 	
-	Client *client = getClient(c_fd);
-	Request	*r = client->getRequest();
+	Client *client;
+	client = getClient(c_fd);
 	assert(client != NULL);
 
-	/*// * in the case of POST -> cgi 
-	if (client->getRequest()->getMethod() == "POST")
+	/*Request	*r = client->getRequest();
+
+	if (r->getMethod() == "POST")
+	
+	// * in the case of POST -> cgi 
+	if (r->getMethod() == "POST")
 		std::string statusCode = cgi(r->getHeaders(), r->getBody());*/
 	
 	//* now back to client
@@ -99,10 +77,12 @@ void	ServerLaunch::sendData(int c_fd) {
 	EV_SET(chlist.end().base() - 1, c_fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 }
 
-void	ServerLaunch::recvData(struct kevent &ev) {
+void	Server::recvData(struct kevent &ev) {
 	char	buf[10000];
 	int		ret;
-	Client	*client = getClient(ev.ident);
+	Client	*client;
+	
+	client = getClient(ev.ident);
 	assert(client != NULL);
 
 	ret = recv(ev.ident, buf, 9999, 0);
@@ -120,42 +100,43 @@ void	ServerLaunch::recvData(struct kevent &ev) {
 	client->putRequestStr(std::string(buf));
 }
 			
-void	ServerLaunch::thread_launch(void *ptr[2]) {
-	ServerLaunch	*launch;
+void	Server::thread_launch(void *ptr[2]) {
+	Server	*launch;
 
-	launch = reinterpret_cast<ServerLaunch*>(ptr[0]);
+	launch = reinterpret_cast<Server*>(ptr[0]);
 	launch->launch(reinterpret_cast<Server *>(ptr[1]));
 }
 
-void	ServerLaunch::launch(Server *server) {
+void	Server::launch(Server *server) {
 	int evNb;
 
-	init_addrinfo();
-	init_server();
+	server->init_addrinfo();
+	server->init_server();
 	std::cout << "WEBSERV launched." << std::endl;
-	quit = false;
+	server->quit = false;
 
-	while (!quit) {
-		evlist.clear();
-		evlist.resize(1);
-		evNb = kevent(kq, &chlist[0], chlist.size(), &evlist[0], evlist.size(), NULL);
-		chlist.clear();
+	while (!server->quit) {
+		server->evlist.clear();
+		server->evlist.resize(1);
+		evNb = kevent(server->kq, &server->chlist[0], server->chlist.size(), 
+			&server->evlist[0], server->evlist.size(), NULL);
+		server->chlist.clear();
 		if (evNb < 0 && errno == EINTR) // protection from CTRL + C (UNIX signal handling)
 			return ;
 		for (int i = 0; i < evNb; i++) {
-			if (evlist[i].flags & EV_EOF) 
-				disconnect(evlist[i].ident);
-			else if (*(reinterpret_cast<int *>(evlist[i].ident)) == sockfd)
-				acceptConnection();
-			else if (evlist[i].filter & EVFILT_READ)
-				recvData(evlist[i]);
-			else if (evlist[i].filter & EVFILT_WRITE)
-				sendData(evlist[i].ident);
+			if (server->evlist[i].flags & EV_EOF) 
+				server->disconnect(server->evlist[i].ident);
+			else if (*(reinterpret_cast<int *>(server->evlist[i].ident)) == server->sockfd)
+				server->acceptConnection();
+			else if (server->evlist[i].filter & EVFILT_READ)
+				server->recvData(server->evlist[i]);
+			else if (server->evlist[i].filter & EVFILT_WRITE)
+				server->sendData(server->evlist[i].ident);
 		}
 	}
 }
 		
-void	ServerLaunch::start(std::vector<Server> & servers) {
+void	Server::start(std::vector<Server> & servers) {
 	if (servers.size() == 1) {
 		launch(&servers.at(0));
 	} else {
@@ -163,13 +144,13 @@ void	ServerLaunch::start(std::vector<Server> & servers) {
 		std::vector<Server>::iterator it_servers = servers.begin();
 		threads.resize(servers.size());
 		for (std::vector<pthread_t>::iterator it = threads.begin(); it != threads.end(); it++)
-			pthread_create(&(*it), NULL, (void * (*)(void *)) &ServerLaunch::thread_launch, (void *[2]) {this, &(*it_servers++)});
+			pthread_create(&(*it), NULL, (void * (*)(void *)) &Server::thread_launch, (void *[2]) {this, &(*it_servers++)});
 		for (std::vector<pthread_t>::iterator it = threads.begin(); it != threads.end(); it++)
 			pthread_detach(*it);
 	}
 }
 
-Client* ServerLaunch::getClient(int fd) {
+Client* Server::getClient(int fd) {
 	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
 		if (it->isClient(fd))
 			return (it.base());

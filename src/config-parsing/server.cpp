@@ -21,10 +21,11 @@ Webserv::Server::Server(std::string servername, std::string host, unsigned int p
 	this->isdefault = isdefault;
 	this->routes = routes;
 	this->codehandlers = codes;
+	
 }
 
 Webserv::Server::~Server() {
-
+	close(this->kq);
 }
 
 Webserv::Server &	Webserv::Server::operator=(const Server & server) {
@@ -34,6 +35,14 @@ Webserv::Server &	Webserv::Server::operator=(const Server & server) {
 	this->isdefault = server.getIsDefault();
 	this->routes = server.getRoutes();
 	this->codehandlers = server.getHandleCode();
+	this->sockfd = server.sockfd;
+	this->kq = server.kq;
+	this->sockaddr = server.sockaddr;
+	this->addrlen = server.addrlen;
+	this->chlist = server.chlist;
+	this->evlist = server.evlist;
+	this->clients = server.clients;
+	this->quit = server.quit;
 	return (*this);
 }
 

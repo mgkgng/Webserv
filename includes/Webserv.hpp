@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/20 13:10:42 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/06/20 14:17:33 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,60 +92,54 @@ namespace Webserv {
 			~Server();
 			Server & operator=(const Server & server);
 			
-			std::string			getServerName() const;
-			std::string			getHost() const;
-			unsigned int			getPort() const;
-			bool					getIsDefault() const;
+			// Getters
+			std::string							getServerName() const;
+			std::string							getHost() const;
+			unsigned int						getPort() const;
+			bool								getIsDefault() const;
 			std::map<std::string, Route>		getRoutes() const;
 			std::map<std::string, HandleCode>	getHandleCode() const;
 
+			// Server Launch 
+			static void			thread_launch(void *ptr[2]);
+			void				launch(Server *server);
+			void				start(std::vector<Server> & servers);
 
+			// Manage client requests
+			void				init_addrinfo();
+			void				init_server();
+			void				acceptConnection();
+			void				disconnect(int fd);
+			void				sendData(int c_fd);
+			void				recvData(struct kevent &ev);
+			Client* 			getClient(int fd);
+			
 		private:
 			// Information about the server, such as its name, it's host and port, and if it's the default server for the port or not
-			std::string					servername;
-			std::string					host;
-			unsigned int				port;
-			bool						isdefault;
+			std::string							servername;
+			std::string							host;
+			unsigned int						port;
+			bool								isdefault;
 
 			// routes and error redirections associated with the server 
 			std::map<std::string, Route>			routes;
 			std::map<std::string, HandleCode>		codehandlers;
 
+			// In order to launch the server
+			int								sockfd;
+			int								kq;
+			struct sockaddr_in				sockaddr;
+			int								addrlen;
+			std::vector<struct kevent>		chlist;
+			std::vector<struct kevent>		evlist;
+			std::vector<Client>				clients;
+			bool							quit;
+			
 			// Common errors
 			struct PortOutsideOfRange: public std::exception { const char * what () const throw () { return "Port Outside of Range, please chose a value inbetween 0 to 65535"; } };
 
 	};
 
-	class ServerLaunch {
-	public:
-		ServerLaunch();
-		ServerLaunch(const ServerLaunch & server);
-		~ServerLaunch();
-		ServerLaunch & operator=(const ServerLaunch & server);
-		
-		static void	thread_launch(void *ptr[2]);
-		void	launch(Server *server);
-		void	start(std::vector<Server> & servers);
-		
-	private:			
-		int								sockfd;
-		int								kq;
-		struct sockaddr_in				sockaddr;
-		int								addrlen;
-		std::vector<struct kevent>		chlist;
-		std::vector<struct kevent>		evlist;
-		std::vector<Client>				clients;
-		bool							quit;
-
-		void	init_addrinfo();
-		void	init_server();
-		void	acceptConnection();
-		void	disconnect(int fd);
-		void	sendData(int c_fd);
-		void	recvData(struct kevent &ev);
-		Client* getClient(int fd);
-	};
- 
 	typedef struct sbh_s {
 		//server
 		std::string		servername;
