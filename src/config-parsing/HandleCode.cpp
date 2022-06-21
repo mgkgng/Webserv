@@ -14,7 +14,7 @@ Webserv::HandleCode::HandleCode(int code, Webserv::Route route, int responsecode
 		throw InvalidHTTPCode();
 	}
 	valid = std::find(Webserv::validHTTPCodes.begin(), Webserv::validHTTPCodes.end(), responsecode);
-	if (valid == Webserv::validHTTPCodes.end()) {
+	if (valid == Webserv::validHTTPCodes.end() && responsecode != 0) {
 		throw InvalidHTTPCode();
 	}
 	this->code = code;
