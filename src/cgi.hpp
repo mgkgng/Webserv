@@ -1,15 +1,6 @@
 #pragma once
 
-#include <iostream>
-#include <vector>
-#include <string>
-#include <string.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <map>
-
-using std::string;
-typedef const std::string const_string;
+#include "utility.hpp"
 
 struct CGI_Environment{
 
@@ -33,10 +24,10 @@ struct CGI_Environment{
 
     void is_special_case(string &name)
     {
-        if (is_found_in(key, ?, "ENV THAT REQUIRE HTTP_"))
-			key = "HTTP_" + key;
+        if (is_found_in(name, 5, "ACCEPT", "ACCEPT_LANGUAGE", "USER_AGENT", "COOKIE", "REFERER"))
+			name = "HTTP_" + name;
 		else if (is_found_in(key, 1, "HOST"))
-			key = "REMOTE_" + key;
+			name = "REMOTE_" + name;
     }
 
     void add_variable(string name, string val)
@@ -65,7 +56,7 @@ void execute_cgi(const std::map<int, string> &status_code, Request &request, con
         // Actually, the subject impose to use fcntl like that
         fcntl(res_fd[0], F_SETFL, O_NONBLOCK);
         // "Something" to be changed, obv. Ideally, we set headers and stuffs
-        // response.set_whatweset("HTTP/1.1 200 OK\r\n", res_fd[0], &status_code, pid, true);
+        // response.set_whatweset("HTTP/1.1 200 OK\r\n", res_fd[0], &status_code, pid, true); ---> TODO
     }
     else 
     {
@@ -76,8 +67,15 @@ void execute_cgi(const std::map<int, string> &status_code, Request &request, con
 
         CGI_Environment environment;
 
+        for (std::map<string, string>::const_iterator iter = request.headers.begin(); iter != request.headers.end(); iter++)
+            environment.add_variable(iter->first, iter->second);
+
         // We set the env variable needed; must update with the actual source
-        //environment.add_variable("???"", ???);
+        environment.add_variable("REQUEST_METHOD", request.type); // -> Member of Request
+		environment.add_variable("PATH_TRANSLATED", uri); // -> Argument from function call
+		environment.add_variable("SCRIPT_NAME", request.url); // -> Member of Request
+		environment.add_variable("QUERY_STRING", request.query); // -> Member of Request
+		environment.add_variable("PATH_INFO", path); // -> Argument from function call
 
         dup2(req_fd[0], 0), close(req_fd[0]);
         dup2(res_fd[1], 1), close(res_fd[1]);
