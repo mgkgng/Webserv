@@ -38,7 +38,8 @@ int main() {
 		//Webserv::ServerLaunch test2;
 		JSON test = JSON("config/example.json");
 		//printjsondata(test, 0);
-		Webserv::makeServersFromJSON(test);
+		std::vector<Webserv::Server> servers = Webserv::makeServersFromJSON(test);
+		Webserv::start(servers)
 	} catch (std::exception & e) {
 		std::cout << e.what() << std::endl;
 	}

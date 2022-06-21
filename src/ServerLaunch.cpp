@@ -56,15 +56,14 @@ void	Server::disconnect(int fd) {
 			clients.erase(it);
 }
 
-void	Server::sendData(int c_fd) {
-	
+void	Server::sendData(int c_fd) {	
 	Client *client;
 	client = getClient(c_fd);
 	assert(client != NULL);
 
-	//Request	*r = client->getRequest();
+	Request	*r = client->getRequest();
 
-	//std::string statusCode = execute_cgi(r);
+	std::string statusCode = execute_cgi(r);
 	
 	//* now back to client
 	send(client->getIdent(), client->getResponseStr().c_str(), client->getResponseStr().size(), 0);
@@ -102,38 +101,38 @@ void	Server::thread_launch(void *ptr[2]) {
 	launch->launch(reinterpret_cast<Server *>(ptr[1]));
 }
 
-void	Server::launch(Server *server) {
+void	Server::launch() {
 	int evNb;
 
-	server->init_addrinfo();
-	server->init_server();
+	init_addrinfo();
+	init_server();
 	std::cout << "WEBSERV launched." << std::endl;
-	server->quit = false;
+	quit = false;
 
-	while (!server->quit) {
-		server->evlist.clear();
-		server->evlist.resize(1);
-		evNb = kevent(server->kq, &server->chlist[0], server->chlist.size(), 
-			&server->evlist[0], server->evlist.size(), NULL);
-		server->chlist.clear();
+	while (!quit) {
+		evlist.clear();
+		evlist.resize(1);
+		evNb = kevent(kq, &chlist[0], chlist.size(), 
+			&evlist[0], evlist.size(), NULL);
+		chlist.clear();
 		if (evNb < 0 && errno == EINTR) // protection from CTRL + C (UNIX signal handling)
 			return ;
 		for (int i = 0; i < evNb; i++) {
-			if (server->evlist[i].flags & EV_EOF) 
-				server->disconnect(server->evlist[i].ident);
-			else if (*(reinterpret_cast<int *>(server->evlist[i].ident)) == server->sockfd)
-				server->acceptConnection();
-			else if (server->evlist[i].filter & EVFILT_READ)
-				server->recvData(server->evlist[i]);
-			else if (server->evlist[i].filter & EVFILT_WRITE)
-				server->sendData(server->evlist[i].ident);
+			if (evlist[i].flags & EV_EOF) 
+				disconnect(evlist[i].ident);
+			else if (*(reinterpret_cast<int *>(evlist[i].ident)) == sockfd)
+				acceptConnection();
+			else if (evlist[i].filter & EVFILT_READ)
+				recvData(evlist[i]);
+			else if (evlist[i].filter & EVFILT_WRITE)
+				sendData(evlist[i].ident);
 		}
 	}
 }
 		
-void	Server::start(std::vector<Server> & servers) {
+void	Webserv::start(std::vector<Server> & servers) {
 	if (servers.size() == 1)
-		launch(&servers.at(0));
+		servers[0].launch();
 	else {
 		std::vector<pthread_t> threads;
 		std::vector<Server>::iterator it_servers = servers.begin();

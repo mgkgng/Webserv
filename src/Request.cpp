@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/20 19:44:15 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/06/21 16:06:36 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,7 @@ Request & Request::operator=(Request const & rhs) {
 }
 
 void	Request::parseRequest(std::string request) {
-	(void) request;
-	std::istringstream iss;
+	std::istringstream iss = request(je sais pas);
 	std::string line;
 
 	// first line parsing
