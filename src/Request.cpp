@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/21 16:06:36 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/06/21 17:02:31 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,11 +39,12 @@ Request & Request::operator=(Request const & rhs) {
 }
 
 void	Request::parseRequest(std::string request) {
-	std::istringstream iss = request(je sais pas);
+	std::stringstream ss;
+	ss << request;
 	std::string line;
 
 	// first line parsing
-	getline(iss, line);
+	getline(ss, line);
 	std::vector<std::string> start_line = ft_split(line, " \n\r");
 	method = start_line.at(0);
 	path = start_line.at(1);
@@ -51,13 +52,13 @@ void	Request::parseRequest(std::string request) {
 
 	// header parsing
 	std::vector<std::string> header_line;
-	while (getline(iss, line) && line != "\n\r") { // a voir
+	while (getline(ss, line) && line != "\n\r") {
 		header_line = ft_split(line, ":");
 		headers.insert(std::pair<std::string, std::string>(header_line.at(0), ft_trim(header_line.at(1), " \n\r")));
 	}
 
 	// body parsing
-	while (getline(iss, line))
+	while (getline(ss, line))
 		body += line;
 }
 

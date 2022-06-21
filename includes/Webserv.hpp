@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/21 16:19:37 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/06/21 16:29:56 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,6 @@ namespace Webserv {
 			std::map<std::string, HandleCode>	getHandleCode() const;
 
 			// Server Launch 
-			static void			thread_launch(void *ptr[2]);
 			void				launch();
 
 			// Manage client requests
@@ -161,6 +160,8 @@ namespace Webserv {
 	
 	std::vector<Server>		makeServersFromJSON(const JSON & json);
 	void					start(std::vector<Server> & servers);
+	//static void			thread_launch(void *ptr[2]);
+	void					thread_launch(void *ptr);
 
 	struct InvalidJSONObjectIdentifier: public std::exception { const char * what () const throw () { return "JSON objects should start with route, code or server"; } };
 	struct InvalidJSONObjectInRoute: public std::exception { const char * what () const throw () { return "Don't define JSON objects inside a route"; } };

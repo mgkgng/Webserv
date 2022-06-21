@@ -61,9 +61,8 @@ void	Server::sendData(int c_fd) {
 	client = getClient(c_fd);
 	assert(client != NULL);
 
-	Request	*r = client->getRequest();
-
-	std::string statusCode = execute_cgi(r);
+	//Request	*r = client->getRequest();
+	//std::string statusCode = execute_cgi(r);
 	
 	//* now back to client
 	send(client->getIdent(), client->getResponseStr().c_str(), client->getResponseStr().size(), 0);
@@ -94,11 +93,11 @@ void	Server::recvData(struct kevent &ev) {
 	client->putRequestStr(std::string(buf));
 }
 			
-void	Server::thread_launch(void *ptr[2]) {
+void	Webserv::thread_launch(void *ptr) {
 	Server	*launch;
 
-	launch = reinterpret_cast<Server*>(ptr[0]);
-	launch->launch(reinterpret_cast<Server *>(ptr[1]));
+	launch = reinterpret_cast<Server*>(ptr);
+	launch->launch();
 }
 
 void	Server::launch() {
@@ -138,7 +137,7 @@ void	Webserv::start(std::vector<Server> & servers) {
 		std::vector<Server>::iterator it_servers = servers.begin();
 		threads.resize(servers.size());
 		for (std::vector<pthread_t>::iterator it = threads.begin(); it != threads.end(); it++)
-			pthread_create(&(*it), NULL, (void * (*)(void *)) &Server::thread_launch, (void *[2]) {this, &(*it_servers++)});
+			pthread_create(&(*it), NULL, (void * (*)(void *)) &Webserv::thread_launch, &(*it_servers++));
 		for (std::vector<pthread_t>::iterator it = threads.begin(); it != threads.end(); it++)
 			pthread_detach(*it);
 	}

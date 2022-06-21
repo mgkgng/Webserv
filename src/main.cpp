@@ -39,7 +39,7 @@ int main() {
 		JSON test = JSON("config/example.json");
 		//printjsondata(test, 0);
 		std::vector<Webserv::Server> servers = Webserv::makeServersFromJSON(test);
-		Webserv::start(servers)
+		Webserv::start(servers);
 	} catch (std::exception & e) {
 		std::cout << e.what() << std::endl;
 	}

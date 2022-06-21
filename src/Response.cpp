@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 16:51:56 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/20 19:47:38 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/06/21 17:05:50 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,13 +34,12 @@ Response & Response::operator=(Response const & rhs) {
 	return (*this);
 }
 
-std::string Response::makeResponseStr(Request const & request) {
-	(void) request;
+std::string Response::makeResponseStr() {
 	std::stringstream ss;
+	
 	ss << protocol_v << ' ' << status_code << ' ' << status_message << std::endl;
-	//for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
-		//ss << it->first() << ": " << it->second() << std::endl;
+	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
+		ss << it->first << ": " << it->second << std::endl;
 	ss << std::endl;
-	//ss << html comes after
 	return (ss.str());
 }
