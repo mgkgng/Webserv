@@ -22,9 +22,7 @@ Webserv::HandleCode::HandleCode(int code, Webserv::Route route, int responsecode
 	this->responsecode = responsecode;
 }
 
-Webserv::HandleCode::~HandleCode() {
-
-}
+Webserv::HandleCode::~HandleCode() { }
 
 Webserv::HandleCode &  Webserv::HandleCode::operator=(const Webserv::HandleCode & handlecode) {
 	this->code = handlecode.getCode();

@@ -1,11 +1,8 @@
 #include <Webserv.hpp>
 #include <JSON.hpp>
 #include <iostream>
-
-
-Webserv::Server::Server() {
-
-}
+#include <sys/types.h>
+#include <sys/socket.h>
 
 Webserv::Server::Server(const Server & server) {
 	*this = server;
@@ -240,6 +237,15 @@ std::vector<Webserv::Server>	Webserv::makeServersFromJSON(const JSON & json) {
 			;
 		} else {
 			throw Webserv::InvalidJSONObjectIdentifier();
+		}
+	}
+	for (std::vector<Webserv::Server>::iterator it = ret.begin(); it != ret.end(); it++) {
+		if ((*it).getIsDefault()) {
+			for(std::vector<Webserv::Server>::iterator sit = it + 1; sit != ret.end(); sit++) {
+				if ((*sit).getIsDefault() && (*sit).getHost().compare(0, (*sit).getHost().size(), (*it).getHost()) == 0 && (*sit).getPort() == (*it).getPort()) {
+					(*sit).setIsDefault(false);
+				}
+			}
 		}
 	}
 	return (ret);

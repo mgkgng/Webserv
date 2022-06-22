@@ -9,6 +9,20 @@
 	"server0": {
 		"host": "example.org",
 		"port": 1234,
-		"server_name": null
+		"server_name": null,
+		"code 404": {
+			"code": 404,
+			"redirect": "/404"
+		},
+		"code 401": {
+			"code": 401,
+			"redirect": "/404",
+			"response_code": 301
+		},
+		"route 404": {
+			"index": "404.html",
+			"root": "./var/www",
+			"path": "/404"
+		}
 	}
 }
