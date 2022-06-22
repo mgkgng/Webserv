@@ -10,16 +10,5 @@
 		"host": "example.org",
 		"port": 1234,
 		"server_name": null
-	},
-	"server1": {
-		"host": "example.com",
-		"port": 2468,
-		"server_name": "other server",
-		"client_body_size": "10M",
-		"root": "./www/static/",
-		"route static": {
-			"path": "/static",
-			"autoindex": true
-		}
 	}
 }
