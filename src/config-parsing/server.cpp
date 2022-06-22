@@ -59,6 +59,10 @@ bool	Webserv::Server::getIsDefault() const {
 	return (this->isdefault);
 }
 
+void	Webserv::Server::setIsDefault(bool d) {
+	this->isdefault = d;
+}
+
 std::map<std::string, Webserv::Route>	Webserv::Server::getRoutes() const {
 	return (this->routes);
 }

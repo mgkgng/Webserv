@@ -3,14 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
+/*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2022/06/21 16:29:56 by min-kang         ###   ########.fr       */
-=======
-/*   Updated: 2022/05/24 12:10:25 by jrathelo         ###   ########.fr       */
->>>>>>> 53ca3f8f0626a2979974571f68b520c70a7dd2ef
+/*   Updated: 2022/06/22 17:17:16 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +99,6 @@ namespace Webserv {
 			bool								getIsDefault() const;
 			std::map<std::string, Route>		getRoutes() const;
 			std::map<std::string, HandleCode>	getHandleCode() const;
-<<<<<<< HEAD
 
 			// Server Launch 
 			void				launch();
@@ -116,14 +111,8 @@ namespace Webserv {
 			void				sendData(int c_fd);
 			void				recvData(struct kevent &ev);
 			Client* 			getClient(int fd);
-			
-=======
-			Client* getClient(int fd);
 
-			void	setIsDefault(bool b);
-
-			void	launch();
->>>>>>> 53ca3f8f0626a2979974571f68b520c70a7dd2ef
+			void				setIsDefault(bool b);
 		private:
 			// Information about the server, such as its name, it's host and port, and if it's the default server for the port or not
 			std::string							servername;
