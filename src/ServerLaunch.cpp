@@ -28,7 +28,7 @@ void	Server::init_server() {
 
 	int	option_on = 1;
 	assert(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option_on, sizeof(int)) == 0);
-	bind(sockfd, (struct sockaddr *) &sockaddr, sizeof(sockaddr));
+	assert(bind(sockfd, (struct sockaddr *) &sockaddr, sizeof(sockaddr)) == 0);
 	assert(listen(sockfd, BACKLOG) == 0);
 
 	kq = kqueue();

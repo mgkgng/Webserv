@@ -36,7 +36,7 @@ void printjsondata(JSON const & json, int level) {
 int main() {
 	try {
 		//Webserv::ServerLaunch test2;
-		JSON test = JSON("config/example.json");
+		JSON test = JSON("./config/example.json");
 		//printjsondata(test, 0);
 		std::vector<Webserv::Server> servers = Webserv::makeServersFromJSON(test);
 		Webserv::start(servers);

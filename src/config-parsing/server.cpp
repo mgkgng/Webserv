@@ -8,7 +8,8 @@ Webserv::Server::Server(const Server & server) {
 	*this = server;
 }
 
-Webserv::Server::Server(std::string servername, std::string host, unsigned int port, bool isdefault, std::map<std::string, Webserv::Route> routes, std::map<std::string, Webserv::HandleCode> codes) {
+Webserv::Server::Server(
+	std::string servername, std::string host, unsigned int port, bool isdefault, std::map<std::string, Webserv::Route> routes, std::map<std::string, Webserv::HandleCode> codes) {
 	this->servername = servername;
 	this->host = host;
 	if (port > 65535) {
@@ -71,8 +72,7 @@ std::map<std::string, Webserv::HandleCode>	Webserv::Server::getHandleCode() cons
 	return (this->codehandlers);
 }
 
-Webserv::sbh_t	getInformation(const JSON & json) {
-	Webserv::sbh_t ret;
+Webserv::sbh_t	getInformation(const JSON & json, Webserv::sbh_t ret) {
 	try {
 		ret.index = json.getStrings().at("index");
 	} catch (std::exception & e) { }
@@ -109,6 +109,12 @@ Webserv::sbh_t	getInformation(const JSON & json) {
 	try {
 		ret.clientmaxbodysize = json.getStrings().at("client_body_size");
 	} catch (std::exception & e) { }
+	try {
+		ret.pythoncgiextension = json.getStrings().at("python_cgi_extension");
+	} catch (std::exception & e) { }
+	try {
+		ret.phpcgiextextension = json.getStrings().at("php_cgi_extensions");
+	} catch (std::exception & e) { }
 	return (ret);
 }
 
@@ -126,6 +132,8 @@ Webserv::sbh_t defaultInformation() {
 	ret.redirect = "/500";
 	ret.responsecode = 0;
 	ret.clientmaxbodysize = "5M";
+	ret.pythoncgiextension = ".py";
+	ret.phpcgiextextension = ".php";
 	return (ret);
 }
 
@@ -133,7 +141,7 @@ Webserv::Route	generateRoute(const JSON & json, Webserv::sbh_t sinfo) {
 	if (json.getObjects().empty() != 1) {
 		throw Webserv::InvalidJSONObjectInRoute();
 	}
-	sinfo = getInformation(json);
+	sinfo = getInformation(json, sinfo);
 	std::vector<std::string> words;
 
 	size_t pos = 0;
@@ -145,7 +153,7 @@ Webserv::Route	generateRoute(const JSON & json, Webserv::sbh_t sinfo) {
 	if (words.empty() != 1) {
 		words.push_back(sinfo.allowedHTTPmethods);
 	}
-	Webserv::Route ret = Webserv::Route(sinfo.islistingdirectory, sinfo.index, sinfo.root, sinfo.path, sinfo.clientmaxbodysize, words);
+	Webserv::Route ret = Webserv::Route(sinfo.islistingdirectory, sinfo.index, sinfo.root, sinfo.path, sinfo.clientmaxbodysize, words, sinfo.pythoncgiextension, sinfo.phpcgiextextension);
 	return (ret);
 }
 
@@ -153,7 +161,7 @@ Webserv::HandleCode	generateHandleCode(const JSON & json, Webserv::sbh_t sinfo, 
 	if (json.getObjects().empty() != 1) {
 		throw Webserv::InvalidJSONObjectInHandleCode();
 	}
-	sinfo = getInformation(json);
+	sinfo = getInformation(json, sinfo);
 
 	for (std::map<std::string, Webserv::Route>::iterator it = routes.begin(); it != routes.end(); it++) {
 		if ((*it).second.getPath() == sinfo.redirect) {
@@ -167,7 +175,7 @@ std::vector<Webserv::Server>	makeServersFromJSONHelper(const JSON & json, Webser
 	std::vector<Webserv::Server> ret;
 	JSON::object_box temp = json.getObjects();
 
-	sinfo = getInformation(json);
+	sinfo = getInformation(json, sinfo);
 	for (JSON::object_box::iterator it = temp.begin(); it != temp.end(); it++) {
 		if ((*it).first.compare(0, 5, "route") == 0) {
 			if (routes.find((*it).first) != routes.end()) {
@@ -212,8 +220,7 @@ std::vector<Webserv::Server>	Webserv::makeServersFromJSON(const JSON & json) {
 	std::map<std::string,Webserv::HandleCode> codes;
 	JSON::object_box temp = json.getObjects();
 
-	Webserv::sbh_t sinfo = defaultInformation();
-	sinfo = getInformation(json);
+	Webserv::sbh_t sinfo = getInformation(json, defaultInformation());
 
 	for (JSON::object_box::iterator it = temp.begin(); it != temp.end(); it++) {
 		if ((*it).first.compare(0, 5, "route") == 0) {

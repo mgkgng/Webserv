@@ -4,13 +4,15 @@
 //default
 Webserv::Route::Route() { }
 
-Webserv::Route::Route(bool islistingdirectory, std::string index, std::string root, std::string path, std::string clientmaxbodysize, std::vector<std::string> allowedHTTPmethods) {
+Webserv::Route::Route(bool islistingdirectory, std::string index, std::string root, std::string path, std::string clientmaxbodysize, std::vector<std::string> allowedHTTPmethods, std::string pythoncgiextension, std::string phpcgiextension) {
 	this->islistingdirectory = islistingdirectory;
 	this->index = index;
 	this->root = root;
 	this->path = path;
 	this->clientmaxbodysize = clientmaxbodysize;
 	this->allowedHTTPmethods = allowedHTTPmethods;
+	this->phpcgiextension = phpcgiextension;
+	this->pythoncgiextension = pythoncgiextension;
 }
 
 Webserv::Route::Route(const Route & route) {
@@ -44,6 +46,15 @@ std::string		Webserv::Route::getIndex() const {
 
 std::string		Webserv::Route::getRoot() const {
 	return (this->root);
+}
+
+
+std::string		Webserv::Route::getPythonCGIExtension() const {
+	return (this->pythoncgiextension);
+}
+
+std::string		Webserv::Route::getPHPCGIExtension() const {
+	return (this->phpcgiextension);
 }
 
 std::vector<std::string> Webserv::Route::getAllowedHTTPMethods() const {

@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/22 17:17:16 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/23 12:32:52 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,16 @@ namespace Webserv {
 	class Route {
 		public:
 			Route();
-			Route(bool islistingdirectory, std::string index, std::string root, std::string path, std::string clientmaxbodysize, std::vector<std::string> allowedHTTPmethods);
+			Route(
+				bool islistingdirectory, 
+				std::string index, 
+				std::string root, 
+				std::string path, 
+				std::string clientmaxbodysize, 
+				std::vector<std::string> allowedHTTPmethods, 
+				std::string pythoncgiextension,
+				std::string phpcgiextension
+			);
 			Route(const Route & route);
 			~Route();
 			Route & operator=(const Route & route);
@@ -35,6 +44,8 @@ namespace Webserv {
 			std::string		getIndex() const;
 			std::string		getRoot() const;
 			std::string		getPath() const;
+			std::string		getPythonCGIExtension() const;
+			std::string		getPHPCGIExtension() const;
 			std::vector<std::string> getAllowedHTTPMethods() const;
 			std::string		getClientMaxBodySize() const;
 		private:
@@ -56,6 +67,12 @@ namespace Webserv {
 			// Allowed http methods for the route
 			std::vector<std::string>	allowedHTTPmethods;
 
+			// Python Extension to look for
+			std::string		pythoncgiextension;
+
+			// PHP Extension to look for
+			std::string		phpcgiextension;
+			
 			// Common errors
 			struct InvalidHTTPMethod: public std::exception { const char * what () const throw () { return "Invalid HTTP method"; } };
 	};
@@ -157,6 +174,8 @@ namespace Webserv {
 		std::string		path;
 		std::string		clientmaxbodysize;
 		std::string		allowedHTTPmethods;
+		std::string		pythoncgiextension;
+		std::string		phpcgiextextension;
 	}	sbh_t;
 	
 	std::vector<Server>		makeServersFromJSON(const JSON & json);
