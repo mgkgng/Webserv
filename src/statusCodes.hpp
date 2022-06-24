@@ -1,9 +1,6 @@
 #pragma once
 
-#include <iostream>
-#include <string>
-#include <map>
-#include <sstream>
+#include "utility.hpp"
 
 // https://www.restapitutorial.com/httpstatuscodes.html
 enum StatusCodes {
@@ -110,15 +107,6 @@ struct StatusCode {
 };
 
 const StatusCode statusCode;
-
-// http://www.cplusplus.com/articles/D9j2Nwbp/
-template<typename T>
-std::string to_string(const T &status_code)
-{  
-	std::ostringstream in_string;
-	in_string << status_code;
-	return (in_string.str());
-}
 
 std::string statusCodeToString(int status_code)
 {

@@ -12,6 +12,21 @@
 using std::string;
 typedef const std::string const_string;
 
+bool        end_with(const_string &str, const_string &end)
+{
+    return end.size() > str.size() ? false : (str.substr(str.size() - end.size()) == end);
+}
+
+// Should be called in server, with a cgi (map set in route/config) and uri
+// If true call the execute_CGI
+string      is_CGI(const std::map<string, string> &cgi, const_string &file)
+{
+    for (std::map<string, string>::const_iterator iter = cgi.begin(); iter != cgi.end(); iter++)
+        if (end_with(file, iter->first))
+            return iter->second;
+    return NULL;
+}
+
 string     to_lower_string(string str)
 {
     for (string::iterator it = str.begin(); it != str.end(); it++)
