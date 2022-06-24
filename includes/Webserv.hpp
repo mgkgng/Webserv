@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/23 12:32:52 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/24 13:08:04 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,8 @@
 
 #include "libft.hpp"
 #include <JSON.hpp>
-#include "Client.hpp"
-#include "Request.hpp"
-#include "Response.hpp"
+#include <Client.hpp>
+#include <Response.hpp>
 
 #define PORT 8080
 #define BACKLOG 20
@@ -127,7 +126,7 @@ namespace Webserv {
 			void				disconnect(int fd);
 			void				sendData(int c_fd);
 			void				recvData(struct kevent &ev);
-			Client* 			getClient(int fd);
+			// Client* 			getClient(int fd);
 
 			void				setIsDefault(bool b);
 		private:
@@ -148,12 +147,36 @@ namespace Webserv {
 			int								addrlen;
 			std::vector<struct kevent>		chlist;
 			std::vector<struct kevent>		evlist;
-			std::vector<Client>				clients;
+			// std::vector<Client>				clients;
 			bool							quit;
 			
 			// Common errors
 			struct PortOutsideOfRange: public std::exception { const char * what () const throw () { return "Port Outside of Range, please chose a value inbetween 0 to 65535"; } };
 
+	};
+
+	class Request {
+		private:
+			std::string 						method;
+			std::string							path;
+			std::string							protocol_v;
+
+			std::map<std::string, std::string>	headers;
+			
+			std::string							body;
+		public:
+			Request();
+			Request(std::string, Server & server);
+			Request(Request const &);
+			~Request();
+
+			Request & operator=(Request const & rhs);
+			
+			void	parseRequest(std::string);
+			
+			std::string	getMethod() const;
+			std::string	getBody() const;
+			std::map<std::string, std::string> getHeaders() const;
 	};
 
 	typedef struct sbh_s {

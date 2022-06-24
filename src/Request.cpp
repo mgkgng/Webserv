@@ -3,32 +3,50 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
+/*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/21 17:02:31 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/06/24 14:22:49 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Request.hpp"
+#include <Webserv.hpp>
+#include <algorithm>
 
 using namespace Webserv;
 
-Request::Request() {
+struct sortByComplex { 
+	inline bool operator() (const Webserv::Route & struct1, const Webserv::Route & struct2) {
+        return (struct1.getPath().length() > struct2.getPath().length());
+    }
+}sortByComplex;
 
-}
+Request::Request(std::string request, Webserv::Server & server) {
+	this->parseRequest(request);
+	std::map<std::string, Webserv::Route> route = server.getRoutes();
+	std::vector<Webserv::Route> matches;
+	for (std::map<std::string, Route>::iterator it = route.begin(); it != route.end(); it++ ) {
+		if (this->path.substr(0, it->second.getPath().length()) == it->second.getPath()) {
+			matches.push_back(it->second);
+		}
+	}
 
-Request::Request(std::string request) {
-	parseRequest(request);
+	// Sort in order from longest to shortest.
+	std::sort(matches.begin(), matches.end(), sortByComplex);
+	it == matches.begin()
+	if (this->path.length() == it->getPath().length()) {
+		std::vector<std::string> a = it->getAllowedHTTPMethods();
+		if (std::find(a.begin(), a.end(), this->method) == a.end()) {
+			std::cout << "DISALLOWED METHOD: ERROR 405" << std::endl;
+		}
+	}
 }
 
 Request::Request(Request const & other) {
 	*this = other;
 }
 
-Request::~Request() {
-	
-}
+Request::~Request() { }
 
 Request & Request::operator=(Request const & rhs) {
 	this->method = rhs.method;
@@ -39,27 +57,30 @@ Request & Request::operator=(Request const & rhs) {
 }
 
 void	Request::parseRequest(std::string request) {
-	std::stringstream ss;
-	ss << request;
-	std::string line;
+	// Head
+	this->method = request.substr(0, request.find(" "));
+	request.erase(0, request.find(" ") + 1);
+	this->path = request.substr(0, request.find(" "));
+	request.erase(0, request.find(" ") + 1);
+	this->protocol_v = request.substr(0, request.find("\r\n"));
+	request.erase(0, request.find("\r\n") + 2);
 
-	// first line parsing
-	getline(ss, line);
-	std::vector<std::string> start_line = ft_split(line, " \n\r");
-	method = start_line.at(0);
-	path = start_line.at(1);
-	protocol_v = start_line.at(2);
-
-	// header parsing
-	std::vector<std::string> header_line;
-	while (getline(ss, line) && line != "\n\r") {
-		header_line = ft_split(line, ":");
-		headers.insert(std::pair<std::string, std::string>(header_line.at(0), ft_trim(header_line.at(1), " \n\r")));
+	// Headers
+	while (request.find("\r\n") != 0) {
+		std::string name = request.substr(0, request.find(":"));
+		request.erase(0, request.find(":") + 1);
+		std::string content = request.substr(0, request.find("\r\n"));
+		request.erase(0, request.find("\r\n") + 2);
+		this->headers.insert(
+			std::pair<std::string, std::string>(
+				name,
+				content
+		));
 	}
+	request.erase(0, request.find("\r\n") + 2);
 
-	// body parsing
-	while (getline(ss, line))
-		body += line;
+	// Body
+	this->body = request;
 }
 
 std::string Request::getMethod() const {

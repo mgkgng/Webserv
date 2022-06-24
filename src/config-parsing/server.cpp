@@ -19,11 +19,12 @@ Webserv::Server::Server(
 	this->isdefault = isdefault;
 	this->routes = routes;
 	this->codehandlers = codes;
-	
+	this->kq = -1;
 }
 
 Webserv::Server::~Server() {
-	close(this->kq);
+	if (this->kq == -1)
+		close(this->kq);
 }
 
 Webserv::Server &	Webserv::Server::operator=(const Server & server) {
@@ -39,7 +40,7 @@ Webserv::Server &	Webserv::Server::operator=(const Server & server) {
 	this->addrlen = server.addrlen;
 	this->chlist = server.chlist;
 	this->evlist = server.evlist;
-	this->clients = server.clients;
+	// this->clients = server.clients;
 	this->quit = server.quit;
 	return (*this);
 }

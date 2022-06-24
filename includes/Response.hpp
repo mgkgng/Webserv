@@ -3,31 +3,29 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
+/*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 20:25:11 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/21 17:06:11 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/06/24 12:02:25 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "libft.hpp"
-#include "Request.hpp"
 
 namespace Webserv {
-
-class Response {
-	private:
-		std::string protocol_v;
-		std::string status_code;
-		std::string status_message;
-		std::map<std::string, std::string> headers;
-	public:
-		Response();
-		Response(Response const &);
-		~Response();
-		Response & operator=(Response const &);
-		std::string makeResponseStr();
-};
+	class Response {
+		private:
+			std::string protocol_v;
+			std::string status_code;
+			std::string status_message;
+			std::map<std::string, std::string> headers;
+		public:
+			Response();
+			Response(Response const &);
+			~Response();
+			Response & operator=(Response const &);
+			std::string makeResponseStr();
+	};
 };
