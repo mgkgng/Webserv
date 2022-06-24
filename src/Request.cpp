@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/24 14:22:49 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/24 14:25:00 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ Request::Request(std::string request, Webserv::Server & server) {
 
 	// Sort in order from longest to shortest.
 	std::sort(matches.begin(), matches.end(), sortByComplex);
-	it == matches.begin()
+	std::vector<Webserv::Route>::iterator it = matches.begin();
 	if (this->path.length() == it->getPath().length()) {
 		std::vector<std::string> a = it->getAllowedHTTPMethods();
 		if (std::find(a.begin(), a.end(), this->method) == a.end()) {
