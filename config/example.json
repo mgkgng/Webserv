@@ -22,8 +22,8 @@
 			"response_code": 301
 		},
 		"route 404": {
-			"index": "404.html",
-			"root": "./var/www",
+			"index": "error_404.html",
+			"root": "./www/error_pages",
 			"path": "/404"
 		}
 	}

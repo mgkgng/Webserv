@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/24 13:08:04 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/24 15:30:16 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,11 +159,14 @@ namespace Webserv {
 		private:
 			std::string 						method;
 			std::string							path;
+			std::map<std::string, std::string>	attributes;
 			std::string							protocol_v;
 
 			std::map<std::string, std::string>	headers;
 			
 			std::string							body;
+
+			std::string							file;
 		public:
 			Request();
 			Request(std::string, Server & server);
