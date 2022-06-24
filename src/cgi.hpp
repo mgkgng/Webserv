@@ -26,7 +26,7 @@ struct CGI_Environment{
     {
         if (is_found_in(name, 5, "ACCEPT", "ACCEPT_LANGUAGE", "USER_AGENT", "COOKIE", "REFERER"))
 			name = "HTTP_" + name;
-		else if (is_found_in(key, 1, "HOST"))
+		else if (is_found_in(name, 1, "HOST"))
 			name = "REMOTE_" + name;
     }
 
@@ -39,31 +39,31 @@ struct CGI_Environment{
     }
 };
 
-// In the prototype, everything is theorical
+// Call that after is_CGI, look at utility is_CGI
 void execute_cgi(const std::map<int, string> &status_code, Request &request, const_string &uri, const_string &cgi, const_string &path)
 {
-    int req_fd[2], res_fd[2];
-    pipe(res_fd);
+    int fd_request[2], fd_response[2];
+    pipe(fd_response);
 
     int pid = fork();
     if (pid)
     {
-        close(res_fd[1]);
+        close(fd_response[1]);
         // https://man7.org/linux/man-pages/man2/fcntl.2.html
         // Fcntl: manipulate file descriptor
         // F_SETFL: Set the file status flags to the value specified by arg.
         // O_NONBLOCK: Nonblock.
         // Actually, the subject impose to use fcntl like that
-        fcntl(res_fd[0], F_SETFL, O_NONBLOCK);
+        fcntl(fd_response[0], F_SETFL, O_NONBLOCK);
         // "Something" to be changed, obv. Ideally, we set headers and stuffs
-        // response.set_whatweset("HTTP/1.1 200 OK\r\n", res_fd[0], &status_code, pid, true); ---> TODO
+        // response.set_whatweset("HTTP/1.1 200 OK\r\n", fd_response[0], &status_code, pid, true); // ---> TODO
     }
     else 
     {
-        pipe(req_fd);
-        // Still no ide what we write
-        write(req_fd[1], what_we_write, len_of_what_we_write);
-        close(req_fd[1]), close(res_fd[0]);
+        pipe(fd_request);
+        // Apparently, according to Mathias, the easiest way to manage is just to write content and parse/compose in req/res
+        write(fd_request[1], request.content.cstring(), request.content.length());
+        close(fd_request[1]), close(fd_response[0]);
 
         CGI_Environment environment;
 
@@ -77,8 +77,8 @@ void execute_cgi(const std::map<int, string> &status_code, Request &request, con
 		environment.add_variable("QUERY_STRING", request.query); // -> Member of Request
 		environment.add_variable("PATH_INFO", path); // -> Argument from function call
 
-        dup2(req_fd[0], 0), close(req_fd[0]);
-        dup2(res_fd[1], 1), close(res_fd[1]);
+        dup2(fd_request[0], 0), close(fd_request[0]);
+        dup2(fd_response[1], 1), close(fd_response[1]);
 
         char *execve_av[] = {
             const_cast<char *>(cgi.c_str()), 
