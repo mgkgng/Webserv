@@ -22,6 +22,8 @@ Webserv::Route::Route(const Route & route) {
 	this->path = route.getPath();
 	this->clientmaxbodysize = route.getClientMaxBodySize();
 	this->allowedHTTPmethods = route.getAllowedHTTPMethods();
+	this->phpcgiextension = route.getPHPCGIExtension();
+	this->pythoncgiextension = route.getPythonCGIExtension();
 }
 
 Webserv::Route::~Route() {}
@@ -33,6 +35,8 @@ Webserv::Route & Webserv::Route::operator=(const Route & route) {
 	this->path = route.getPath();
 	this->clientmaxbodysize = route.getClientMaxBodySize();
 	this->allowedHTTPmethods = route.getAllowedHTTPMethods();
+	this->phpcgiextension = route.getPHPCGIExtension();
+	this->pythoncgiextension = route.getPythonCGIExtension();
 	return (*this);
 }
 

@@ -111,6 +111,7 @@ void	Server::launch() {
 	init_addrinfo();
 	init_server();
 	std::cout << "WEBSERV launched." << std::endl;
+	std::cout << this->port << std::endl;
 	quit = false;
 
 	while (!quit) {

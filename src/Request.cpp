@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/24 16:20:59 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/25 14:21:11 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,24 @@ struct sortByComplex {
         return (struct1.getPath().length() > struct2.getPath().length());
     }
 }sortByComplex;
+
+std::string find_extension(std::string path) {
+	std::string temp = path;
+	while (temp.find(".") != std::string::npos) {
+		temp.erase(0, temp.find(".") + 1);
+	}
+	if (path.length() == temp.length()) {
+		return "";
+	}
+	if (temp.find('/') != std::string::npos) {
+		return "";
+	}
+	return temp;
+}
+
+std::string get_file_from_path(std::string path, std::string route) {
+	return path.substr(route.length());
+}
 
 Request::Request(std::string request, Webserv::Server & server) {
 	this->parseRequest(request);
@@ -42,6 +60,17 @@ Request::Request(std::string request, Webserv::Server & server) {
 			std::cout << "REQUESTED INDEX FILE" << std::endl;
 		} else {
 			std::cout << "REQUESTED ANOTHER FILE" << std::endl;
+			std::string extension = find_extension(this->path);
+			std::string file = get_file_from_path(this->path, it->getPath());
+			if (extension == "") {
+				std::cout << "REQUESTED EXTENSONLESS FILE OR DIRECTORY" << std::endl;
+			} else if (extension == it->getPHPCGIExtension()) {
+				std::cout << "REQUESTED PHP CGI FILE" <<  std::endl;
+			} else if (extension == it->getPythonCGIExtension()) {
+				std::cout << "REQUESTED PYTHON CGI FILE" << std::endl;
+			} else {
+				std::cout << "REQUESTED FILE" << std::endl;
+			}
 		}
 	} else if (this->method == "POST") {
 

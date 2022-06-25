@@ -133,8 +133,8 @@ Webserv::sbh_t defaultInformation() {
 	ret.redirect = "/500";
 	ret.responsecode = 0;
 	ret.clientmaxbodysize = "5M";
-	ret.pythoncgiextension = ".py";
-	ret.phpcgiextextension = ".php";
+	ret.pythoncgiextension = "py";
+	ret.phpcgiextextension = "php";
 	return (ret);
 }
 

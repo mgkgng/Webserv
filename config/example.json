@@ -1,8 +1,8 @@
 {
 	"index": "index.html",
 	"allowed_methods": "GET POST",
-	"python_cgi_extension": ".py",
-	"php_cgi_extension": ".php",
+	"python_cgi_extension": "py",
+	"php_cgi_extension": "php",
 	"route index": {
 		"path": "/",
 		"autoindex": false,
