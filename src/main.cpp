@@ -33,7 +33,9 @@ void printjsondata(JSON const & json, int level) {
 	std::cout << "}" << std::endl;;
 }*/
 
-int main() {
+int main(int argc, char ** argv) {
+	(void) argc;
+	std::cout << argv[0] << std::endl;
 	try {
 		//Webserv::ServerLaunch test2;
 		JSON test = JSON("./config/example.json");

@@ -6,7 +6,7 @@
 	"route index": {
 		"path": "/",
 		"autoindex": false,
-		"root": "./www"
+		"root": "./www/"
 	},
 	"server0": {
 		"host": "example.org",

@@ -6,12 +6,16 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/25 14:21:11 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/25 18:04:31 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <Webserv.hpp>
 #include <algorithm>
+#include <fstream>
+
+// #include <unistd.h>
+// #include <sys/param.h>
 
 using namespace Webserv;
 
@@ -39,6 +43,29 @@ std::string get_file_from_path(std::string path, std::string route) {
 	return path.substr(route.length());
 }
 
+std::string get_file_full_path(std::string requested_file, std::string root) {
+	// need a ++98 way of getting the path of the working dir
+	// char buf [MAXPATHLEN];
+	// getcwd(buf, MAXPATHLEN);
+	// if (root.find('.') == 0 && root.find('/') == 1) {
+	// 	root.replace(0, 1, buf);
+	// } else if (root.find('/') != 0) {
+	// 	root.insert(0, 1, '/');
+	// 	root.insert(0, buf);
+	// }
+	if (root.find('/', root.length() - 1) == std::string::npos && requested_file.find('/') != 0) {
+		root.push_back('/');
+	}
+	return root + requested_file;
+}
+
+bool check_if_file_exists(const std::string name) {
+    std::fstream f(name.c_str());
+    bool ret = f.good();
+	f.close();
+	return ret;
+}
+
 Request::Request(std::string request, Webserv::Server & server) {
 	this->parseRequest(request);
 	std::map<std::string, Webserv::Route> route = server.getRoutes();
@@ -57,11 +84,17 @@ Request::Request(std::string request, Webserv::Server & server) {
 		std::cout << "DISALLOWED METHOD: ERROR 405" << std::endl;
 	} else if (this->method == "GET") {
 		if (this->path.length() == it->getPath().length()) {
-			std::cout << "REQUESTED INDEX FILE" << std::endl;
+			std::string file = get_file_full_path(it->getIndex(), it->getRoot());
+			if (check_if_file_exists(file)) {
+				std::cout << "REQUESTED INDEX FILE" << std::endl;
+			} else {
+				std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+			}
 		} else {
-			std::cout << "REQUESTED ANOTHER FILE" << std::endl;
 			std::string extension = find_extension(this->path);
 			std::string file = get_file_from_path(this->path, it->getPath());
+			file = get_file_full_path(file, it->getRoot());
+			std::cout << check_if_file_exists(file) << std::endl;
 			if (extension == "") {
 				std::cout << "REQUESTED EXTENSONLESS FILE OR DIRECTORY" << std::endl;
 			} else if (extension == it->getPHPCGIExtension()) {
