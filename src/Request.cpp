@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/25 18:04:31 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/25 18:28:47 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,12 +97,32 @@ Request::Request(std::string request, Webserv::Server & server) {
 			std::cout << check_if_file_exists(file) << std::endl;
 			if (extension == "") {
 				std::cout << "REQUESTED EXTENSONLESS FILE OR DIRECTORY" << std::endl;
+				if (check_if_file_exists(file)) {
+					std::cout << "REQUESTED INDEX FILE" << std::endl;
+				} else {
+					std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+				}
 			} else if (extension == it->getPHPCGIExtension()) {
 				std::cout << "REQUESTED PHP CGI FILE" <<  std::endl;
+				if (check_if_file_exists(file)) {
+					std::cout << "REQUESTED INDEX FILE" << std::endl;
+				} else {
+					std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+				}
 			} else if (extension == it->getPythonCGIExtension()) {
 				std::cout << "REQUESTED PYTHON CGI FILE" << std::endl;
+				if (check_if_file_exists(file)) {
+					std::cout << "REQUESTED INDEX FILE" << std::endl;
+				} else {
+					std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+				}
 			} else {
 				std::cout << "REQUESTED FILE" << std::endl;
+				if (check_if_file_exists(file)) {
+					std::cout << "REQUESTED INDEX FILE" << std::endl;
+				} else {
+					std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+				}
 			}
 		}
 	} else if (this->method == "POST") {
