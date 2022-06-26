@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/26 14:21:05 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/26 14:53:00 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ Request::Request(std::string request, Webserv::Server & server) {
 	std::vector<Webserv::Route>::iterator it = matches.begin();
 	std::vector<std::string> a = it->getAllowedHTTPMethods();
 	if (std::find(a.begin(), a.end(), this->method) == a.end()) {
-		std::cout << "DISALLOWED METHOD: ERROR 405" << std::endl;
+		throw ERROR405();
 	} else if (this->method == "GET") {
 		if (this->path.length() == it->getPath().length()) {
 			std::string file = get_file_full_path(it->getIndex(), it->getRoot());
@@ -98,10 +98,10 @@ Request::Request(std::string request, Webserv::Server & server) {
 				if (it->getListingDirectory()) {
 					std::cout << "REQUESTED DIRECTORY" << std::endl;
 				} else {
-					std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+					throw ERROR404();
 				}
 			} else {
-				std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+				throw ERROR404();
 			}
 		} else {
 			std::string extension = find_extension(this->path);
@@ -114,10 +114,10 @@ Request::Request(std::string request, Webserv::Server & server) {
 					if (it->getListingDirectory()) {
 						std::cout << "REQUESTED DIRECTORY" << std::endl;
 					} else {
-						std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+						throw ERROR404();
 					}
 				} else {
-					std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+					throw ERROR404();
 				}
 			} else if (extension == it->getPHPCGIExtension()) {
 				if (check_if_file_exists(file)) {
@@ -126,10 +126,10 @@ Request::Request(std::string request, Webserv::Server & server) {
 					if (it->getListingDirectory()) {
 						std::cout << "REQUESTED DIRECTORY" << std::endl;
 					} else {
-						std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+						throw ERROR404();
 					}
 				} else {
-					std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+					throw ERROR404();
 				}
 			} else if (extension == it->getPythonCGIExtension()) {
 				if (check_if_file_exists(file)) {
@@ -138,10 +138,10 @@ Request::Request(std::string request, Webserv::Server & server) {
 					if (it->getListingDirectory()) {
 						std::cout << "REQUESTED DIRECTORY" << std::endl;
 					} else {
-						std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+						throw ERROR404();
 					}
 				} else {
-					std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+					throw ERROR404();
 				}
 			} else {
 				if (check_if_file_exists(file)) {
@@ -150,10 +150,10 @@ Request::Request(std::string request, Webserv::Server & server) {
 					if (it->getListingDirectory()) {
 						std::cout << "REQUESTED DIRECTORY" << std::endl;
 					} else {
-						std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+						throw ERROR404();
 					}
 				} else {
-					std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+					throw ERROR404();
 				}
 			}
 		}
