@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/25 18:28:47 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/26 14:21:05 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,9 @@
 #include <algorithm>
 #include <fstream>
 
-// #include <unistd.h>
-// #include <sys/param.h>
+#include <unistd.h>
+#include <sys/param.h>
+#include <sys/stat.h>
 
 using namespace Webserv;
 
@@ -44,15 +45,14 @@ std::string get_file_from_path(std::string path, std::string route) {
 }
 
 std::string get_file_full_path(std::string requested_file, std::string root) {
-	// need a ++98 way of getting the path of the working dir
-	// char buf [MAXPATHLEN];
-	// getcwd(buf, MAXPATHLEN);
-	// if (root.find('.') == 0 && root.find('/') == 1) {
-	// 	root.replace(0, 1, buf);
-	// } else if (root.find('/') != 0) {
-	// 	root.insert(0, 1, '/');
-	// 	root.insert(0, buf);
-	// }
+	char buf [MAXPATHLEN];
+	getcwd(buf, MAXPATHLEN);
+	if (root.find('.') == 0 && root.find('/') == 1) {
+		root.replace(0, 1, buf);
+	} else if (root.find('/') != 0) {
+		root.insert(0, 1, '/');
+		root.insert(0, buf);
+	}
 	if (root.find('/', root.length() - 1) == std::string::npos && requested_file.find('/') != 0) {
 		root.push_back('/');
 	}
@@ -64,6 +64,13 @@ bool check_if_file_exists(const std::string name) {
     bool ret = f.good();
 	f.close();
 	return ret;
+}
+
+bool check_if_file_is_dir(const std::string name) {
+   struct stat statbuf;
+   if (stat(name.c_str(), &statbuf) != 0)
+       return 0;
+   return S_ISDIR(statbuf.st_mode);
 }
 
 Request::Request(std::string request, Webserv::Server & server) {
@@ -87,6 +94,12 @@ Request::Request(std::string request, Webserv::Server & server) {
 			std::string file = get_file_full_path(it->getIndex(), it->getRoot());
 			if (check_if_file_exists(file)) {
 				std::cout << "REQUESTED INDEX FILE" << std::endl;
+			} else if (check_if_file_is_dir(file)) {
+				if (it->getListingDirectory()) {
+					std::cout << "REQUESTED DIRECTORY" << std::endl;
+				} else {
+					std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+				}
 			} else {
 				std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
 			}
@@ -94,32 +107,51 @@ Request::Request(std::string request, Webserv::Server & server) {
 			std::string extension = find_extension(this->path);
 			std::string file = get_file_from_path(this->path, it->getPath());
 			file = get_file_full_path(file, it->getRoot());
-			std::cout << check_if_file_exists(file) << std::endl;
 			if (extension == "") {
-				std::cout << "REQUESTED EXTENSONLESS FILE OR DIRECTORY" << std::endl;
 				if (check_if_file_exists(file)) {
-					std::cout << "REQUESTED INDEX FILE" << std::endl;
+					std::cout << "REQUESTED EXTENSONLESS FILE OR DIRECTORY" << std::endl;
+				} else if (check_if_file_is_dir(file)) {
+					if (it->getListingDirectory()) {
+						std::cout << "REQUESTED DIRECTORY" << std::endl;
+					} else {
+						std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+					}
 				} else {
 					std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
 				}
 			} else if (extension == it->getPHPCGIExtension()) {
-				std::cout << "REQUESTED PHP CGI FILE" <<  std::endl;
 				if (check_if_file_exists(file)) {
-					std::cout << "REQUESTED INDEX FILE" << std::endl;
+					std::cout << "REQUESTED PHP CGI FILE" <<  std::endl;
+				} else if (check_if_file_is_dir(file)) {
+					if (it->getListingDirectory()) {
+						std::cout << "REQUESTED DIRECTORY" << std::endl;
+					} else {
+						std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+					}
 				} else {
 					std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
 				}
 			} else if (extension == it->getPythonCGIExtension()) {
-				std::cout << "REQUESTED PYTHON CGI FILE" << std::endl;
 				if (check_if_file_exists(file)) {
-					std::cout << "REQUESTED INDEX FILE" << std::endl;
+					std::cout << "REQUESTED PYTHON CGI FILE" << std::endl;
+				} else if (check_if_file_is_dir(file)) {
+					if (it->getListingDirectory()) {
+						std::cout << "REQUESTED DIRECTORY" << std::endl;
+					} else {
+						std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+					}
 				} else {
 					std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
 				}
 			} else {
-				std::cout << "REQUESTED FILE" << std::endl;
 				if (check_if_file_exists(file)) {
-					std::cout << "REQUESTED INDEX FILE" << std::endl;
+					std::cout << "REQUESTED FILE" << std::endl;
+				} else if (check_if_file_is_dir(file)) {
+					if (it->getListingDirectory()) {
+						std::cout << "REQUESTED DIRECTORY" << std::endl;
+					} else {
+						std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
+					}
 				} else {
 					std::cout << "ERROR 404: FILE NOT FOUND" << std::endl;
 				}
