@@ -298,12 +298,28 @@ JSON::JSON(std::ifstream & file) {
 	}
 }
 
+std::string find_extension_parser(std::string path) {
+	std::string temp = path;
+	while (temp.find(".") != std::string::npos) {
+		temp.erase(0, temp.find(".") + 1);
+	}
+	if (path.length() == temp.length()) {
+		return "";
+	}
+	if (temp.find('/') != std::string::npos) {
+		return "";
+	}
+	return temp;
+}
+
 JSON::JSON(std::string path) {
 	std::ifstream	file;
 	char			c;
 
 	if (access(path.c_str(), F_OK | R_OK) == -1) {
 		throw InvalidPath();
+	} else if (find_extension_parser(path) != "json") {
+		throw InvalidExtension();
 	}
 	file.open(path);
 	skipwhitespace(file);

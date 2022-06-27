@@ -50,6 +50,7 @@ class JSON {
 		// Errors related to IO
 		struct InvalidPath: public std::exception { const char * what () const throw () { return "No file was found from the given path"; } };
 		struct ErrorReadingFile: public std::exception { const char * what () const throw () { return "A fatal error was encountered while reading the file"; } };
+		struct InvalidExtension: public std::exception {const char * what () const throw () { return "Invalid extension, only .json files are allowed!"; } };
 
 		// Errors related to Incorectly Formated JSON
 		struct InvalidJSON: public std::exception { const char * what () const throw () { return "An error with the JSON was found"; } };

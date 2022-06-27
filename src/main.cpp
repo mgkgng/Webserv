@@ -4,46 +4,25 @@
 #include <iostream>
 #include <algorithm>
 
-/*void printtabs(int level) {
-	for (int i = 0; i < level; i++) {
-		std::cout << "\t";
-	}
-}
-
-void printjsondata(JSON const & json, int level) {
-	std::cout << "{" << std::endl;;
-	for (auto const &pair: json.getStrings()) {
-		printtabs(level + 1);
-		std::cout << pair.first << ": " << pair.second << std::endl;
-	}
-	for (auto const &pair: json.getBooleans()) {
-		printtabs(level + 1);
-		std::cout << pair.first << ": " << pair.second << std::endl;
-	}
-	for (auto const &pair: json.getNumbers()) {
-		printtabs(level + 1);
-		std::cout << pair.first << ": " << pair.second << std::endl;
-	}
-	for (auto const &pair: json.getObjects()) {
-		printtabs(level + 1);
-		std::cout << pair.first << ": ";
-		printjsondata(pair.second, level + 1);
-	}
-	printtabs(level);
-	std::cout << "}" << std::endl;;
-}*/
-
 int main(int argc, char ** argv) {
-	(void) argc;
-	std::cout << argv[0] << std::endl;
-	try {
-		//Webserv::ServerLaunch test2;
-		JSON test = JSON("./config/example.json");
-		//printjsondata(test, 0);
-		std::vector<Webserv::Server> servers = Webserv::makeServersFromJSON(test);
-		Webserv::start(servers);
-	} catch (std::exception & e) {
-		std::cout << e.what() << std::endl;
+	if (argc == 1) {
+		try {
+			JSON test = JSON("./config/example.json"); 
+			std::vector<Webserv::Server> servers = Webserv::makeServersFromJSON(test);
+			Webserv::start(servers);
+		} catch (std::exception & e) {
+			std::cerr << e.what() << std::endl;
+		}
+	} else if (argc == 2) {
+		try {
+			JSON test = JSON(argv[1]);
+			std::vector<Webserv::Server> servers = Webserv::makeServersFromJSON(test);
+			Webserv::start(servers);
+		} catch (std::exception & e) {
+			std::cerr << e.what() << std::endl;
+		}
+	} else {
+		std::cerr << "To many arguments!" << std::endl;
 	}
 }
 
