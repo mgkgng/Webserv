@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/26 14:53:00 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/27 14:09:37 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -210,11 +210,33 @@ void	Request::parseRequest(std::string request) {
 	this->protocol_v = request.substr(0, request.find("\r\n"));
 	request.erase(0, request.find("\r\n") + 2);
 
+	if (this->method.find("\r\n") != std::string::npos) {
+		throw ERROR400();
+	}
+	if (this->path.find("\r\n") != std::string::npos) {
+		throw ERROR400();
+	}
+	if (this->protocol_v.find("\r\n") != std::string::npos) {
+		throw ERROR400();
+	}
+	if (this->method != "GET" && this->method != "POST" && this->method != "DELETE") {
+		throw ERROR400();
+	}
+	if (this->protocol_v != "HTTP/1.1") {
+		throw ERROR400();
+	}
+
 	// Headers
 	while (request.find("\r\n") != 0) {
+		if (request.find (":") == std::string::npos) {
+			throw ERROR400();
+		}
 		std::string name = request.substr(0, request.find(":"));
 		request.erase(0, request.find(":") + 1);
 		std::string content = request.substr(0, request.find("\r\n"));
+		if (content.find(":") != std::string::npos) {
+			throw ERROR400();
+		}
 		request.erase(0, request.find("\r\n") + 2);
 		this->headers.insert(
 			std::pair<std::string, std::string>(

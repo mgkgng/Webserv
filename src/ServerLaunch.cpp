@@ -97,12 +97,15 @@ void	Server::recvData(struct kevent &ev) {
 	try {
 		Request request = Request(buf, *this);
 	} catch (Webserv::Request::ERROR400 & e) {
-
+		std::cout << "INVAID REQUEST: ERROR 400" << std::endl;
 	} catch (Webserv::Request::ERROR404 & e) {
 		std::cout << "FILE NOT FOUND: ERROR 404" << std::endl;
 	} catch (Webserv::Request::ERROR405 & e) {
 		std::cout << "DISALLOWED METHOD: ERROR 405" << std::endl;
-	}	// client->putRequestStr(std::string(buf));
+	} catch (std::exception & e) {
+		std::cout << e.what() << std::endl;
+	}	
+	// client->putRequestStr(std::string(buf));
 }
 
 void	Webserv::thread_launch(void *ptr) {
