@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/28 14:28:19 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/28 15:29:46 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,26 @@ bool check_if_file_is_dir(const std::string name) {
    return S_ISDIR(statbuf.st_mode);
 }
 
+void	do_request_depending_on_file_type(const std::string file, const Webserv::Route & it) {
+	if (check_if_file_exists(file)) {
+		std::cout << "REQUESTED INDEX FILE" << std::endl;
+	} else if (check_if_file_is_dir(file)) {
+		if (it.getListingDirectory()) {
+			std::cout << "REQUESTED DIRECTORY" << std::endl;
+		} else if (it.getDirectoryFile() != "") {
+			if (check_if_file_exists(get_file_full_path(it.getDirectoryFile(), it.getRoot()))) {
+				std::cout << "REQUESTED FILEDIR" << std::endl;
+			} else {
+				throw Webserv::Request::ERROR404();
+			}
+		} else {
+			throw Webserv::Request::ERROR403();
+		}
+	} else {
+		throw Webserv::Request::ERROR404();
+	}
+}
+
 Request::Request(std::string request, Webserv::Server & server) {
 	this->parseRequest(request);
 	std::map<std::string, Webserv::Route> route = server.getRoutes();
@@ -92,93 +112,19 @@ Request::Request(std::string request, Webserv::Server & server) {
 	} else if (this->method == "GET") {
 		if (this->path.length() == it->getPath().length()) {
 			std::string file = get_file_full_path(it->getIndex(), it->getRoot());
-			if (check_if_file_exists(file)) {
-				std::cout << "REQUESTED INDEX FILE" << std::endl;
-			} else if (check_if_file_is_dir(file)) {
-				if (it->getListingDirectory()) {
-					std::cout << "REQUESTED DIRECTORY" << std::endl;
-				} else if (it->getDirectoryFile() != "") {
-					if (check_if_file_exists(get_file_full_path(it->getDirectoryFile(), it->getRoot()))) {
-						std::cout << "REQUESTED FILEDIR" << std::endl;
-					} else {
-						throw ERROR404();
-					}
-				} else {
-					throw ERROR403();
-				}
-			} else {
-				throw ERROR404();
-			}
+			do_request_depending_on_file_type(file, *it);
 		} else {
 			std::string extension = find_extension(this->path);
 			std::string file = get_file_from_path(this->path, it->getPath());
 			file = get_file_full_path(file, it->getRoot());
 			if (extension == "") {
-				if (check_if_file_exists(file)) {
-					std::cout << "REQUESTED EXTENSONLESS FILE OR DIRECTORY" << std::endl;
-				} else if (check_if_file_is_dir(file)) {
-					if (it->getListingDirectory()) {
-						std::cout << "REQUESTED DIRECTORY" << std::endl;
-					} else if (it->getDirectoryFile() != "") {
-						if (check_if_file_exists(get_file_full_path(it->getDirectoryFile(), it->getRoot()))) {
-							std::cout << "REQUESTED FILEDIR" << std::endl;
-						} else {
-							throw ERROR404();
-						}
-					} else {
-						throw ERROR403();
-					}
-				} else {
-					throw ERROR404();
-				}
+				do_request_depending_on_file_type(file, *it);
 			} else if (extension == it->getPHPCGIExtension()) {
-				if (check_if_file_exists(file)) {
-					std::cout << "REQUESTED PHP CGI FILE" <<  std::endl;
-				} else if (check_if_file_is_dir(file)) {
-					if (it->getListingDirectory()) {
-						std::cout << "REQUESTED DIRECTORY" << std::endl;
-					} else {
-						throw ERROR404();
-					}
-				} else {
-					throw ERROR404();
-				}
+				do_request_depending_on_file_type(file, *it);
 			} else if (extension == it->getPythonCGIExtension()) {
-				if (check_if_file_exists(file)) {
-					std::cout << "REQUESTED PYTHON CGI FILE" << std::endl;
-				} else if (check_if_file_is_dir(file)) {
-					if (it->getListingDirectory()) {
-						std::cout << "REQUESTED DIRECTORY" << std::endl;
-					} else if (it->getDirectoryFile() != "") {
-						if (check_if_file_exists(get_file_full_path(it->getDirectoryFile(), it->getRoot()))) {
-							std::cout << "REQUESTED FILEDIR" << std::endl;
-						} else {
-							throw ERROR404();
-						}
-					} else {
-						throw ERROR403();
-					}
-				} else {
-					throw ERROR404();
-				}
+				do_request_depending_on_file_type(file, *it);
 			} else {
-				if (check_if_file_exists(file)) {
-					std::cout << "REQUESTED FILE" << std::endl;
-				} else if (check_if_file_is_dir(file)) {
-					if (it->getListingDirectory()) {
-						std::cout << "REQUESTED DIRECTORY" << std::endl;
-					} else if (it->getDirectoryFile() != "") {
-						if (check_if_file_exists(get_file_full_path(it->getDirectoryFile(), it->getRoot()))) {
-							std::cout << "REQUESTED FILEDIR" << std::endl;
-						} else {
-							throw ERROR404();
-						}
-					} else {
-						throw ERROR403();
-					}
-				} else {
-					throw ERROR404();
-				}
+				do_request_depending_on_file_type(file, *it);
 			}
 		}
 	} else if (this->method == "POST") {
