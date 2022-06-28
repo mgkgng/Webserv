@@ -4,9 +4,11 @@
 //default
 Webserv::Route::Route() { }
 
-Webserv::Route::Route(bool islistingdirectory, std::string directoryfile, std::string index, std::string root, std::string path, std::string clientmaxbodysize, std::vector<std::string> allowedHTTPmethods, std::string pythoncgiextension, std::string phpcgiextension) {
+Webserv::Route::Route(bool islistingdirectory, std::string directoryfile, bool isuploadable, std::string uploadroot, std::string index, std::string root, std::string path, std::string clientmaxbodysize, std::vector<std::string> allowedHTTPmethods, std::string pythoncgiextension, std::string phpcgiextension) {
 	this->islistingdirectory = islistingdirectory;
 	this->directoryfile = directoryfile;
+	this->isuploadable = isuploadable;
+	this->uploadroot = uploadroot;
 	this->index = index;
 	this->root = root;
 	this->path = path;
@@ -49,6 +51,14 @@ bool			Webserv::Route::getListingDirectory() const {
 
 std::string 	Webserv::Route::getDirectoryFile() const {
 	return (this->directoryfile);
+}
+
+bool			Webserv::Route::getUploadable() const {
+	return (this->isuploadable);
+}
+
+std::string 	Webserv::Route::getUploadRoot() const {
+	return (this->uploadroot);
 }
 
 std::string		Webserv::Route::getIndex() const {

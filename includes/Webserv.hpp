@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/28 14:26:42 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/28 14:43:25 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ namespace Webserv {
 			Route(
 				bool islistingdirectory, 
 				std::string directoryfile,
+				bool uploadable,
+				std::string uploadRoot,
 				std::string index, 
 				std::string root, 
 				std::string path, 
@@ -42,6 +44,8 @@ namespace Webserv {
 
 			bool			getListingDirectory() const;
 			std::string 	getDirectoryFile() const;
+			bool			getUploadable() const;
+			std::string 	getUploadRoot() const;
 			std::string		getIndex() const;
 			std::string		getRoot() const;
 			std::string		getPath() const;
@@ -55,6 +59,12 @@ namespace Webserv {
 
 			// the default page that is shown if islistingdirectory is false
 			std::string		directoryfile;
+
+			// can the route upload files
+			bool			isuploadable;
+
+			// location where uploaded files are stored
+			std::string 	uploadroot;
 
 			// index of the route, first file found is shown to the user
 			std::string		index;
@@ -207,6 +217,8 @@ namespace Webserv {
 		// Route
 		bool			islistingdirectory;
 		std::string		directoryfile;
+		bool			isuploadable;
+		std::string		uploadroot;
 		std::string		index;
 		std::string		root;
 		std::string		path;

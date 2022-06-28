@@ -3,11 +3,13 @@
 	"allowed_methods": "GET POST",
 	"python_cgi_extension": "py",
 	"php_cgi_extension": "php",
+	"upload_root": "./media",
 	"route index": {
 		"path": "/",
 		"autoindex": false,
 		"directory_file": "index.html",
-		"root": "./www/"
+		"root": "./www/",
+		"uploadable": false
 	},
 	"server0": {
 		"host": "example.org",
