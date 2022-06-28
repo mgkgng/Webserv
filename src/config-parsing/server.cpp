@@ -90,6 +90,9 @@ Webserv::sbh_t	getInformation(const JSON & json, Webserv::sbh_t ret) {
 		ret.islistingdirectory = json.getBooleans().at("autoindex");
 	} catch (std::exception & e) { }
 	try {
+		ret.directoryfile = json.getStrings().at("directory_file");
+	} catch (std::exception & e) { }
+	try {
 		ret.host = json.getStrings().at("host");
 	} catch (std::exception & e) { }
 	try {
@@ -126,6 +129,7 @@ Webserv::sbh_t defaultInformation() {
 	ret.allowedHTTPmethods = "";
 	ret.path = "/";
 	ret.islistingdirectory = false;
+	ret.directoryfile = "";
 	ret.host = "localhost";
 	ret.port = 42069;
 	ret.servername = "default";
@@ -154,7 +158,7 @@ Webserv::Route	generateRoute(const JSON & json, Webserv::sbh_t sinfo) {
 	if (words.empty() != 1) {
 		words.push_back(sinfo.allowedHTTPmethods);
 	}
-	Webserv::Route ret = Webserv::Route(sinfo.islistingdirectory, sinfo.index, sinfo.root, sinfo.path, sinfo.clientmaxbodysize, words, sinfo.pythoncgiextension, sinfo.phpcgiextextension);
+	Webserv::Route ret = Webserv::Route(sinfo.islistingdirectory, sinfo.directoryfile, sinfo.index, sinfo.root, sinfo.path, sinfo.clientmaxbodysize, words, sinfo.pythoncgiextension, sinfo.phpcgiextextension);
 	return (ret);
 }
 

@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/26 14:49:47 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/28 14:26:42 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ namespace Webserv {
 			Route();
 			Route(
 				bool islistingdirectory, 
+				std::string directoryfile,
 				std::string index, 
 				std::string root, 
 				std::string path, 
@@ -40,6 +41,7 @@ namespace Webserv {
 			Route & operator=(const Route & route);
 
 			bool			getListingDirectory() const;
+			std::string 	getDirectoryFile() const;
 			std::string		getIndex() const;
 			std::string		getRoot() const;
 			std::string		getPath() const;
@@ -50,6 +52,9 @@ namespace Webserv {
 		private:
 			// is this routes directory listing its contents to the client
 			bool			islistingdirectory;
+
+			// the default page that is shown if islistingdirectory is false
+			std::string		directoryfile;
 
 			// index of the route, first file found is shown to the user
 			std::string		index;
@@ -183,6 +188,7 @@ namespace Webserv {
 
 
 			struct ERROR400: public std::exception { const char * what () const throw () { return "Error 400"; } };
+			struct ERROR403: public std::exception { const char * what () const throw () { return "Error 403"; } };
 			struct ERROR404: public std::exception { const char * what () const throw () { return "Error 404"; } };
 			struct ERROR405: public std::exception { const char * what () const throw () { return "Error 405"; } };
 	};
@@ -200,6 +206,7 @@ namespace Webserv {
 		
 		// Route
 		bool			islistingdirectory;
+		std::string		directoryfile;
 		std::string		index;
 		std::string		root;
 		std::string		path;

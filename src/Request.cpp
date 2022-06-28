@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/28 12:19:06 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/28 14:28:19 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,8 +97,14 @@ Request::Request(std::string request, Webserv::Server & server) {
 			} else if (check_if_file_is_dir(file)) {
 				if (it->getListingDirectory()) {
 					std::cout << "REQUESTED DIRECTORY" << std::endl;
+				} else if (it->getDirectoryFile() != "") {
+					if (check_if_file_exists(get_file_full_path(it->getDirectoryFile(), it->getRoot()))) {
+						std::cout << "REQUESTED FILEDIR" << std::endl;
+					} else {
+						throw ERROR404();
+					}
 				} else {
-					throw ERROR404();
+					throw ERROR403();
 				}
 			} else {
 				throw ERROR404();
@@ -113,8 +119,14 @@ Request::Request(std::string request, Webserv::Server & server) {
 				} else if (check_if_file_is_dir(file)) {
 					if (it->getListingDirectory()) {
 						std::cout << "REQUESTED DIRECTORY" << std::endl;
+					} else if (it->getDirectoryFile() != "") {
+						if (check_if_file_exists(get_file_full_path(it->getDirectoryFile(), it->getRoot()))) {
+							std::cout << "REQUESTED FILEDIR" << std::endl;
+						} else {
+							throw ERROR404();
+						}
 					} else {
-						throw ERROR404();
+						throw ERROR403();
 					}
 				} else {
 					throw ERROR404();
@@ -137,8 +149,14 @@ Request::Request(std::string request, Webserv::Server & server) {
 				} else if (check_if_file_is_dir(file)) {
 					if (it->getListingDirectory()) {
 						std::cout << "REQUESTED DIRECTORY" << std::endl;
+					} else if (it->getDirectoryFile() != "") {
+						if (check_if_file_exists(get_file_full_path(it->getDirectoryFile(), it->getRoot()))) {
+							std::cout << "REQUESTED FILEDIR" << std::endl;
+						} else {
+							throw ERROR404();
+						}
 					} else {
-						throw ERROR404();
+						throw ERROR403();
 					}
 				} else {
 					throw ERROR404();
@@ -149,8 +167,14 @@ Request::Request(std::string request, Webserv::Server & server) {
 				} else if (check_if_file_is_dir(file)) {
 					if (it->getListingDirectory()) {
 						std::cout << "REQUESTED DIRECTORY" << std::endl;
+					} else if (it->getDirectoryFile() != "") {
+						if (check_if_file_exists(get_file_full_path(it->getDirectoryFile(), it->getRoot()))) {
+							std::cout << "REQUESTED FILEDIR" << std::endl;
+						} else {
+							throw ERROR404();
+						}
 					} else {
-						throw ERROR404();
+						throw ERROR403();
 					}
 				} else {
 					throw ERROR404();

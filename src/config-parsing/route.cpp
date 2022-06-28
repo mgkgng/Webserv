@@ -4,8 +4,9 @@
 //default
 Webserv::Route::Route() { }
 
-Webserv::Route::Route(bool islistingdirectory, std::string index, std::string root, std::string path, std::string clientmaxbodysize, std::vector<std::string> allowedHTTPmethods, std::string pythoncgiextension, std::string phpcgiextension) {
+Webserv::Route::Route(bool islistingdirectory, std::string directoryfile, std::string index, std::string root, std::string path, std::string clientmaxbodysize, std::vector<std::string> allowedHTTPmethods, std::string pythoncgiextension, std::string phpcgiextension) {
 	this->islistingdirectory = islistingdirectory;
+	this->directoryfile = directoryfile;
 	this->index = index;
 	this->root = root;
 	this->path = path;
@@ -17,6 +18,7 @@ Webserv::Route::Route(bool islistingdirectory, std::string index, std::string ro
 
 Webserv::Route::Route(const Route & route) {
 	this->islistingdirectory = route.getListingDirectory();
+	this->directoryfile = route.getDirectoryFile();
 	this->index = route.getIndex();
 	this->root = route.getRoot();
 	this->path = route.getPath();
@@ -30,6 +32,7 @@ Webserv::Route::~Route() {}
 
 Webserv::Route & Webserv::Route::operator=(const Route & route) {
 	this->islistingdirectory = route.getListingDirectory();
+	this->directoryfile = route.getDirectoryFile();
 	this->index = route.getIndex();
 	this->root = route.getRoot();
 	this->path = route.getPath();
@@ -42,6 +45,10 @@ Webserv::Route & Webserv::Route::operator=(const Route & route) {
 
 bool			Webserv::Route::getListingDirectory() const {
 	return (this->islistingdirectory);
+}
+
+std::string 	Webserv::Route::getDirectoryFile() const {
+	return (this->directoryfile);
 }
 
 std::string		Webserv::Route::getIndex() const {

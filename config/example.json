@@ -6,6 +6,7 @@
 	"route index": {
 		"path": "/",
 		"autoindex": false,
+		"directory_file": "index.html",
 		"root": "./www/"
 	},
 	"server0": {
@@ -23,6 +24,7 @@
 		},
 		"route 404": {
 			"index": "error_404.html",
+			"autoindex": true,
 			"root": "./www/error_pages",
 			"path": "/404"
 		}

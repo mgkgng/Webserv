@@ -98,6 +98,8 @@ void	Server::recvData(struct kevent &ev) {
 		Request request = Request(buf, *this);
 	} catch (Webserv::Request::ERROR400 & e) {
 		std::cout << "INVAID REQUEST: ERROR 400" << std::endl;
+	} catch (Webserv::Request::ERROR403 & e) {
+		std::cout << "FORBIDDEN: ERROR 403" << std::endl;
 	} catch (Webserv::Request::ERROR404 & e) {
 		std::cout << "FILE NOT FOUND: ERROR 404" << std::endl;
 	} catch (Webserv::Request::ERROR405 & e) {
