@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/27 14:09:37 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/28 12:19:06 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,6 +179,24 @@ Request & Request::operator=(Request const & rhs) {
 	return (*this);
 }
 
+const std::string WHITESPACE = " \n\r\t\f\v";
+ 
+std::string ltrim(const std::string &s)
+{
+    size_t start = s.find_first_not_of(WHITESPACE);
+    return (start == std::string::npos) ? "" : s.substr(start);
+}
+ 
+std::string rtrim(const std::string &s)
+{
+    size_t end = s.find_last_not_of(WHITESPACE);
+    return (end == std::string::npos) ? "" : s.substr(0, end + 1);
+}
+
+std::string trim(const std::string & s) {
+	return rtrim(ltrim(s));
+}
+
 void	Request::parseRequest(std::string request) {
 	// Head
 	this->method = request.substr(0, request.find(" "));
@@ -234,9 +252,10 @@ void	Request::parseRequest(std::string request) {
 		std::string name = request.substr(0, request.find(":"));
 		request.erase(0, request.find(":") + 1);
 		std::string content = request.substr(0, request.find("\r\n"));
-		if (content.find(":") != std::string::npos) {
-			throw ERROR400();
-		}
+		// Might keep this, might not. Nginix just doesn't respond.
+		// if (content.find(":") != std::string::npos) {
+		// 	throw ERROR400();
+		// }
 		request.erase(0, request.find("\r\n") + 2);
 		this->headers.insert(
 			std::pair<std::string, std::string>(
@@ -247,7 +266,10 @@ void	Request::parseRequest(std::string request) {
 	request.erase(0, request.find("\r\n") + 2);
 
 	// Body
-	this->body = request;
+	this->body = trim(request);
+	if (this->method == "GET" && this->body.size() > 0) {
+		throw ERROR400();
+	}
 }
 
 std::string Request::getMethod() const {
