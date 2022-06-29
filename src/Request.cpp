@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/29 13:33:17 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/29 13:45:02 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,11 @@ std::string find_extension(std::string path) {
 }
 
 std::string get_file_from_path(std::string path, std::string route) {
-	return path.substr(route.length());
+	std::string ret = path.substr(route.length());
+	if ((*ret.rbegin()) == '/') {
+		ret.pop_back();
+	} 
+	return ret;
 }
 
 std::string get_file_full_path(std::string requested_file, std::string root) {
@@ -131,7 +135,9 @@ Request::Request(std::string request, Webserv::Server & server) {
 		} else {
 			std::string extension = find_extension(this->path);
 			std::string file = get_file_from_path(this->path, it->getPath());
+			std::cout << file << std::endl;
 			file = get_file_full_path(file, it->getRoot());
+			std::cout << file << std::endl;
 			if (extension == "") {
 				do_request_depending_on_file_type(file, *it);
 			} else if (extension == it->getPHPCGIExtension()) {
