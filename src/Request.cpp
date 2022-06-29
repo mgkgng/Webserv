@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/28 15:29:46 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/29 13:33:17 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,8 +93,23 @@ void	do_request_depending_on_file_type(const std::string file, const Webserv::Ro
 	}
 }
 
+bool endsWith(std::string const &str, std::string const &suffix) {
+    if (str.length() < suffix.length()) {
+        return false;
+    }
+    return str.compare(str.length() - suffix.length(), suffix.length(), suffix) == 0;
+}
+
 Request::Request(std::string request, Webserv::Server & server) {
 	this->parseRequest(request);
+	try {
+		if (!endsWith(this->headers.at("Host"), server.getHost())) {
+			throw Webserv::Request::ERROR400();
+		}
+	} catch (std::out_of_range & e) {
+		throw Webserv::Request::ERROR400();
+	}
+
 	std::map<std::string, Webserv::Route> route = server.getRoutes();
 	std::vector<Webserv::Route> matches;
 	for (std::map<std::string, Route>::iterator it = route.begin(); it != route.end(); it++ ) {
@@ -229,10 +244,11 @@ void	Request::parseRequest(std::string request) {
 		request.erase(0, request.find("\r\n") + 2);
 		this->headers.insert(
 			std::pair<std::string, std::string>(
-				name,
-				content
+				trim(name),
+				trim(content)
 		));
 	}
+
 	request.erase(0, request.find("\r\n") + 2);
 
 	// Body

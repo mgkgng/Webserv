@@ -12,7 +12,7 @@
 		"uploadable": false
 	},
 	"server0": {
-		"host": "example.org",
+		"host": ".42nice.fr",
 		"port": 1234,
 		"server_name": null,
 		"code 404": {
