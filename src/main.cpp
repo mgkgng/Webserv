@@ -23,9 +23,6 @@ int main(int argc, char ** argv) {
 			std::vector<Webserv::Server> servers = Webserv::makeServersFromJSON(test);
 			std::sort(servers.begin(), servers.end(), sortLogic);
 			std::vector<Webserv::Server>::iterator it = servers.begin();
-			for (; it != servers.end(); it++) {
-				std::cout << it->getHost() << ":" << it->getPort() << std::endl;
-			}
 			Webserv::start(servers);
 		} catch (std::exception & e) {
 			std::cerr << "Error" << std::endl;
