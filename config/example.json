@@ -30,9 +30,5 @@
 			"root": "./www/error_pages",
 			"path": "/404"
 		}
-	},
-	"server1": {
-		"host": ".42nice.fr",
-		"port": 1234
 	}
 }

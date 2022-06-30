@@ -171,9 +171,10 @@ void	Webserv::start(std::vector<Server> & servers) {
 			while (end->getPort() == it_ports->getPort()) {
 				end ++;
 			}
-			std::vector<Server> launch(it_servers, end);
-			pthread_create(&(*it), NULL, (void * (*)(void *)) &Webserv::thread_launch, &(launch));
+			std::vector<Server> serverReadyToGo(it_servers, end);
+			pthread_create(&(*it), NULL, (void * (*)(void *)) &Webserv::thread_launch, &(serverReadyToGo));
 			it_ports++;
+			usleep(300);
 		}
 		for (std::vector<pthread_t>::iterator it = threads.begin(); it != threads.end(); it++)
 			pthread_detach(*it);
