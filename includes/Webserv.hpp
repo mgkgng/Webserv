@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/28 14:43:25 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/30 11:58:30 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,7 @@ namespace Webserv {
 			std::map<std::string, HandleCode>	getHandleCode() const;
 
 			// Server Launch 
-			void				launch();
+			void				launch(std::vector<Webserv::Server> & servers);
 
 			// Manage client requests
 			void				init_addrinfo();
@@ -140,7 +140,7 @@ namespace Webserv {
 			void				acceptConnection();
 			void				disconnect(int fd);
 			void				sendData(int c_fd);
-			void				recvData(struct kevent &ev);
+			void				recvData(struct kevent &ev, std::vector<Webserv::Server> & servers);
 			// Client* 			getClient(int fd);
 
 			void				setIsDefault(bool b);
@@ -184,7 +184,7 @@ namespace Webserv {
 			std::string							file;
 		public:
 			Request();
-			Request(std::string, Server & server);
+			Request(std::string, std::vector<Webserv::Server> & servers);
 			Request(Request const &);
 			~Request();
 

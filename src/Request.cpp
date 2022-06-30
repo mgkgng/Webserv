@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/29 13:45:02 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/30 12:15:14 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,17 +104,39 @@ bool endsWith(std::string const &str, std::string const &suffix) {
     return str.compare(str.length() - suffix.length(), suffix.length(), suffix) == 0;
 }
 
-Request::Request(std::string request, Webserv::Server & server) {
+Request::Request(std::string request, std::vector<Webserv::Server> & server) {
 	this->parseRequest(request);
-	try {
-		if (!endsWith(this->headers.at("Host"), server.getHost())) {
+
+	std::vector<Webserv::Server>::iterator it_s = server.begin();
+	for (std::vector<Webserv::Server>::iterator it_s = server.begin(); it_s != server.end(); it_s++) {
+		try {
+			std::string temp = this->headers.at("Host");
+			if (this->headers.at("Host").find(":") != std::string::npos) {
+				temp.erase(temp.find(":")); 
+			}
+			if ((*it_s->getHost().begin()) == '.') {
+				if (!endsWith(temp, it_s->getHost())) {
+					throw Webserv::Request::ERROR400();
+				} else {
+					break;
+				}
+			} else {
+				if (temp != it_s->getHost()) {
+					throw Webserv::Request::ERROR400();
+				} else {
+					break;
+				}
+			}
+		} catch (std::out_of_range & e) {
 			throw Webserv::Request::ERROR400();
+		} catch (Webserv::Request::ERROR400 & e) {
+			if (it_s + 1 == server.end()) {
+				throw Webserv::Request::ERROR400();
+			}
 		}
-	} catch (std::out_of_range & e) {
-		throw Webserv::Request::ERROR400();
 	}
 
-	std::map<std::string, Webserv::Route> route = server.getRoutes();
+	std::map<std::string, Webserv::Route> route = it_s->getRoutes();
 	std::vector<Webserv::Route> matches;
 	for (std::map<std::string, Route>::iterator it = route.begin(); it != route.end(); it++ ) {
 		if (this->path.substr(0, it->second.getPath().length()) == it->second.getPath()) {

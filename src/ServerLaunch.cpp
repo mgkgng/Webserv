@@ -28,7 +28,7 @@ void	Server::init_server() {
 
 	int	option_on = 1;
 	assert(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option_on, sizeof(int)) == 0);
-	bind(sockfd, (struct sockaddr *) &sockaddr, sizeof(sockaddr));
+	assert(bind(sockfd, (struct sockaddr *) &sockaddr, sizeof(sockaddr)) == 0);
 	assert(listen(sockfd, 20) == 0);
 
 	kq = kqueue();
@@ -70,7 +70,7 @@ void	Server::disconnect(int fd) {
 // 	EV_SET(chlist.end().base() - 1, c_fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 // }
 
-void	Server::recvData(struct kevent &ev) {
+void	Server::recvData(struct kevent &ev, std::vector<Webserv::Server> & servers) {
 	char	buf[10000];
 	int		ret;
 	// Client	*client;
@@ -95,7 +95,7 @@ void	Server::recvData(struct kevent &ev) {
 
 	std::cout << "Client Sent data!" << std::endl;
 	try {
-		Request request = Request(buf, *this);
+		Request request = Request(buf, servers);
 	} catch (Webserv::Request::ERROR400 & e) {
 		std::cout << "INVAID REQUEST: ERROR 400" << std::endl;
 	} catch (Webserv::Request::ERROR403 & e) {
@@ -111,13 +111,13 @@ void	Server::recvData(struct kevent &ev) {
 }
 
 void	Webserv::thread_launch(void *ptr) {
-	Server	*launch;
+	std::vector<Server> *launch;
 
-	launch = reinterpret_cast<Server*>(ptr);
-	launch->launch();
+	launch = reinterpret_cast<std::vector<Server> *>(ptr);
+	launch->begin()->launch((*launch));
 }
 
-void	Server::launch() {
+void	Server::launch(std::vector<Server> & servers) {
 	int evNb;
 
 	init_addrinfo();
@@ -139,7 +139,7 @@ void	Server::launch() {
 			else if (static_cast<int>(evlist.at(i).ident) == sockfd)
 				acceptConnection();
 			else if (evlist.at(i).filter & EVFILT_READ)
-				recvData(evlist[i]);
+				recvData(evlist[i], servers);
 			// else if (print(4) && evlist.at(i).filter & EVFILT_WRITE)
 			// 	sendData(evlist[i].ident);
 		}
@@ -147,16 +147,38 @@ void	Server::launch() {
 }
 		
 void	Webserv::start(std::vector<Server> & servers) {
-	if (servers.size() == 1)
-		servers[0].launch();
+	std::vector<Server>::iterator it_servers = servers.begin();
+	std::vector<Server> ports;
+	for (; it_servers != servers.end(); it_servers++) {
+		if (ports.empty()) {
+			ports.push_back((*it_servers));
+		} else if (ports[ports.size() - 1].getPort() != it_servers->getPort()) {
+			ports.push_back((*it_servers));
+		}
+	}
+	if (ports.size() == 1)
+		servers[0].launch(servers);
 	else {
 		std::vector<pthread_t> threads;
-		std::vector<Server>::iterator it_servers = servers.begin();
-		threads.resize(servers.size());
-		for (std::vector<pthread_t>::iterator it = threads.begin(); it != threads.end(); it++)
-			pthread_create(&(*it), NULL, (void * (*)(void *)) &Webserv::thread_launch, &(*it_servers++));
+		it_servers = servers.begin();
+		std::vector<Server>::iterator it_ports = ports.begin();
+		threads.resize(ports.size());
+		for (std::vector<pthread_t>::iterator it = threads.begin(); it != threads.end(); it++) {
+			while (it_servers->getPort() < it_ports->getPort() && it_servers != servers.end()) {
+				it_servers ++;
+			}
+			std::vector<Server>::iterator end = it_servers;
+			while (end->getPort() == it_ports->getPort()) {
+				end ++;
+			}
+			std::vector<Server> launch(it_servers, end);
+			pthread_create(&(*it), NULL, (void * (*)(void *)) &Webserv::thread_launch, &(launch));
+			it_ports++;
+		}
 		for (std::vector<pthread_t>::iterator it = threads.begin(); it != threads.end(); it++)
 			pthread_detach(*it);
+		while (1)
+			;
 	}
 }
 
