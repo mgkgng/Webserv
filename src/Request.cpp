@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/30 13:52:48 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/30 15:47:53 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,7 @@ bool check_if_host_match(std::string s, std::string th) {
 Request::Request(std::string request, std::vector<Webserv::Server> & server) {
 	this->parseRequest(request);
 	std::vector<Webserv::Server>::iterator it_s = server.begin();
-	for (std::vector<Webserv::Server>::iterator it_s = server.begin(); it_s != server.end(); it_s++) {
+	for (; it_s != server.end(); it_s++) {
 		try {
 			std::string temp = this->headers.at("Host");
 			if (this->headers.at("Host").find(":") != std::string::npos) {
