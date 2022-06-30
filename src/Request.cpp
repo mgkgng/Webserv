@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/30 12:15:14 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/30 12:28:15 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,12 +135,15 @@ Request::Request(std::string request, std::vector<Webserv::Server> & server) {
 			}
 		}
 	}
-
-	std::map<std::string, Webserv::Route> route = it_s->getRoutes();
+	
+	std::string	target_host = it_s->getHost();
 	std::vector<Webserv::Route> matches;
-	for (std::map<std::string, Route>::iterator it = route.begin(); it != route.end(); it++ ) {
-		if (this->path.substr(0, it->second.getPath().length()) == it->second.getPath()) {
-			matches.push_back(it->second);
+	for (; it_s->getHost() == target_host && it_s != server.end(); it_s++) {
+		std::map<std::string, Webserv::Route> route = it_s->getRoutes();
+		for (std::map<std::string, Route>::iterator it = route.begin(); it != route.end(); it++ ) {
+			if (this->path.substr(0, it->second.getPath().length()) == it->second.getPath()) {
+				matches.push_back(it->second);
+			}
 		}
 	}
 
