@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/30 13:35:33 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/30 18:42:36 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,7 @@ namespace Webserv {
 			std::map<std::string, HandleCode>	getHandleCode() const;
 
 			// Server Launch 
-			void				launch(std::vector<Webserv::Server> & servers);
+			void				launch(std::vector<Webserv::Server> servers);
 
 			// Manage client requests
 			void				init_addrinfo();

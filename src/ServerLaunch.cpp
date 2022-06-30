@@ -117,7 +117,7 @@ void	Webserv::thread_launch(void *ptr) {
 	launch->begin()->launch((*launch));
 }
 
-void	Server::launch(std::vector<Server> & servers) {
+void	Server::launch(std::vector<Server> servers) {
 	int evNb;
 
 	init_addrinfo();
