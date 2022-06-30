@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/30 11:58:30 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/30 13:35:33 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,7 +195,6 @@ namespace Webserv {
 			std::string	getMethod() const;
 			std::string	getBody() const;
 			std::map<std::string, std::string> getHeaders() const;
-
 
 			struct ERROR400: public std::exception { const char * what () const throw () { return "Error 400"; } };
 			struct ERROR403: public std::exception { const char * what () const throw () { return "Error 403"; } };

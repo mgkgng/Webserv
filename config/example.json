@@ -32,7 +32,7 @@
 		}
 	},
 	"server1": {
-		"host": "localhost",
+		"host": ".42nice.fr",
 		"port": 1234
 	}
 }

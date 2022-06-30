@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/30 12:28:15 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/06/30 13:52:48 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,9 +104,15 @@ bool endsWith(std::string const &str, std::string const &suffix) {
     return str.compare(str.length() - suffix.length(), suffix.length(), suffix) == 0;
 }
 
+bool check_if_host_match(std::string s, std::string th) {
+	if (s.find(":") != std::string::npos) {
+		s.erase(s.find(":")); 
+	}
+	return s == th;
+}
+
 Request::Request(std::string request, std::vector<Webserv::Server> & server) {
 	this->parseRequest(request);
-
 	std::vector<Webserv::Server>::iterator it_s = server.begin();
 	for (std::vector<Webserv::Server>::iterator it_s = server.begin(); it_s != server.end(); it_s++) {
 		try {
@@ -138,10 +144,20 @@ Request::Request(std::string request, std::vector<Webserv::Server> & server) {
 	
 	std::string	target_host = it_s->getHost();
 	std::vector<Webserv::Route> matches;
-	for (; it_s->getHost() == target_host && it_s != server.end(); it_s++) {
+
+	for (; check_if_host_match(it_s->getHost(), target_host) && it_s != server.end(); it_s++) {
 		std::map<std::string, Webserv::Route> route = it_s->getRoutes();
 		for (std::map<std::string, Route>::iterator it = route.begin(); it != route.end(); it++ ) {
 			if (this->path.substr(0, it->second.getPath().length()) == it->second.getPath()) {
+				std::vector<Route>::iterator mit = matches.begin();
+				for (; mit != matches.end(); mit++ ) {
+					if (mit->getPath() == it->second.getPath()) {
+						break ;
+					}
+				}
+				if (mit != matches.end()) {
+					continue;
+				}
 				matches.push_back(it->second);
 			}
 		}
@@ -179,6 +195,8 @@ Request::Request(std::string request, std::vector<Webserv::Server> & server) {
 		
 	}
 }
+
+
 
 
 Request::Request(Request const & other) {

@@ -22,7 +22,6 @@ int main(int argc, char ** argv) {
 			JSON test = JSON("./config/example.json"); 
 			std::vector<Webserv::Server> servers = Webserv::makeServersFromJSON(test);
 			std::sort(servers.begin(), servers.end(), sortLogic);
-			std::vector<Webserv::Server>::iterator it = servers.begin();
 			Webserv::start(servers);
 		} catch (std::exception & e) {
 			std::cerr << "Error" << std::endl;
