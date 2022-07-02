@@ -46,8 +46,6 @@ void	Server::acceptConnection() {
 	chlist.resize(chlist.size() + 1);
 	EV_SET(chlist.end().base() - 1, newConnection, EVFILT_READ, EV_ADD, 0,0, NULL);
 
-	// Client	c = Client(newConnection);
-	// clients.push_back(c);
 	std::cout << "Connection accepted." << std::endl;
 }
 	
@@ -56,42 +54,20 @@ void	Server::disconnect(int fd) {
 	close(fd);
 }
 
-// void	Server::sendData(int c_fd) {	
-// 	Client *client;
-// 	client = getClient(c_fd);
-// 	assert(client != NULL);
-
-// 	//Request	*r = client->getRequest();
-// 	//std::string statusCode = execute_cgi(r);
-	
-// 	//* now back to client
-// 	send(client->getIdent(), client->getResponseStr().c_str(), client->getResponseStr().size(), 0);
-// 	chlist.resize(chlist.size() + 1);
-// 	EV_SET(chlist.end().base() - 1, c_fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-// }
-
 void	Server::recvData(struct kevent &ev, std::vector<Webserv::Server> & servers) {
 	char	buf[10000];
 	int		ret;
-	// Client	*client;
-	
-	// client = getClient(ev.ident);
-	// assert(client != NULL);
 
 	ret = recv(ev.ident, buf, 9999, 0);
-	// std::cout << client->getIdent() << std::endl;
 	if (ret < 0)
 		return ;
 	if (!ret) {
 		chlist.resize(chlist.size() + 2);
 		EV_SET(chlist.end().base() - 2, ev.ident, EVFILT_READ, EV_DELETE, 0, 0, NULL);
 		EV_SET(chlist.end().base() - 1, ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
-		// client->putRequest();
-		// client->clearReponseStr();
 		return ;
 	}
 	buf[ret] = '\0';
-	// std::cout << buf << std::endl;
 
 	std::cout << "Client Sent data!" << std::endl;
 	try {
@@ -107,7 +83,6 @@ void	Server::recvData(struct kevent &ev, std::vector<Webserv::Server> & servers)
 	} catch (std::exception & e) {
 		std::cout << e.what() << std::endl;
 	}	
-	// client->putRequestStr(std::string(buf));
 }
 
 void	Webserv::thread_launch(void *ptr) {
@@ -140,8 +115,6 @@ void	Server::launch(std::vector<Server> servers) {
 				acceptConnection();
 			else if (evlist.at(i).filter & EVFILT_READ)
 				recvData(evlist[i], servers);
-			// else if (print(4) && evlist.at(i).filter & EVFILT_WRITE)
-			// 	sendData(evlist[i].ident);
 		}
 	}
 }
@@ -178,14 +151,6 @@ void	Webserv::start(std::vector<Server> & servers) {
 		}
 		for (std::vector<pthread_t>::iterator it = threads.begin(); it != threads.end(); it++)
 			pthread_detach(*it);
-		while (1)
-			;
+		while (1);
 	}
 }
-
-// Client* Server::getClient(int fd) {
-// 	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
-// 		if (it->isClient(fd))
-// 			return (it.base());
-// 	return (NULL);
-// }
