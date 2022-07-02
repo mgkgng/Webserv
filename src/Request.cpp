@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
+/*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/30 15:47:53 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/07/02 16:27:17 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,9 +195,6 @@ Request::Request(std::string request, std::vector<Webserv::Server> & server) {
 		
 	}
 }
-
-
-
 
 Request::Request(Request const & other) {
 	*this = other;
