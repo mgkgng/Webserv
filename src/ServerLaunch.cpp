@@ -70,12 +70,13 @@ void	Server::recvData(struct kevent &ev, std::vector<Webserv::Server> & servers)
 	buf[ret] = '\0';
 	std::cout << "Client Sent data!" << std::endl;
 	try {
-		std::cout << buf << std::endl;
+		//std::cout << buf << std::endl;
 		Request request = Request(buf, servers);
-		std::string	s = request.sdffsf;
-		send(clientID, s.c_str(), s.size(), 0);
-		chlist.resize(chlist.size() + 1);
-		EV_SET(chlist.end().base() - 1, c_fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+		std::string	res = request.getHtml();
+		std::cout << res << std::endl;
+		//send(clientID, s.c_str(), s.size(), 0);
+		//chlist.resize(chlist.size() + 1);
+		//EV_SET(chlist.end().base() - 1, c_fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 
 	} catch (Webserv::Request::ERROR400 & e) {
 		std::cout << "INVAID REQUEST: ERROR 400" << std::endl;

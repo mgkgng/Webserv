@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/02 16:27:17 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/07/03 20:00:56 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -226,6 +226,16 @@ std::string rtrim(const std::string &s)
 
 std::string trim(const std::string & s) {
 	return rtrim(ltrim(s));
+}
+
+std::string	Request::getHtml() const {
+	std::string rname = "www/" + this->path + ".html";
+	if (exist(rname))
+		rname = "www/error_pages/error_404.html";
+	std::ifstream f(rname);
+	std::stringstream buf;
+	buf << f.rdbuf();
+	return (buf.str());	
 }
 
 void	Request::parseRequest(std::string request) {

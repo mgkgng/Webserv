@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
+/*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/30 18:42:36 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/07/03 19:48:32 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 
 #include "libft.hpp"
 #include <JSON.hpp>
-#include <Client.hpp>
 #include <Response.hpp>
 
 #define PORT 8080
@@ -192,6 +191,7 @@ namespace Webserv {
 			
 			void	parseRequest(std::string);
 			
+			std::string	getHtml() const;
 			std::string	getMethod() const;
 			std::string	getBody() const;
 			std::map<std::string, std::string> getHeaders() const;

@@ -1,5 +1,10 @@
 #include "libft.hpp"
 
+bool exist(const std::string& fname) {
+  struct stat buffer;
+  return (stat(fname.c_str(), &buffer) == 0);
+}
+
 std::vector<std::string> ft_split(std::string str, std::string sep) {
 	char *substr;
 	std::vector<std::string> res;
