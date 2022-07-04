@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/30 15:47:53 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/07/04 13:53:04 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,26 +75,6 @@ bool check_if_file_is_dir(const std::string name) {
    if (stat(name.c_str(), &statbuf) != 0)
        return 0;
    return S_ISDIR(statbuf.st_mode);
-}
-
-void	do_request_depending_on_file_type(const std::string file, const Webserv::Route & it) {
-	if (check_if_file_exists(file)) {
-		std::cout << "REQUESTED INDEX FILE" << std::endl;
-	} else if (check_if_file_is_dir(file)) {
-		if (it.getListingDirectory()) {
-			std::cout << "REQUESTED DIRECTORY" << std::endl;
-		} else if (it.getDirectoryFile() != "") {
-			if (check_if_file_exists(get_file_full_path(it.getDirectoryFile(), it.getRoot()))) {
-				std::cout << "REQUESTED FILEDIR" << std::endl;
-			} else {
-				throw Webserv::Request::ERROR404();
-			}
-		} else {
-			throw Webserv::Request::ERROR403();
-		}
-	} else {
-		throw Webserv::Request::ERROR404();
-	}
 }
 
 bool endsWith(std::string const &str, std::string const &suffix) {
@@ -172,7 +152,7 @@ Request::Request(std::string request, std::vector<Webserv::Server> & server) {
 	} else if (this->method == "GET") {
 		if (this->path.length() == it->getPath().length()) {
 			std::string file = get_file_full_path(it->getIndex(), it->getRoot());
-			do_request_depending_on_file_type(file, *it);
+			this->do_request_depending_on_file_type(file, *it);
 		} else {
 			std::string extension = find_extension(this->path);
 			std::string file = get_file_from_path(this->path, it->getPath());
@@ -180,24 +160,60 @@ Request::Request(std::string request, std::vector<Webserv::Server> & server) {
 			file = get_file_full_path(file, it->getRoot());
 			std::cout << file << std::endl;
 			if (extension == "") {
-				do_request_depending_on_file_type(file, *it);
+				this->do_request_depending_on_file_type(file, *it);
 			} else if (extension == it->getPHPCGIExtension()) {
-				do_request_depending_on_file_type(file, *it);
+				this->do_request_depending_on_file_type(file, *it);
 			} else if (extension == it->getPythonCGIExtension()) {
-				do_request_depending_on_file_type(file, *it);
+				this->do_request_depending_on_file_type(file, *it);
 			} else {
-				do_request_depending_on_file_type(file, *it);
+				this->do_request_depending_on_file_type(file, *it);
 			}
 		}
 	} else if (this->method == "POST") {
-
+		if (this->path.length() == it->getPath().length()) {
+			std::string file = get_file_full_path(it->getIndex(), it->getRoot());
+			this->do_request_depending_on_file_type(file, *it);
+		} else {
+			std::string extension = find_extension(this->path);
+			std::string file = get_file_from_path(this->path, it->getPath());
+			std::cout << file << std::endl;
+			file = get_file_full_path(file, it->getRoot());
+			std::cout << file << std::endl;
+			if (extension == "") {
+				this->do_request_depending_on_file_type(file, *it);
+			} else if (extension == it->getPHPCGIExtension()) {
+				this->do_request_depending_on_file_type(file, *it);
+			} else if (extension == it->getPythonCGIExtension()) {
+				this->do_request_depending_on_file_type(file, *it);
+			} else {
+				this->do_request_depending_on_file_type(file, *it);
+			}
+		}
 	} else if (this->method == "DELETE") {
 		
 	}
 }
 
-
-
+void	Request::do_request_depending_on_file_type(const std::string file, const Webserv::Route & it) {
+	std::cout << "GOT " << this->method << " REQUEST" << std::endl;
+	if (check_if_file_exists(file)) {
+		std::cout << "REQUESTED INDEX FILE" << std::endl;
+	} else if (check_if_file_is_dir(file)) {
+		if (it.getListingDirectory()) {
+			std::cout << "REQUESTED DIRECTORY" << std::endl;
+		} else if (it.getDirectoryFile() != "") {
+			if (check_if_file_exists(get_file_full_path(it.getDirectoryFile(), it.getRoot()))) {
+				std::cout << "REQUESTED FILEDIR" << std::endl;
+			} else {
+				throw Webserv::Request::ERROR404();
+			}
+		} else {
+			throw Webserv::Request::ERROR403();
+		}
+	} else {
+		throw Webserv::Request::ERROR404();
+	}
+}
 
 Request::Request(Request const & other) {
 	*this = other;
