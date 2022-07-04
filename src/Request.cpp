@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/04 13:32:19 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/07/04 14:12:28 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,21 +69,26 @@ Request & Request::operator=(Request const & rhs) {
 
 std::string	Request::getResponse() {
 
+	//if (this->path == "/")
+
+
 	
-	this->res = Response(this->protocol_v, )
+	//this->res = Response(this->protocol_v, );
 
 	std::stringstream ss;
 	
-	ss << protocol_v << ' ' << status_code << ' ' << status_message << std::endl;
+	// Headers
+	ss << 
+	ss << this->res.getProtocol() << ' ' << res.getStatusCode() << ' ' << res.getStatusMsg() << ' ' << "\r\n";
 	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
-		ss << it->first << ": " << it->second << std::endl;
+		ss << it->first << ": " << it->second << "\r\n";
 	ss << std::endl;
 	return (ss.str());
 
-	
-	if (exist(rname))
-		rname = "www/error_pages/error_404.html";
-	std::ifstream f(rname);
+	std::string route;
+	if (!exist(route))
+		route = "www/error_pages/error_404.html";
+	std::ifstream f(route);
 	std::stringstream buf;
 	buf << f.rdbuf();
 	return (buf.str());

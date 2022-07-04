@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/04 13:33:46 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/07/04 14:12:22 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 #define WEBSERVER_HPP
 
 #include "libft.hpp"
+#include "statusCodes.hpp"
 #include <JSON.hpp>
-#include <Response.hpp>
 
 #define PORT 8080
 #define BACKLOG 20
@@ -182,6 +182,9 @@ namespace Webserv {
 			~Response();
 			Response & operator=(Response const &);
 			
+			std::string getProtocol() const;
+			std::string	getStatusCode() const;
+			std::string	getStatusMsg() const;
 	};
 
 	class Request {
@@ -211,7 +214,7 @@ namespace Webserv {
 			void	parseErrorCheck() const;	
 			void	getResponse() const;
 
-			std::string	getHtml() const;
+			std::string	getResponse();
 			std::string	getMethod() const;
 			std::string	getBody() const;
 			std::map<std::string, std::string> getHeaders() const;
