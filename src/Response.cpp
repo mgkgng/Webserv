@@ -6,11 +6,11 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 16:51:56 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/21 17:05:50 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/07/04 13:31:23 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Response.hpp"
+#include "Webserv.hpp"
 
 using namespace Webserv;
 
@@ -18,7 +18,18 @@ Response::Response() {
 	
 }
 
+Response::Response(std::string ptc, std::string code, std::string msg, std::map<std::string, std::string> headers) {
+	this->protocol_v = ptc;
+	this->status_code = code;
+	this->status_message = msg;
+	this->headers = headers;
+}
+
 Response::Response(Response const & other) {
+	this->protocol_v = other.protocol_v;
+	this->status_code = other.status_code;
+	this->status_message = other.status_message;
+	this->headers = other.headers;
 	*this = other;
 }
 
@@ -32,14 +43,4 @@ Response & Response::operator=(Response const & rhs) {
 	this->status_message = rhs.status_message;
 	this->headers = rhs.headers;
 	return (*this);
-}
-
-std::string Response::makeResponseStr() {
-	std::stringstream ss;
-	
-	ss << protocol_v << ' ' << status_code << ' ' << status_message << std::endl;
-	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
-		ss << it->first << ": " << it->second << std::endl;
-	ss << std::endl;
-	return (ss.str());
 }

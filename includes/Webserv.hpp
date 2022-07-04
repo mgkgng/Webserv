@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/03 19:48:32 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/07/04 13:33:46 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,6 +169,21 @@ namespace Webserv {
 
 	};
 
+	class Response {
+		private:
+			std::string protocol_v;
+			std::string status_code;
+			std::string status_message;
+			std::map<std::string, std::string> headers;
+		public:
+			Response();
+			Response(std::string, std::string, std::string, std::map<std::string, std::string>);
+			Response(Response const &);
+			~Response();
+			Response & operator=(Response const &);
+			
+	};
+
 	class Request {
 		private:
 			std::string 						method;
@@ -181,16 +196,21 @@ namespace Webserv {
 			std::string							body;
 
 			std::string							file;
+
+			Response							res;
+
 		public:
 			Request();
-			Request(std::string, std::vector<Webserv::Server> & servers);
+			Request(std::string);
 			Request(Request const &);
 			~Request();
 
 			Request & operator=(Request const & rhs);
 			
 			void	parseRequest(std::string);
-			
+			void	parseErrorCheck() const;	
+			void	getResponse() const;
+
 			std::string	getHtml() const;
 			std::string	getMethod() const;
 			std::string	getBody() const;
@@ -237,7 +257,7 @@ namespace Webserv {
 	struct InvalidJSONObjectInHandleCode: public std::exception { const char * what () const throw () { return "Don't define JSON objects inside a code"; } };
 	struct InvalidJSONHandleCodeInvalidRoute: public std::exception { const char * what () const throw () { return "Code needs to have a valid route to redirect towards"; } };
 
-	static const unsigned int arr[] = {
+/*	static const unsigned int arr[] = {
 		100, // Continue
 		101, // Switching Protocols
 		102, // Processing
@@ -300,7 +320,7 @@ namespace Webserv {
 		508, // (WebDav) Loop detected
 		510, // Not Extended
 		511  // Network Authentication Required
-	};
+	};*/
 	static const std::vector<unsigned int> validHTTPCodes (arr, arr + sizeof(arr) / sizeof(arr[0]) );
 };
 
