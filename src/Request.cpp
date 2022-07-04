@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/04 15:15:14 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/07/04 15:42:24 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -323,9 +323,7 @@ void	Request::parseRequest(std::string request) {
 	} else if (this->method == "POST") { // TODO: Need a way to handle chunked requests
 		try {
 			std::string temp = this->headers.at("Content-Type");
-			if (temp == "application/x-www-form-urlencode") { 
-				
-			} else if (temp == "application/x-www-form-urlencode") {
+			if (temp == "application/x-www-form-urlencoded") {
 				temp = this->body;
 				while (temp.size() != 0) {
 					std::string name = temp.substr(0, temp.find("="));
@@ -343,11 +341,9 @@ void	Request::parseRequest(std::string request) {
 					));	
 				}
 			}
-			// std::cout << temp << std::endl;
 		} catch (std::out_of_range & e) {
 			throw ERROR400();
-		} 
-		// std::cout << this->body << std::endl;
+		}
 	}
 }
 
