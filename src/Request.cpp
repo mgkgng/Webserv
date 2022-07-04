@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/04 13:53:04 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/07/04 15:15:14 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -320,6 +320,34 @@ void	Request::parseRequest(std::string request) {
 	this->body = trim(request);
 	if (this->method == "GET" && this->body.size() > 0) {
 		throw ERROR400();
+	} else if (this->method == "POST") { // TODO: Need a way to handle chunked requests
+		try {
+			std::string temp = this->headers.at("Content-Type");
+			if (temp == "application/x-www-form-urlencode") { 
+				
+			} else if (temp == "application/x-www-form-urlencode") {
+				temp = this->body;
+				while (temp.size() != 0) {
+					std::string name = temp.substr(0, temp.find("="));
+					temp.erase(0, temp.find("=") + 1);
+					std::string content = temp.substr(0, temp.find("&"));
+					if (temp.find("&") == std::string::npos) {
+						temp.clear();
+					} else {
+						temp.erase(0, temp.find("&") + 1);
+					}
+					this->post_attributes.insert(
+						std::pair<std::string, std::string>(
+							name,
+							content
+					));	
+				}
+			}
+			// std::cout << temp << std::endl;
+		} catch (std::out_of_range & e) {
+			throw ERROR400();
+		} 
+		// std::cout << this->body << std::endl;
 	}
 }
 

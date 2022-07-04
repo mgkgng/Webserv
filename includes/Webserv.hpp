@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/04 13:13:30 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/07/04 15:14:17 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,6 +175,7 @@ namespace Webserv {
 			std::string 						method;
 			std::string							path;
 			std::map<std::string, std::string>	attributes;
+			std::map<std::string, std::string>	post_attributes;
 			std::string							protocol_v;
 
 			std::map<std::string, std::string>	headers;
