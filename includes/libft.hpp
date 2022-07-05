@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:42:44 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/05 13:00:37 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/07/05 14:54:24 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,3 +44,4 @@ std::string	ft_trim(std::string s, std::string set);
 std::string get_file_full_path(std::string requested_file, std::string root);
 bool check_if_file_exists(const std::string name);
 bool check_if_file_is_dir(const std::string name);
+bool endsWith(std::string const &str, std::string const &suffix);

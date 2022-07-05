@@ -55,3 +55,10 @@ bool check_if_file_is_dir(const std::string name) {
        return 0;
    return S_ISDIR(statbuf.st_mode);
 }
+
+bool endsWith(std::string const &str, std::string const &suffix) {
+	if (str.length() < suffix.length()) {
+		return false;
+	}
+	return str.compare(str.length() - suffix.length(), suffix.length(), suffix) == 0;
+}

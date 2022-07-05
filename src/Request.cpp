@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/05 14:26:08 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/07/05 14:55:55 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,13 +46,6 @@ std::string get_file_from_path(std::string path, std::string route) {
 		ret.pop_back();
 	} 
 	return ret;
-}
-
-bool endsWith(std::string const &str, std::string const &suffix) {
-    if (str.length() < suffix.length()) {
-        return false;
-    }
-    return str.compare(str.length() - suffix.length(), suffix.length(), suffix) == 0;
 }
 
 bool check_if_host_match(std::string s, std::string th) {

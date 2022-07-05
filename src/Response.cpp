@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 16:51:56 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/05 14:45:39 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/07/05 14:55:44 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,9 @@ Response::Response(DIR * directory, std::string route) {
 	while (diritem != NULL) {
 		this->body.append("<il>\r\n<a href=\"");
 		this->body.append(route);
-		this->body.append("/");
+		if (!endsWith(route, "/")) {
+			this->body.append("/");
+		}
 		this->body.append(diritem->d_name);
 		this->body.append("\">");
 		this->body.append(diritem->d_name);

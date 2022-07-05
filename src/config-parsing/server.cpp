@@ -130,7 +130,7 @@ Webserv::sbh_t	getInformation(const JSON & json, Webserv::sbh_t ret) {
 
 Webserv::sbh_t defaultInformation() {
 	Webserv::sbh_t ret;
-	ret.index = "index.html";
+	ret.index = "";
 	ret.root = ".";
 	ret.allowedHTTPmethods = "";
 	ret.path = "/";
