@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/14 17:08:04 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/04 15:14:17 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/07/05 14:43:31 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,13 @@
 
 #include "libft.hpp"
 #include <JSON.hpp>
-#include <Client.hpp>
-#include <Response.hpp>
+#include <fstream>
+
+#include <unistd.h>
+#include <sys/param.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
 
 #define PORT 8080
 #define BACKLOG 20
@@ -195,6 +200,7 @@ namespace Webserv {
 			
 			std::string	getMethod() const;
 			std::string	getBody() const;
+			std::string getPath() const;
 			std::map<std::string, std::string> getHeaders() const;
 
 			void	do_request_depending_on_file_type(const std::string file, const Webserv::Route & it);
@@ -203,6 +209,23 @@ namespace Webserv {
 			struct ERROR403: public std::exception { const char * what () const throw () { return "Error 403"; } };
 			struct ERROR404: public std::exception { const char * what () const throw () { return "Error 404"; } };
 			struct ERROR405: public std::exception { const char * what () const throw () { return "Error 405"; } };
+	};
+
+	class Response {
+		private:
+			std::string protocol_v;
+			std::string status_code;
+			std::string status_message;
+			std::map<std::string, std::string> headers;
+			std::string body;
+		public:
+			Response();
+			Response(std::string file);
+			Response(DIR * directory, std::string route);
+			Response(Response const &);
+			~Response();
+			Response & operator=(Response const &);
+			std::string makeResponseStr();
 	};
 
 	typedef struct sbh_s {
@@ -229,6 +252,8 @@ namespace Webserv {
 		std::string		pythoncgiextension;
 		std::string		phpcgiextextension;
 	}	sbh_t;
+	
+	Response				gen_response_directory(const Webserv::Request & request, const std::string directory, const Webserv::Route & route);
 	
 	std::vector<Server>		makeServersFromJSON(const JSON & json);
 	void					start(std::vector<Server> & servers);

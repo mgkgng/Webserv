@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libft.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
+/*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:42:44 by min-kang          #+#    #+#             */
-/*   Updated: 2022/06/20 15:27:31 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/07/05 13:00:37 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,3 +41,6 @@
 
 std::vector<std::string> ft_split(std::string str, std::string sep);
 std::string	ft_trim(std::string s, std::string set);
+std::string get_file_full_path(std::string requested_file, std::string root);
+bool check_if_file_exists(const std::string name);
+bool check_if_file_is_dir(const std::string name);

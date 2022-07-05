@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/05 10:37:47 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/07/05 14:26:08 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,35 +46,6 @@ std::string get_file_from_path(std::string path, std::string route) {
 		ret.pop_back();
 	} 
 	return ret;
-}
-
-std::string get_file_full_path(std::string requested_file, std::string root) {
-	char buf [MAXPATHLEN];
-	getcwd(buf, MAXPATHLEN);
-	if (root.find('.') == 0 && root.find('/') == 1) {
-		root.replace(0, 1, buf);
-	} else if (root.find('/') != 0) {
-		root.insert(0, 1, '/');
-		root.insert(0, buf);
-	}
-	if (root.find('/', root.length() - 1) == std::string::npos && requested_file.find('/') != 0) {
-		root.push_back('/');
-	}
-	return root + requested_file;
-}
-
-bool check_if_file_exists(const std::string name) {
-	std::fstream f(name.c_str());
-	bool ret = f.good();
-	f.close();
-	return ret;
-}
-
-bool check_if_file_is_dir(const std::string name) {
-   struct stat statbuf;
-   if (stat(name.c_str(), &statbuf) != 0)
-       return 0;
-   return S_ISDIR(statbuf.st_mode);
 }
 
 bool endsWith(std::string const &str, std::string const &suffix) {
@@ -156,9 +127,7 @@ Request::Request(std::string request, std::vector<Webserv::Server> & server) {
 		} else {
 			std::string extension = find_extension(this->path);
 			std::string file = get_file_from_path(this->path, it->getPath());
-			std::cout << file << std::endl;
 			file = get_file_full_path(file, it->getRoot());
-			std::cout << file << std::endl;
 			if (extension == "") {
 				this->do_request_depending_on_file_type(file, *it);
 			} else if (extension == it->getPHPCGIExtension()) {
@@ -199,17 +168,8 @@ void	Request::do_request_depending_on_file_type(const std::string file, const We
 	if (check_if_file_exists(file)) {
 		std::cout << "REQUESTED INDEX FILE" << std::endl;
 	} else if (check_if_file_is_dir(file)) {
-		if (it.getListingDirectory()) {
-			std::cout << "REQUESTED DIRECTORY" << std::endl;
-		} else if (it.getDirectoryFile() != "") {
-			if (check_if_file_exists(get_file_full_path(it.getDirectoryFile(), it.getRoot()))) {
-				std::cout << "REQUESTED FILEDIR" << std::endl;
-			} else {
-				throw Webserv::Request::ERROR404();
-			}
-		} else {
-			throw Webserv::Request::ERROR403();
-		}
+		std::cout << "REQUESTED DIRECTORY" << std::endl;
+		Webserv::gen_response_directory(*this, file, it);
 	} else {
 		throw Webserv::Request::ERROR404();
 	}
@@ -348,13 +308,17 @@ void	Request::parseRequest(std::string request) {
 }
 
 std::string Request::getMethod() const {
-	return method;
+	return this->method;
 }
 
 std::string Request::getBody() const {
-	return body;
+	return this->body;
+}
+
+std::string Request::getPath() const {
+	return this->path;
 }
 
 std::map<std::string, std::string> Request::getHeaders() const {
-	return headers;
+	return this->headers;
 }

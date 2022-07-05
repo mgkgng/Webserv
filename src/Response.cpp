@@ -6,28 +6,51 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 16:51:56 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/05 11:12:41 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/07/05 14:45:39 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <Webserv.hpp>
-#include <Response.hpp>
 #include <fstream>
 
 #include <unistd.h>
 #include <sys/param.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
 
 using namespace Webserv;
 
 Response::Response() { }
 
 Response::Response(std::string file) {
-	//gen_headers
+	//gen headers
+
 	std::fstream f(file.c_str());
 	std::ostringstream sstr;
 	sstr << f.rdbuf();
 	this->body = sstr.str();
+}
+
+Response::Response(DIR * directory, std::string route) {
+	//gen headers
+
+	//gen body
+	struct dirent *diritem = readdir(directory);
+	this->body = "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n<meta charset=\"utf-8\" />\r\n</head>\r\n<body>\r\n<ul>\r\n";
+	while (diritem != NULL) {
+		this->body.append("<il>\r\n<a href=\"");
+		this->body.append(route);
+		this->body.append("/");
+		this->body.append(diritem->d_name);
+		this->body.append("\">");
+		this->body.append(diritem->d_name);
+		this->body.append("</a>\r\n</il>\r\n");
+		diritem = readdir(directory);
+	}
+	closedir(directory);
+	this->body.append("</ul>\r\n</body>\r\n</html>");
+	std::cout << this->body << std::endl;
 }
 
 Response::Response(Response const & other) {
@@ -56,41 +79,13 @@ std::string Response::makeResponseStr() {
 	return (ss.str());
 }
 
-std::string get_file_full_path(std::string requested_file, std::string root) {
-	char buf [MAXPATHLEN];
-	getcwd(buf, MAXPATHLEN);
-	if (root.find('.') == 0 && root.find('/') == 1) {
-		root.replace(0, 1, buf);
-	} else if (root.find('/') != 0) {
-		root.insert(0, 1, '/');
-		root.insert(0, buf);
-	}
-	if (root.find('/', root.length() - 1) == std::string::npos && requested_file.find('/') != 0) {
-		root.push_back('/');
-	}
-	return root + requested_file;
-}
-
-bool check_if_file_exists(const std::string name) {
-	std::fstream f(name.c_str());
-	bool ret = f.good();
-	f.close();
-	return ret;
-}
-
-bool check_if_file_is_dir(const std::string name) {
-   struct stat statbuf;
-   if (stat(name.c_str(), &statbuf) != 0)
-       return 0;
-   return S_ISDIR(statbuf.st_mode);
-}
-
-Response	gen_response_directory(Webserv::Request & request, std::string directory, Webserv::Route & route) {
+Response	Webserv::gen_response_directory(const Webserv::Request & request, const std::string directory, const Webserv::Route & route) {
+	(void) request;
 	if (route.getListingDirectory()) {
 		if (check_if_file_is_dir(directory)) {
-
+			return Response(opendir(directory.c_str()), request.getPath());
 		} else {
-			throw Request::ERROR404();
+			throw Request::ERROR403();
 		}
 	} else {
 		if (route.getDirectoryFile() == "") {
@@ -98,9 +93,10 @@ Response	gen_response_directory(Webserv::Request & request, std::string director
 		}
 		std::string dirfile =  get_file_full_path(route.getDirectoryFile(), route.getRoot());
 		if (check_if_file_exists(dirfile)) {
-			return Response(dirfile);
+			// return Response(dirfile);
 		} else  {
 			throw Request::ERROR404();
 		}
 	}
+	throw Request::ERROR404();
 }

@@ -6,7 +6,7 @@
 	"upload_root": "./media",
 	"route index": {
 		"path": "/",
-		"autoindex": false,
+		"autoindex": true,
 		"directory_file": "index.html",
 		"root": "./www/",
 		"uploadable": false
@@ -26,7 +26,7 @@
 		},
 		"route 404": {
 			"index": "error_404.html",
-			"autoindex": true,
+			"autoindex": false,
 			"root": "./www/error_pages",
 			"path": "/404"
 		}
