@@ -6,7 +6,7 @@
 /*   By: jrathelo <student.42nice.fr>               +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/04 15:42:24 by jrathelo         ###   ########.fr       */
+/*   Updated: 2022/07/05 10:37:47 by jrathelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,8 +64,8 @@ std::string get_file_full_path(std::string requested_file, std::string root) {
 }
 
 bool check_if_file_exists(const std::string name) {
-    std::fstream f(name.c_str());
-    bool ret = f.good();
+	std::fstream f(name.c_str());
+	bool ret = f.good();
 	f.close();
 	return ret;
 }
