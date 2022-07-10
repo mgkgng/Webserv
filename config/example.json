@@ -1,0 +1,34 @@
+{
+	"index": "index.html",
+	"allowed_methods": "GET POST",
+	"python_cgi_extension": "py",
+	"php_cgi_extension": "php",
+	"upload_root": "./media",
+	"route index": {
+		"path": "/",
+		"autoindex": false,
+		"directory_file": "index.html",
+		"root": "./www/",
+		"uploadable": false
+	},
+	"server0": {
+		"host": ".42nice.fr",
+		"port": 1234,
+		"server_name": null,
+		"code 404": {
+			"code": 404,
+			"redirect": "/404"
+		},
+		"code 401": {
+			"code": 401,
+			"redirect": "/404",
+			"response_code": 301
+		},
+		"route 404": {
+			"index": "error_404.html",
+			"autoindex": true,
+			"root": "./www/error_pages",
+			"path": "/404"
+		}
+	}
+}

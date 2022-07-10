@@ -5,6 +5,7 @@
 *.slo
 *.lo
 *.o
+*.opp
 *.obj
 
 # Precompiled Headers
@@ -30,3 +31,9 @@
 *.exe
 *.out
 *.app
+
+# Other
+*test*
+webserv
+.vscode
+*.dSYM

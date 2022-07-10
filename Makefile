@@ -6,15 +6,10 @@
 #    By: jrathelo <student.42nice.fr>               +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/25 15:25:19 by jrathelo          #+#    #+#              #
-<<<<<<< HEAD
-#    Updated: 2022/05/16 11:16:56 by jrathelo         ###   ########.fr        #
-=======
-#    Updated: 2022/05/16 11:08:00 by jrathelo         ###   ########.fr        #
->>>>>>> f274804babd720ef6ecca0916b4d0fd156c2e8cb
+#    Updated: 2022/06/22 16:53:55 by jrathelo         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-# Colors
 _BLACK			= \033[0;30m
 _RED 			= \033[0;31m
 _GREEN			= \033[0;32m
@@ -52,13 +47,17 @@ SRC_DIR = src
 OUTS = objs
 
 # Source Files
-SRC = 
+SRC = main.cpp																				\
+		config-parsing/JSON.cpp config-parsing/Route.cpp config-parsing/Server.cpp			\
+		config-parsing/HandleCode.cpp ServerLaunch.cpp Request.cpp Response.cpp Client.cpp	\
+		libft.cpp \
+
 SRC_PLUS_PATH = $(addprefix $(SRC_DIR)/, $(SRC))
 
 # Output Files
 OUT = $(subst $(SRC_DIR)/, $(OUTS)/, $(patsubst %.cpp, %.opp, $(SRC_PLUS_PATH)))
 
-NAME = container
+NAME = webserv
 
 CC = c++
 CFLAGS = -Wall -Wextra -Werror -std=c++98 -g #-fsanitize=address
@@ -77,7 +76,7 @@ $(OUT): $(OUTS)/%.opp : $(SRC_DIR)/%.cpp
 	@$(CC) $(CFLAGS) -c $< -o $@ $(INCLUDES)
 
 re: fclean
-	make $(NAME)
+	@make $(NAME)
 
 fclean: clean
 	@echo "$(_RED)Cleaning output files$(_COLOR_RESET)"
