@@ -26,10 +26,4 @@ class Request {
 		std::string	getBody() const;
 
 		std::map<std::string, std::string> getHeaders() const;
-
-		void	do_request_depending_on_file_type(const std::string file, const Webserv::Route & it);
-		struct ERROR400: public std::exception { const char * what () const throw () { return "Error 400"; } };
-		struct ERROR403: public std::exception { const char * what () const throw () { return "Error 403"; } };
-		struct ERROR404: public std::exception { const char * what () const throw () { return "Error 404"; } };
-		struct ERROR405: public std::exception { const char * what () const throw () { return "Error 405"; } };
 };

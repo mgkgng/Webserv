@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   utility.hpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/05/24 13:42:44 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/11 19:22:52 by min-kang         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #pragma once
 
 // C++ libraries
@@ -26,6 +14,7 @@
 #include <map>
 #include <iterator>
 #include <cstdarg>
+#include <algorithm>
 
 // C libraries
 #include <sys/socket.h> 
