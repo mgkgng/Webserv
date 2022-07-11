@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 16:51:56 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/04 13:31:23 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/07/11 18:58:20 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,4 +43,16 @@ Response & Response::operator=(Response const & rhs) {
 	this->status_message = rhs.status_message;
 	this->headers = rhs.headers;
 	return (*this);
+}
+
+std::string Response::getProtocol() const {
+	return (this->protocol_v);
+}
+
+std::string Response::getStatusCode() const {
+	return (this->status_code);
+}
+
+std::string Response::getStatusMsg() const {
+	return (this->status_message);
 }

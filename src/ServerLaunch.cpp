@@ -54,7 +54,7 @@ void	Server::disconnect(int fd) {
 	close(fd);
 }
 
-void	Server::recvData(struct kevent &ev, std::vector<Webserv::Server> & servers) {
+void	Server::recvData(struct kevent &ev) {
 	char	buf[10000];
 	int		ret;
 
@@ -69,35 +69,16 @@ void	Server::recvData(struct kevent &ev, std::vector<Webserv::Server> & servers)
 	}
 	buf[ret] = '\0';
 	std::cout << "Client Sent data!" << std::endl;
-	try {
-		std::cout << buf << std::endl;
-		Request request = Request(buf, servers);
-		std::string	res = request.getHtml();
-		std::cout << "brrr" << res << std::endl;
-		//send(clientID, s.c_str(), s.size(), 0);
-		//chlist.resize(chlist.size() + 1);
-		//EV_SET(chlist.end().base() - 1, c_fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-	} catch (Webserv::Request::ERROR400 & e) {
-		std::cout << "INVAID REQUEST: ERROR 400" << std::endl;
-	} catch (Webserv::Request::ERROR403 & e) {
-		std::cout << "FORBIDDEN: ERROR 403" << std::endl;
-	} catch (Webserv::Request::ERROR404 & e) {
-		std::cout << "FILE NOT FOUND: ERROR 404" << std::endl;
-	} catch (Webserv::Request::ERROR405 & e) {
-		std::cout << "DISALLOWED METHOD: ERROR 405" << std::endl;
-	} catch (std::exception & e) {
-		std::cout << e.what() << std::endl;
-	}	
+	std::cout << buf << std::endl;
+	Request request = Request(buf);
+	std::string	res = request.getResponse();
+	std::cout << "brrr" << res << std::endl;
+	//send(clientID, s.c_str(), s.size(), 0);
+	//chlist.resize(chlist.size() + 1);
+	//EV_SET(chlist.end().base() - 1, c_fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 }
 
-void	Webserv::thread_launch(void *ptr) {
-	std::vector<Server> *launch;
-
-	launch = reinterpret_cast<std::vector<Server> *>(ptr);
-	launch->begin()->launch((*launch));
-}
-
-void	Server::launch(std::vector<Server> servers) {
+void	Server::launch() {
 	int evNb;
 
 	init_addrinfo();
@@ -119,43 +100,13 @@ void	Server::launch(std::vector<Server> servers) {
 			else if (static_cast<int>(evlist.at(i).ident) == sockfd)
 				acceptConnection();
 			else if (evlist.at(i).filter & EVFILT_READ)
-				recvData(evlist[i], servers);
+				recvData(evlist[i]);
 		}
 	}
 }
-		
-void	Webserv::start(std::vector<Server> & servers) {
-	std::vector<Server>::iterator it_servers = servers.begin();
-	std::vector<Server> ports;
-	for (; it_servers != servers.end(); it_servers++) {
-		if (ports.empty()) {
-			ports.push_back((*it_servers));
-		} else if (ports[ports.size() - 1].getPort() != it_servers->getPort()) {
-			ports.push_back((*it_servers));
-		}
-	}
-	if (ports.size() == 1)
-		servers[0].launch(servers);
-	else {
-		std::vector<pthread_t> threads;
-		it_servers = servers.begin();
-		std::vector<Server>::iterator it_ports = ports.begin();
-		threads.resize(ports.size());
-		for (std::vector<pthread_t>::iterator it = threads.begin(); it != threads.end(); it++) {
-			while (it_servers->getPort() < it_ports->getPort() && it_servers != servers.end()) {
-				it_servers ++;
-			}
-			std::vector<Server>::iterator end = it_servers;
-			while (end->getPort() == it_ports->getPort()) {
-				end ++;
-			}
-			std::vector<Server> serverReadyToGo(it_servers, end);
-			pthread_create(&(*it), NULL, (void * (*)(void *)) &Webserv::thread_launch, &(serverReadyToGo));
-			it_ports++;
-			usleep(300);
-		}
-		for (std::vector<pthread_t>::iterator it = threads.begin(); it != threads.end(); it++)
-			pthread_detach(*it);
-		while (1);
-	}
+
+void	Webserv::thread_launch(void *ptr) 
+
+void	Webserv::start(std::vector<Server> &servers) {
+
 }

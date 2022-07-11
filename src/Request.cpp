@@ -6,7 +6,7 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/04 14:12:28 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/07/11 18:55:07 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,8 +46,8 @@ Request::Request(std::string s) {
 	}
 
 	// Body
-	for (it; it != req.end(); it++)
-		this->body = *it + "\r\n";
+	while (it != req.end())
+		this->body = *(it++) + "\r\n";
 
 	// Error check
 	parseErrorCheck();
@@ -103,6 +103,9 @@ void	Request::parseErrorCheck() const {
 		throw ERROR400();
 	if (this->method == "GET" && this->body.size() > 0)
 		throw ERROR400();
+	else if (this->method == "POST") { // TODO: Need a way to handle chunked requests
+		return ;
+	}
 }
 
 std::string Request::getMethod() const {

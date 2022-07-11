@@ -1,16 +1,79 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utility.hpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/05/24 13:42:44 by min-kang          #+#    #+#             */
+/*   Updated: 2022/07/11 19:22:52 by min-kang         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #pragma once
 
+// C++ libraries
 #include <iostream>
-#include <vector>
+#include <istream>
 #include <string>
-#include <string.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <cstdarg>
+#include <exception>
+#include <cassert>
+#include <cerrno>
+#include <vector>
+#include <thread>
+#include <utility>
+#include <sstream>
 #include <map>
+#include <iterator>
+#include <cstdarg>
+
+// C libraries
+#include <sys/socket.h> 
+#include <sys/event.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/un.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <fcntl.h> 
+#include <netdb.h>
+#include <pthread.h>
+#include <string.h>
+
+#define WHITESPACE " \n\r\t\f\v";
 
 using std::string;
 typedef const std::string const_string;
+
+bool exist(const std::string& fname) {
+  struct stat buffer;
+  return (stat(fname.c_str(), &buffer) == 0);
+}
+
+std::vector<std::string> split(std::string s, std::string sep) {
+	size_t start = 0, end, sep_len = sep.length();
+	std::string ss;
+	std::vector<std::string> res;
+
+	while ((end = s.find(sep, start)) != std::string::npos) {
+		ss = s.substr(start, end - start);
+		start = end + sep_len;
+		res.push_back(ss);
+	}
+	res.push_back(s.substr(start));
+	return (res);
+}
+
+std::string	trim(std::string s, std::string set) {
+	for (std::string::iterator c = s.begin(); c != s.end() && set.find(*c, 0) != std::string::npos; c++)
+		s.erase(c);
+	for (std::string::iterator c = s.end() - 1; c != s.begin() && set.find(*c, 0) != std::string::npos; c--)
+		s.erase(c);
+	return (s);
+}
 
 bool        end_with(const_string &str, const_string &end)
 {
@@ -71,8 +134,10 @@ bool    is_found_in(Elem elem, size_t n, Type first ...)
 
         while (n--)
         {
-            if (elem == first)
-                va_end(args), return (true);
+            if (elem == first) {
+                va_end(args);
+                return (true);
+            }
             first = va_arg(args, Type);
         }
         va_end(args);

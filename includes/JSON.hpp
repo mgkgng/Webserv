@@ -1,5 +1,4 @@
-#ifndef JSON_HPP
-#define JSON_HPP
+#pragma once 
 
 #include <string>
 #include <map>
@@ -63,5 +62,3 @@ class JSON {
 		struct InvalidJSONUnclosedQuotations: public std::exception { const char * what () const throw () { return "An unclosed quote was discovered"; } };
 		struct InvalidJSONDuplicateKeyNames: public std::exception { const char * what () const throw () { return "Two Different KEYs share the same name!"; } };
 };
-
-#endif
