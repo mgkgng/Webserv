@@ -6,13 +6,12 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 16:51:56 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/11 18:58:20 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/07/11 20:54:38 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Webserv.hpp"
-
-using namespace Webserv;
+#include "Response.hpp"
 
 Response::Response() {
 	

@@ -1,3 +1,5 @@
+#include "Response.hpp"
+
 class Request {
 	private:
 		std::string 						method;
@@ -10,6 +12,7 @@ class Request {
 		std::string							body;
 		std::string							file;
 		Response							res;
+
 	public:
 		Request();
 		Request(std::string);

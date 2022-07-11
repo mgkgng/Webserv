@@ -3,6 +3,7 @@
 // C++ libraries
 #include <iostream>
 #include <istream>
+#include <fstream>
 #include <string>
 #include <exception>
 #include <cassert>
@@ -23,6 +24,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/param.h>
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <unistd.h>

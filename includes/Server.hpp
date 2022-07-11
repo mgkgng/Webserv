@@ -123,27 +123,28 @@ class Server {
 				}
 			}
 		}
+
+		static void thread_launch(void *ptr) {
+			Server *launch;
+
+			launch = reinterpret_cast<Server *>(ptr);
+			launch->launch();
+		}
+
+		static void start(std::vector<Server> & servers) {
+			int	serverNb = servers.size();
+			
+			if (serverNb == 1)
+				servers[0].launch();
+			else {
+				std::vector<pthread_t> threads(serverNb);
+
+				for (int i = 0; i < serverNb; i++)
+					pthread_create(&threads.at(i), NULL, (void * (*)(void *)) &thread_launch, &servers.at(i));
+				for (int i = 0; i < serverNb; i++)
+					pthread_detach(threads.at(i));
+			}
+			while (1);
+		}
 };
 
-void thread_launch(void *ptr) {
-	Server *launch;
-
-	launch = reinterpret_cast<Server *>(ptr);
-	launch->launch();
-}
-
-void start(std::vector<Server> & servers) {
-	int	serverNb = servers.size();
-	
-	if (serverNb == 1)
-		servers[0].launch();
-	else {
-		std::vector<pthread_t> threads(serverNb);
-
-		for (int i = 0; i < serverNb; i++)
-			pthread_create(&threads.at(i), NULL, (void * (*)(void *)) &thread_launch, &servers.at(i));
-		for (int i = 0; i < serverNb; i++)
-			pthread_detach(threads.at(i));
-	}
-	while (1);
-}

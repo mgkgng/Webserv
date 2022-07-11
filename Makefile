@@ -6,7 +6,7 @@
 #    By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/25 15:25:19 by jrathelo          #+#    #+#              #
-#    Updated: 2022/07/02 15:57:52 by min-kang         ###   ########.fr        #
+#    Updated: 2022/07/11 20:53:47 by min-kang         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -47,10 +47,7 @@ SRC_DIR = src
 OUTS = objs
 
 # Source Files
-SRC = main.cpp																				\
-		config-parsing/JSON.cpp config-parsing/Route.cpp config-parsing/Server.cpp			\
-		config-parsing/HandleCode.cpp ServerLaunch.cpp Request.cpp Response.cpp				\
-		libft.cpp \
+SRC = main.cpp Request.cpp Response.cpp
 
 SRC_PLUS_PATH = $(addprefix $(SRC_DIR)/, $(SRC))
 

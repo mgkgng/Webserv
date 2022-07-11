@@ -6,19 +6,12 @@
 /*   By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 13:36:24 by min-kang          #+#    #+#             */
-/*   Updated: 2022/07/11 18:55:07 by min-kang         ###   ########.fr       */
+/*   Updated: 2022/07/11 20:55:15 by min-kang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <Webserv.hpp>
-#include <algorithm>
-#include <fstream>
-
-#include <unistd.h>
-#include <sys/param.h>
-#include <sys/stat.h>
-
-using namespace Webserv;
+#include "Webserv.hpp"
+#include "Request.hpp"
 
 Request::Request(std::string s) {
 	std::vector<std::string> req = split(s, "\r\n");
