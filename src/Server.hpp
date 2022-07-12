@@ -16,21 +16,21 @@ class Server {
 		std::vector<struct kevent>	evlist;
 
 		Server() {};
-		Server(ServerInfo info) {
-			this->info = info;
-		};
 		~Server() {
 			if (this->kq == -1)
 				close(this->kq);
 		};
-		Server & operator=(const Server & server) {
-			this->info = server.info;
-			this->sockfd = server.sockfd;
-			this->kq = server.kq;
-			this->sockaddr = server.sockaddr;
-			this->addrlen = server.addrlen;
-			this->chlist = server.chlist;
-			this->evlist = server.evlist;
+		Server & operator=(const Server & other) {
+			this->port = other.port;
+			this->serverName = other.serverName;
+			this->maxBodySize = other.maxBodySize;
+			this->routes = other.routes; 
+			this->sockfd = other.sockfd;
+			this->kq = other.kq;
+			this->sockaddr = other.sockaddr;
+			this->addrlen = other.addrlen;
+			this->chlist = other.chlist;
+			this->evlist = other.evlist;
 			return (*this);
 		};
 		

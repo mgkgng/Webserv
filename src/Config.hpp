@@ -2,7 +2,6 @@
 #include "Server.hpp"
 #include <string>
 
-
 class Route {
 	public:
 		std::string					index;
@@ -11,8 +10,8 @@ class Route {
 		std::vector<std::string>	methods;
 		bool						autoindex;
 
-
-		Route();
+		Route() {}
+		~Route() {}
 };
 
 class Config {
@@ -44,7 +43,7 @@ class Config {
 		}
 
 		Server	&parseServer(std::string serverConfig) {
-			Server	res = new Server();
+			Server	res = Server();
 
 			std::vector<std::string> lines = split(serverConfig, "\n");
 			for (std::vector<std::string>::iterator line = lines.begin(); line != lines.end(); line++) {
@@ -55,14 +54,14 @@ class Config {
 					res.serverName = trim(info.at(1), WHITESPACE);
 				else if (info.at(0) == "maxbodysize")
 					res.maxBodySize = trim(info.at(1), WHITESPACE);
-				else if (info.at(0) == "location")
-					res.routes[trim(info.at(1), WHITESPACE)] = parseLocation(line, lines, 1);
+				else if (info.at(0) == "route")
+					res.routes[trim(info.at(1), WHITESPACE)] = parseRoute(line, lines, 1);
 				else
 					std::cerr << "Error: Wrong config file format." << std::endl;
 			}
 		}
-		Route	&parseLocation(std::vector<std::string>::iterator line, std::vector<std::string> lines, int dotNb) {
-			Route	res = new Route();
+		Route	&parseRoute(std::vector<std::string>::iterator line, std::vector<std::string> lines, int dotNb) {
+			Route	res = Route();
 
 			std::string dots = createDots(dotNb);
 			while (line != lines.end() && strncmp((*line).c_str(), dots.c_str(), dotNb)) {
@@ -75,8 +74,8 @@ class Config {
 					res.index = trim(info.at(1), WHITESPACE);
 				else if (info.at(0), "autoindex" && trim(info.at(1), WHITESPACE) == "on")
 					res.autoindex = true;
-				/*else if (info.at(0) == "location")
-					res.routes = parseLocation(line, lines, dotNb + 1);*/
+				/*else if (info.at(0) == "route")
+					res.routes = parseRoute(line, lines, dotNb + 1);*/
 				else
 					std::cerr << "Error: Wrong config file format." << std::endl;
 			}
