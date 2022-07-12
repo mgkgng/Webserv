@@ -2,8 +2,12 @@
 #include "Request.hpp"
 
 class Server {
-	private:
-		Config 						config;
+	public:
+		std::string					port;
+		std::string					serverName;
+		std::string					maxBodySize;
+		std::map<std::string, Route> routes;
+	
 		int							sockfd;
 		int							kq;
 		struct sockaddr_in			sockaddr;
@@ -11,7 +15,6 @@ class Server {
 		std::vector<struct kevent>	chlist;
 		std::vector<struct kevent>	evlist;
 
-	public:
 		Server() {};
 		Server(ServerInfo info) {
 			this->info = info;
