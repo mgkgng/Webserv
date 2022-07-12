@@ -66,14 +66,16 @@ class Request {
 
 			std::stringstream ss;
 			
+			// for now, we need a function which will put protocol version, status code and status message.
+	
 			// Headers
-			ss << 
 			ss << this->res.getProtocol() << ' ' << res.getStatusCode() << ' ' << res.getStatusMsg() << ' ' << "\r\n";
 			for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
 				ss << it->first << ": " << it->second << "\r\n";
 			ss << std::endl;
 			return (ss.str());
 
+			// i wanted to get html file here
 			std::string route;
 			if (!exist(route))
 				route = "www/error_pages/error_404.html";

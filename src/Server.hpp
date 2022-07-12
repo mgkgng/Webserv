@@ -89,7 +89,9 @@ class Server {
 			buf[ret] = '\0';
 			std::cout << "Data received:" << std::endl;
 			std::cout << buf << std::endl;
+
 			Request request = Request(buf);
+
 			std::string	res = request.getResponse();
 			std::cout << "brrr" << res << std::endl;
 
