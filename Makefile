@@ -6,7 +6,7 @@
 #    By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/25 15:25:19 by jrathelo          #+#    #+#              #
-#    Updated: 2022/07/11 20:53:47 by min-kang         ###   ########.fr        #
+#    Updated: 2022/07/12 11:11:27 by min-kang         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -47,7 +47,7 @@ SRC_DIR = src
 OUTS = objs
 
 # Source Files
-SRC = main.cpp Request.cpp Response.cpp
+SRC = main.cpp
 
 SRC_PLUS_PATH = $(addprefix $(SRC_DIR)/, $(SRC))
 

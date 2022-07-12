@@ -34,7 +34,7 @@
 #include <pthread.h>
 #include <string.h>
 
-#define WHITESPACE " \n\r\t\f\v";
+#define WHITESPACE " \n\r\t\f\v"
 
 using std::string;
 typedef const std::string const_string;
