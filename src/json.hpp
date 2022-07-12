@@ -5,7 +5,7 @@
 
 class Route {
 	public:
-		Route() { }
+		Route() {}
 
 		Route(bool islistingdirectory, std::string directoryfile, bool isuploadable, std::string uploadroot, std::string index, std::string root, std::string path, std::string clientmaxbodysize, std::vector<std::string> allowedHTTPmethods, std::string pythoncgiextension, std::string phpcgiextension) {
 			this->islistingdirectory = islistingdirectory;
@@ -22,78 +22,32 @@ class Route {
 		}
 
 		Route(const Route & route) {
-			this->islistingdirectory = route.getListingDirectory();
-			this->directoryfile = route.getDirectoryFile();
-			this->index = route.getIndex();
-			this->root = route.getRoot();
-			this->path = route.getPath();
-			this->clientmaxbodysize = route.getClientMaxBodySize();
-			this->allowedHTTPmethods = route.getAllowedHTTPMethods();
-			this->phpcgiextension = route.getPHPCGIExtension();
-			this->pythoncgiextension = route.getPythonCGIExtension();
+			this->islistingdirectory = route.islistingdirectory;
+			this->directoryfile = route.directoryfile;
+			this->index = route.index;
+			this->root = route.root;
+			this->path = route.path;
+			this->clientmaxbodysize = route.clientmaxbodysize;
+			this->allowedHTTPmethods = route.allowedHTTPmethods;
+			this->phpcgiextension = route.phpcgiextension;
+			this->pythoncgiextension = route.pythoncgiextension;
 		}
 
 		~Route() {}
 
 		Route & operator=(const Route & route) {
-			this->islistingdirectory = route.getListingDirectory();
-			this->directoryfile = route.getDirectoryFile();
-			this->index = route.getIndex();
-			this->root = route.getRoot();
-			this->path = route.getPath();
-			this->clientmaxbodysize = route.getClientMaxBodySize();
-			this->allowedHTTPmethods = route.getAllowedHTTPMethods();
-			this->phpcgiextension = route.getPHPCGIExtension();
-			this->pythoncgiextension = route.getPythonCGIExtension();
+			this->islistingdirectory = route.islistingdirectory;
+			this->directoryfile = route.directoryfile;
+			this->index = route.index;
+			this->root = route.root;
+			this->path = route.path;
+			this->clientmaxbodysize = route.clientmaxbodysize;
+			this->allowedHTTPmethods = route.allowedHTTPmethods;
+			this->phpcgiextension = route.phpcgiextension;
+			this->pythoncgiextension = route.pythoncgiextension;
 			return (*this);
 		}
 
-		bool			getListingDirectory() const {
-			return (this->islistingdirectory);
-		}
-
-		std::string 	getDirectoryFile() const {
-			return (this->directoryfile);
-		}
-
-		bool			getUploadable() const {
-			return (this->isuploadable);
-		}
-
-		std::string 	getUploadRoot() const {
-			return (this->uploadroot);
-		}
-
-		std::string		getIndex() const {
-			return (this->index);
-		}
-
-		std::string		getRoot() const {
-			return (this->root);
-		}
-
-
-		std::string		getPythonCGIExtension() const {
-			return (this->pythoncgiextension);
-		}
-
-		std::string		getPHPCGIExtension() const {
-			return (this->phpcgiextension);
-		}
-
-		std::vector<std::string> getAllowedHTTPMethods() const {
-			return (this->allowedHTTPmethods);
-		}
-
-		std::string	getClientMaxBodySize() const {
-			return (this->clientmaxbodysize);
-		}
-
-		std::string getPath() const {
-			return (this->path);
-		}
-
-	private:
 		// is this routes directory listing its contents to the client
 		bool			islistingdirectory;
 			// the default page that is shown if islistingdirectory is false
@@ -122,12 +76,35 @@ class Route {
 		struct InvalidHTTPMethod: public std::exception { const char * what () const throw () { return "Invalid HTTP method"; } };
 };
 
+std::ostream &operator<<(std::ostream &os, const Route &route)
+{
+	os << "listing directory: " << route.islistingdirectory << std::endl;
+	os << "directory file: " << route.directoryfile << std::endl;
+	os << "index: " << route.index << std::endl;
+	os << "root: " << route.root << std::endl;
+	os << "client max body size: " << route.clientmaxbodysize << std::endl;
+	//std::cout << it->second.getAllowedHTTPMethods() << std::endl;
+	os << "php cgi: " << route.phpcgiextension << std::endl;
+	os << "python cgi: " << route.pythoncgiextension << std::endl;
+
+	return os;
+}
+
 class HandleCode {
 	public:
+		// The HTTP code that is defined
+		unsigned int			code;
+		// code that is sent to the user
+		unsigned int			responsecode;
+		// The Route to redirect the if the code is encountered
+		Route					route;
+		// Common errors
+		struct InvalidHTTPCode: public std::exception { const char * what () const throw () { return "Invalid HTTP code"; } };
+		
 		HandleCode(const HandleCode & handlecode) {
-			this->code = handlecode.getCode();
-			this->route = handlecode.getRoute();
-			this->responsecode = handlecode.getResponseCode();
+			this->code = handlecode.code;
+			this->route = handlecode.route;
+			this->responsecode = handlecode.responsecode;
 		}
 
 		HandleCode(int code, Route route, int responsecode) {
@@ -148,37 +125,21 @@ class HandleCode {
 		~HandleCode() { }
 
 		HandleCode &  operator=(const HandleCode & handlecode) {
-			this->code = handlecode.getCode();
-			this->route = handlecode.getRoute();
-			this->responsecode = handlecode.getResponseCode();
+			this->code = handlecode.code;
+			this->route = handlecode.route;
+			this->responsecode = handlecode.responsecode;
 			return (*this);
 		}
-
-		unsigned int	getCode() const {
-			return (this->code);
-		}
-
-		Route	getRoute() const {
-			return (this->route);
-		}
-
-		unsigned int	getResponseCode() const {
-			return (this->responsecode);
-		}
-
-	private:
-		// The HTTP code that is defined
-		unsigned int			code;
-		// code that is sent to the user
-		unsigned int			responsecode;
-		// The Route to redirect the if the code is encountered
-		Route					route;
-		// Common errors
-		struct InvalidHTTPCode: public std::exception { const char * what () const throw () { return "Invalid HTTP code"; } };
-
-
-
 };
+
+std::ostream &operator<<(std::ostream &os, HandleCode &h)
+{
+	os << "code: " << h.code << std::endl;
+	os << "route: " << h.route << std::endl;
+	os << "response code: " << h.responsecode << std::endl;
+
+	return os;
+}
 
 class JSON {
 	public:
@@ -663,7 +624,7 @@ class JSON {
 };
 
 class ServerInfo {
-	private:
+	public:
 		std::string						servername;
 		std::string						host;
 		unsigned int					port;
@@ -672,7 +633,6 @@ class ServerInfo {
 		std::map<std::string, Route>			routes;
 		std::map<std::string, HandleCode>		codehandlers;
 
-	public:
 		ServerInfo() {};
 		ServerInfo(std::string servername, std::string host, unsigned int port, bool isdefault, std::map<std::string, Route> routes, std::map<std::string, HandleCode> codes) {
 			this->servername = servername;
@@ -697,16 +657,33 @@ class ServerInfo {
 		};
 		~ServerInfo() {};
 
-		std::string	getServerName() const { return (this->servername); }
-		std::string	getHost() const { return (this->host); }
-		unsigned int	getPort() const { return (this->port); }
-		bool	getIsDefault() const { return (this->isdefault); }
-		void	setIsDefault(bool d) { this->isdefault = d; }
-		std::map<std::string, Route> getRoutes() const { return (this->routes); }
-		std::map<std::string, HandleCode> getHandleCode() const { return (this->codehandlers); }
-
 		struct PortOutsideOfRange: public std::exception { const char * what () const throw () { return "Port Outside of Range, please chose a value inbetween 0 to 65535"; } };
 };
+
+std::ostream &operator<<(std::ostream &os, ServerInfo &info)
+{
+	os << "Servername: " << info.servername << std::endl;
+	os << "Host: " << info.host << std::endl;
+	os << "Port: " << info.port << std::endl;
+	os << "Isdefault: " << info.isdefault << std::endl;
+	os << "Route: " << std::endl;
+	for (std::map<std::string, Route>::iterator it = info.routes.begin(); it != info.routes.end(); it++) {
+		std::cout << "===================" << std::endl;
+		std::cout << "route name" << it->first << std::endl;
+		std::cout << "route info:" << std::endl << it->second << std::endl;
+		std::cout << "=======================" << std::endl;
+	}
+	//std::cout << it->second.getAllowedHTTPMethods() << std::endl;
+	os << "Code Handlers: " << info.codehandlers << std::endl;
+	for (std::map<std::string, HandleCode>::iterator it = info.codehandlers.begin(); it != info.codehandlers.end(); it++) {
+		std::cout << "===================" << std::endl;
+		std::cout << "code handler name" << it->first << std::endl;
+		std::cout << "code handler info:" << std::endl << it->second << std::endl;
+		std::cout << "=======================" << std::endl;
+	}
+
+	return os;
+}
 
 typedef struct sbh_s {
 	//server
@@ -842,7 +819,7 @@ HandleCode	generateHandleCode(const JSON & json, sbh_t sinfo, std::map<std::stri
 	sinfo = getInformation(json, sinfo);
 
 	for (std::map<std::string, Route>::iterator it = routes.begin(); it != routes.end(); it++) {
-		if ((*it).second.getPath() == sinfo.redirect) {
+		if ((*it).second.path == sinfo.redirect) {
 			return (HandleCode(sinfo.code, (*it).second, sinfo.responsecode));
 		}
 	}
@@ -883,7 +860,7 @@ std::vector<ServerInfo>	makeServersFromJSONHelper(const JSON & json, sbh_t sinfo
 		}
 	}
 	for (std::vector<ServerInfo>::iterator it = ret.begin(); it != ret.end(); it++) {
-		if ((*it).getHost() == sinfo.host && (*it).getPort() == sinfo.port) {
+		if ((*it).host == sinfo.host && (*it).port == sinfo.port) {
 			ret.push_back(ServerInfo(sinfo.servername, sinfo.host, sinfo.port, false, routes, codes));
 			return (ret);
 		}
@@ -929,10 +906,10 @@ std::vector<ServerInfo>	getServerInfo(const JSON & json) {
 		}
 	}
 	for (std::vector<ServerInfo>::iterator it = ret.begin(); it != ret.end(); it++) {
-		if ((*it).getIsDefault()) {
+		if ((*it).isdefault) {
 			for(std::vector<ServerInfo>::iterator sit = it + 1; sit != ret.end(); sit++) {
-				if ((*sit).getIsDefault() && (*sit).getHost().compare(0, (*sit).getHost().size(), (*it).getHost()) == 0 && (*sit).getPort() == (*it).getPort()) {
-					(*sit).setIsDefault(false);
+				if ((*sit).isdefault && (*sit).host.compare(0, (*sit).host.size(), (*it).host) == 0 && (*sit).port == (*it).port) {
+					(*sit).isdefault = false;
 				}
 			}
 		}
