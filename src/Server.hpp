@@ -28,6 +28,7 @@ class Server {
 			this->addrlen = server.addrlen;
 			this->chlist = server.chlist;
 			this->evlist = server.evlist;
+			return (*this);
 		};
 		
 		// Server Launch 
