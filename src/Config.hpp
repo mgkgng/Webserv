@@ -25,16 +25,17 @@ class Config {
 	public:
 		std::vector<Server> servers;
 
-		Config(std::ifstream fs) {
-			std::string configFile = getConfigFile(fs);
+		Config(std::string configFile) {
+			std::string config = getConfigFile(configFile);
 			
-			std::vector<std::string> serverConfig = split(configFile, "@");
+			std::vector<std::string> serverConfig = split(config, "@");
 			for (std::vector<std::string>::iterator it = serverConfig.begin(); it != serverConfig.end(); it++) {
 				this->servers.push_back(parseServer(*it));
 			}
 		}
 
-		std::string	getConfigFile(std::ifstream fs) {
+		std::string	getConfigFile(std::string configFile) {
+			std::fstream fs(configFile); // should do some error check
 			std::string res;
 
 			for (std::string line; getline(fs, line); )
@@ -81,7 +82,4 @@ class Config {
 			}
 			line--;
 		}
-
-		static std::vector<Server> createServer()
-
-}
+};

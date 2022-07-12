@@ -40,7 +40,7 @@ class Server {
 			bzero(&sockaddr, sizeof(struct sockaddr_in));
 			sockaddr.sin_family = AF_INET;
 			sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-			sockaddr.sin_port = htons(this->info.port);
+			sockaddr.sin_port = htons(this->port);
 			addrlen = sizeof(sockaddr);
 		};
 
@@ -110,7 +110,7 @@ class Server {
 			init_addrinfo();
 			init_server();
 			std::cout << "WEBSERV launched." << std::endl;
-			std::cout << this->info.port << std::endl;
+			std::cout << this->port << std::endl;
 
 			while (1) {
 				evlist.clear();
