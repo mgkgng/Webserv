@@ -1,9 +1,11 @@
-#include "Webserv.hpp"
+#pragma once
+
+#include "utility.hpp"
 #include "Request.hpp"
 
 class Server {
 	public:
-		std::string					port;
+		unsigned int				port;
 		std::string					serverName;
 		std::string					maxBodySize;
 		std::map<std::string, Route> routes;
@@ -93,10 +95,8 @@ class Server {
 			std::cout << "Data received:" << std::endl;
 			std::cout << buf << std::endl;
 
-			Request request = Request(buf);
-
-			std::string	res = request.getResponse();
-			std::cout << "brrr" << res << std::endl;
+			Request req = Request(buf);
+			std::cout << "brrr" << req.res << std::endl;
 
 			// send response
 			//send(ev.ident, s.c_str(), s.size(), 0);

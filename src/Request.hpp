@@ -1,9 +1,9 @@
-#include "utility.hpp"
-#include "statusCodes.hpp"
+#pragma once
+
 #include "Response.hpp"
 
 class Request {
-	private:
+	public:
 		std::string 						method;
 		std::string							path;
 		std::map<std::string, std::string>	attributes;
@@ -14,7 +14,6 @@ class Request {
 		std::string							file;
 		Response							res;
 
-	public:
 		Request(std::string s) {
 			std::vector<std::string> req = split(s, "\r\n");
 
@@ -45,7 +44,7 @@ class Request {
 				this->body = *(it++) + "\r\n";
 
 			// Error check
-			parseErrorCheck();
+			//parseErrorCheck();
 		}
 
 		Request(Request const & other) {
@@ -62,34 +61,18 @@ class Request {
 			return (*this);
 		}
 
-		std::string	getResponse(Server &server) {
-			std::map<std::string, Route>::iterator it = server.routes.find(this->path);
-			if (it == server.routes.end()) {
-				this->res.statCode = NotFound;
-				this->res.statMsg = statusCodeToString(NotFound);
-				this->res.putBody(NotFound);
-			} else {
-				this->res.statCode = Ok;
-				this->res.statMsg = statusCodeToString(Ok);
-				this->res.putBody(server.routes[this->path]);
-			}
-
-			// for now, we need a function which will put protocol version, status code and status message.
-
-		}
-
-		bool	parseErrorCheck() const {
+		/*bool	parseErrorCheck() const {
 			if (!this->method.length() || !this->path.length() || !this->protocolVer.length()
 				|| (this->method != "GET" && this->method != "POST" && this->method != "DELETE")
 				|| this->protocolVer != "HTTP/1.1")
 				return (false);
 			if (!this->headers.size())
 				return (false);
-			/*if (this->method == "GET" && this->body.size() > 0)
+			if (this->method == "GET" && this->body.size() > 0)
 				;
 			else if (this->method == "POST") { // TODO: Need a way to handle chunked requests
 				return ;
-			}*/
+			}
 			return (true);
-		}
+		}*/
 };

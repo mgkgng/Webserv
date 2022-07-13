@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Webserv.hpp"
-
 struct CGI_Environment{
 
     std::vector<char *> variable;

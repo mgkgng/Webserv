@@ -1,18 +1,8 @@
-#include "Webserv.hpp"
+#pragma once
+
+#include "utility.hpp"
 #include "Server.hpp"
-#include <string>
-
-class Route {
-	public:
-		std::string					index;
-		std::string					root;
-		int							bodySizeLimit;
-		std::vector<std::string>	methods;
-		bool						autoindex;
-
-		Route() {}
-		~Route() {}
-};
+#include "Route.hpp"
 
 class Config {
 	private:
@@ -44,14 +34,14 @@ class Config {
 			return (res);
 		}
 
-		Server	&parseServer(std::string serverConfig) {
+		Server	parseServer(std::string serverConfig) {
 			Server	res = Server();
 
 			std::vector<std::string> lines = split(serverConfig, "\n");
 			for (std::vector<std::string>::iterator line = lines.begin(); line != lines.end(); line++) {
 				std::vector<std::string> info = split(*line, ":");
-				if (info.at(0) == "listen")
-					res.port = trim(info.at(1), WHITESPACE);
+				if (info.at(0) == "port")
+					res.port = std::stoul(trim(info.at(1), WHITESPACE));
 				else if (info.at(0) == "servername")
 					res.serverName = trim(info.at(1), WHITESPACE);
 				else if (info.at(0) == "maxbodysize")
@@ -61,9 +51,10 @@ class Config {
 				else
 					throw Config::InvalidConfig();
 			}
+			return (res);
 		}
 
-		Route	&parseRoute(std::vector<std::string>::iterator &line, std::vector<std::string> lines, int dotNb) {
+		Route	parseRoute(std::vector<std::string>::iterator &line, std::vector<std::string> lines, int dotNb) {
 			Route	res = Route();
 
 			std::string dots = createDots(dotNb);
@@ -83,6 +74,7 @@ class Config {
 					throw Config::InvalidConfig();
 			}
 			line--;
+			return (res);
 		}
 
 		class InvalidConfig: public std::exception { const char * what () const throw () { return "Error: Invalid configuration file format."; } };

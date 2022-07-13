@@ -1,3 +1,10 @@
+#pragma once
+
+#include "utility.hpp"
+#include "statusCodes.hpp"
+#include "Route.hpp"
+#include "Server.hpp"
+
 class Response {
 	public:
 		std::string protocolVer;
@@ -7,13 +14,6 @@ class Response {
 		std::string	body;
 
 		Response() {}
-
-		Response(std::string ptc, std::string code, std::string msg, std::map<std::string, std::string> headers) {
-			this->protocolVer = ptc;
-			this->statCode = code;
-			this->statMsg = msg;
-			this->headers = headers;
-		}
 
 		Response(Response const & other) {
 			*this = other;
@@ -35,21 +35,37 @@ class Response {
 
 			buf << f.rdbuf();
 			this->body = buf.str();
-			this->headers["Content-length"] = this->body.length();
+			this->headers["Content-Length"] = this->body.length();
+			this->headers["Content-Type"] = "text/html";
 		}
 
-		void	putBody(unsigned int errCode) {
+		static Response putResponse(std::string path, std::map<std::string, Route> routes) {
+			Response res = Response();
 
+			std::map<std::string, Route>::iterator it = routes.find(path);
+			if (it == routes.end()) {
+				res.statCode = NotFound;
+				res.statMsg = statusCodeToString(NotFound);
+				//res.putBody(NotFound);
+			} else {
+				res.statCode = Ok;
+				res.statMsg = statusCodeToString(Ok);
+				res.putBody(routes[path]);
+			}
+			return (res);
 		}
+		/*void	putBody(unsigned int errCode) {
+
+		}*/
 };
 
-std::ostream &operator<<(std::ostream &os, Response const &res)
+std::ostream &operator<<(std::ostream &os, Response &res)
 {
 	os << res.protocolVer << ' ' << res.statCode << ' ' << res.statMsg << ' ' << "\r\n";
-	os << "Content-Size: " << 
+	for (std::map<std::string, std::string>::iterator it = res.headers.begin(); it != res.headers.end(); it++)
+		os << it->first << ": " << it->second << "\r\n";
 	os << std::endl;
-
 	os << res.body;
 
-	return os;
+	return (os);
 }
