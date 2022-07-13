@@ -32,83 +32,83 @@ enum StatusCodes {
 
 struct StatusCode {
 
-	std::map<int, std::string> status_code;
+	std::map<int, std::string> statCode;
 
 	StatusCode() {
-		status_code[None] = "None";
-		status_code[Incomplete] = "Incomplete";
-		status_code[Continue] = "Continue";
-		status_code[SwitchingProtocols] = "Switching Protocols";
-		status_code[Processing] = "Processing";
-		status_code[EarlyHints] = "EarlyHints";
-		status_code[Ok] = "OK";
-		status_code[Created] = "Created";
-		status_code[Accepted] = "Accepted";
-		status_code[NonAuthoritativeInformation] = "Non-Authoritative Information";
-		status_code[NoContent] = "No Content";
-		status_code[ResetContent] = "Reset Content";
-		status_code[PartialContent] = "Partial Content";
-		status_code[MultiStatus] = "Multi Status";
-		status_code[AlreadyReported] = "AlreadyReported";
-		status_code[IMUsed] = "IMUsed";
-		status_code[MultipleChoices] = "Multiple Choices";
-		status_code[MovedPermanently] = "Moved Permanently";
-		status_code[Found] = "Found";
-		status_code[SeeOther] = "See Other";
-		status_code[NotModified] = "Not Modified";
-		status_code[UseProxy] = "Use Proxy";
-		status_code[TemporaryRedirect] = "Temporary Redirect";
-		status_code[PermanentRedirect] = "Permanent Redirect";
-		status_code[BadRequest] = "Bad Request";
-		status_code[Unauthorized] = "Unauthorized";
-		status_code[PaymentRequired] = "Payment Required";
-		status_code[Forbidden] = "Forbidden";
-		status_code[NotFound] = "Not Found";
-		status_code[MethodNotAllowed] = "Method Not Allowed";
-		status_code[NotAcceptable] = "Not Acceptable";
-		status_code[ProxyAuthenticationRequired] = "Proxy Authentication Required";
-		status_code[RequestTimeout] = "Request Time-out";
-		status_code[Conflict] = "Conflict";
-		status_code[Gone] = "Gone";
-		status_code[LengthRequired] = "Length Required";
-		status_code[PreconditionFailed] = "Precondition Failed";
-		status_code[PayloadTooLarge] = "Request Entity Too Large";
-		status_code[URITooLong] = "Request-URI Too Large";
-		status_code[UnsupportedMediaType] = "Unsupported Media Type";
-		status_code[RangeNotSatisfiable] = "Requested range not satisfiable";
-		status_code[ExpectationFailed] = "Expectation Failed";
-		status_code[Teapot] = "Teapot";
-		status_code[MisdirectedRequest] = "Misdirected Request";
-		status_code[UnprocessableEntity] = "Unprocessable Entity";
-		status_code[Locked] = "Locked";
-		status_code[FailedDependency] = "Failed Dependency";
-		status_code[TooEarly] = "Too Early";
-		status_code[UpgradeRequired] = "Upgrade Required";
-		status_code[PreconditionRequired] = "Precondition Required";
-		status_code[TooManyRequests] = "Too Many Requests";
-		status_code[RequestHeaderFieldsTooLarge] = "Request Header Fields too Large";
-		status_code[UnavailableForLegalReasons] = "Unavailable for Legal Reason";
-		status_code[InternalServerError] = "Internal Server Error";
-		status_code[NotImplemented] = "Not Implemented";
-		status_code[BadGateway] = "Bad Gateway";
-		status_code[ServiceUnavailable] = "Service Unavailable";
-		status_code[GatewayTimeout] = "Gateway Time-out";
-		status_code[HTTPVersionNotSupported] = "HTTP Version not supported";
-		status_code[VariantAlsoNegotiates] = "Variant also negotiates";
-		status_code[InsufficientStorage] = "Insufficient Storage";
-		status_code[LoopDetected] = "Loop Detected";
-		status_code[NotExtended] = "Not extended";
-		status_code[NetworkAuthenticationRequired] = "Network Authentication Required";
+		statCode[None] = "None";
+		statCode[Incomplete] = "Incomplete";
+		statCode[Continue] = "Continue";
+		statCode[SwitchingProtocols] = "Switching Protocols";
+		statCode[Processing] = "Processing";
+		statCode[EarlyHints] = "EarlyHints";
+		statCode[Ok] = "OK";
+		statCode[Created] = "Created";
+		statCode[Accepted] = "Accepted";
+		statCode[NonAuthoritativeInformation] = "Non-Authoritative Information";
+		statCode[NoContent] = "No Content";
+		statCode[ResetContent] = "Reset Content";
+		statCode[PartialContent] = "Partial Content";
+		statCode[MultiStatus] = "Multi Status";
+		statCode[AlreadyReported] = "AlreadyReported";
+		statCode[IMUsed] = "IMUsed";
+		statCode[MultipleChoices] = "Multiple Choices";
+		statCode[MovedPermanently] = "Moved Permanently";
+		statCode[Found] = "Found";
+		statCode[SeeOther] = "See Other";
+		statCode[NotModified] = "Not Modified";
+		statCode[UseProxy] = "Use Proxy";
+		statCode[TemporaryRedirect] = "Temporary Redirect";
+		statCode[PermanentRedirect] = "Permanent Redirect";
+		statCode[BadRequest] = "Bad Request";
+		statCode[Unauthorized] = "Unauthorized";
+		statCode[PaymentRequired] = "Payment Required";
+		statCode[Forbidden] = "Forbidden";
+		statCode[NotFound] = "Not Found";
+		statCode[MethodNotAllowed] = "Method Not Allowed";
+		statCode[NotAcceptable] = "Not Acceptable";
+		statCode[ProxyAuthenticationRequired] = "Proxy Authentication Required";
+		statCode[RequestTimeout] = "Request Time-out";
+		statCode[Conflict] = "Conflict";
+		statCode[Gone] = "Gone";
+		statCode[LengthRequired] = "Length Required";
+		statCode[PreconditionFailed] = "Precondition Failed";
+		statCode[PayloadTooLarge] = "Request Entity Too Large";
+		statCode[URITooLong] = "Request-URI Too Large";
+		statCode[UnsupportedMediaType] = "Unsupported Media Type";
+		statCode[RangeNotSatisfiable] = "Requested range not satisfiable";
+		statCode[ExpectationFailed] = "Expectation Failed";
+		statCode[Teapot] = "Teapot";
+		statCode[MisdirectedRequest] = "Misdirected Request";
+		statCode[UnprocessableEntity] = "Unprocessable Entity";
+		statCode[Locked] = "Locked";
+		statCode[FailedDependency] = "Failed Dependency";
+		statCode[TooEarly] = "Too Early";
+		statCode[UpgradeRequired] = "Upgrade Required";
+		statCode[PreconditionRequired] = "Precondition Required";
+		statCode[TooManyRequests] = "Too Many Requests";
+		statCode[RequestHeaderFieldsTooLarge] = "Request Header Fields too Large";
+		statCode[UnavailableForLegalReasons] = "Unavailable for Legal Reason";
+		statCode[InternalServerError] = "Internal Server Error";
+		statCode[NotImplemented] = "Not Implemented";
+		statCode[BadGateway] = "Bad Gateway";
+		statCode[ServiceUnavailable] = "Service Unavailable";
+		statCode[GatewayTimeout] = "Gateway Time-out";
+		statCode[HTTPVersionNotSupported] = "HTTP Version not supported";
+		statCode[VariantAlsoNegotiates] = "Variant also negotiates";
+		statCode[InsufficientStorage] = "Insufficient Storage";
+		statCode[LoopDetected] = "Loop Detected";
+		statCode[NotExtended] = "Not extended";
+		statCode[NetworkAuthenticationRequired] = "Network Authentication Required";
 	}
 
-	std::string getError(int error) const { return (status_code.find(error)->second); }
+	std::string getError(int error) const { return (statCode.find(error)->second); }
 
 	~StatusCode() {}
 };
 
 const StatusCode statusCode;
 
-std::string statusCodeToString(int status_code)
+std::string statusCodeToString(int statCode)
 {
-	return (to_string(status_code) + " " + statusCode.getError(status_code));
+	return (to_string(statCode) + " " + statusCode.getError(statCode));
 }

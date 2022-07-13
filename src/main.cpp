@@ -1,7 +1,7 @@
-#include "Webserv.hpp"
+#include "utility.hpp"
+#include "statusCodes.hpp"
 #include "Server.hpp"
 #include "Config.hpp"
-#include <fstream>
 
 int main(int argc, char **argv) {
 	if (argc > 2)

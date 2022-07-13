@@ -1,4 +1,5 @@
-#include "Webserv.hpp"
+#include "utility.hpp"
+#include "statusCodes.hpp"
 #include "Response.hpp"
 
 class Request {
@@ -6,8 +7,7 @@ class Request {
 		std::string 						method;
 		std::string							path;
 		std::map<std::string, std::string>	attributes;
-		std::map<std::string, std::string>	post_attributes;
-		std::string							protocol_v;
+		std::string							protocolVer;
 		std::map<std::string, std::string>	headers;
 		
 		std::string							body;
@@ -31,7 +31,7 @@ class Request {
 					this->attributes.insert(std::pair<std::string, std::string>(kv.at(0), kv.at(1)));
 				}
 			}
-			this->protocol_v = head.at(2);
+			this->protocolVer = head.at(2);
 
 			// headers
 			std::vector<std::string>::iterator it;
@@ -62,33 +62,26 @@ class Request {
 			return (*this);
 		}
 
-		std::string	getResponse() {
+		std::string	getResponse(Server &server) {
+			std::map<std::string, Route>::iterator it = server.routes.find(this->path);
+			if (it == server.routes.end()) {
+				this->res.statCode = NotFound;
+				this->res.statMsg = statusCodeToString(NotFound);
+				this->res.putBody(NotFound);
+			} else {
+				this->res.statCode = Ok;
+				this->res.statMsg = statusCodeToString(Ok);
+				this->res.putBody(server.routes[this->path]);
+			}
 
-			std::stringstream ss;
-			
 			// for now, we need a function which will put protocol version, status code and status message.
-	
-			// Headers
-			ss << this->res.getProtocol() << ' ' << res.getStatusCode() << ' ' << res.getStatusMsg() << ' ' << "\r\n";
-			for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
-				ss << it->first << ": " << it->second << "\r\n";
-			ss << std::endl;
-			return (ss.str());
 
-			// i wanted to get html file here
-			std::string route;
-			if (!exist(route))
-				route = "www/error_pages/error_404.html";
-			std::ifstream f(route);
-			std::stringstream buf;
-			buf << f.rdbuf();
-			return (buf.str());
 		}
 
 		bool	parseErrorCheck() const {
-			if (!this->method.length() || !this->path.length() || !this->protocol_v.length()
+			if (!this->method.length() || !this->path.length() || !this->protocolVer.length()
 				|| (this->method != "GET" && this->method != "POST" && this->method != "DELETE")
-				|| this->protocol_v != "HTTP/1.1")
+				|| this->protocolVer != "HTTP/1.1")
 				return (false);
 			if (!this->headers.size())
 				return (false);
@@ -98,17 +91,5 @@ class Request {
 				return ;
 			}*/
 			return (true);
-		}
-
-		std::string getMethod() const {
-			return method;
-		}
-
-		std::string getBody() const {
-			return body;
-		}
-
-		std::map<std::string, std::string> getHeaders() const {
-			return headers;
 		}
 };

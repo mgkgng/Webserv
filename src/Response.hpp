@@ -1,46 +1,55 @@
 class Response {
-	private:
-		std::string protocol_v;
-		std::string status_code;
-		std::string status_message;
-		std::map<std::string, std::string> headers;
 	public:
+		std::string protocolVer;
+		unsigned int	statCode;
+		std::string statMsg;
+		std::map<std::string, std::string> headers;
+		std::string	body;
+
 		Response() {}
 
 		Response(std::string ptc, std::string code, std::string msg, std::map<std::string, std::string> headers) {
-			this->protocol_v = ptc;
-			this->status_code = code;
-			this->status_message = msg;
+			this->protocolVer = ptc;
+			this->statCode = code;
+			this->statMsg = msg;
 			this->headers = headers;
 		}
 
 		Response(Response const & other) {
-			this->protocol_v = other.protocol_v;
-			this->status_code = other.status_code;
-			this->status_message = other.status_message;
-			this->headers = other.headers;
 			*this = other;
 		}
 
 		~Response() {}
 
 		Response & operator=(Response const & rhs) {
-			this->protocol_v = rhs.protocol_v;
-			this->status_code = rhs.status_code;
-			this->status_message = rhs.status_message;
+			this->protocolVer = rhs.protocolVer;
+			this->statCode = rhs.statCode;
+			this->statMsg = rhs.statMsg;
 			this->headers = rhs.headers;
 			return (*this);
 		}
 
-		std::string getProtocol() const {
-			return (this->protocol_v);
+		void	putBody(Route &route) {
+			std::ifstream f(route.root + "/" + route.index);
+			std::stringstream buf;
+
+			buf << f.rdbuf();
+			this->body = buf.str();
+			this->headers["Content-length"] = this->body.length();
 		}
 
-		std::string getStatusCode() const {
-			return (this->status_code);
-		}
+		void	putBody(unsigned int errCode) {
 
-		std::string getStatusMsg() const {
-			return (this->status_message);
 		}
 };
+
+std::ostream &operator<<(std::ostream &os, Response const &res)
+{
+	os << res.protocolVer << ' ' << res.statCode << ' ' << res.statMsg << ' ' << "\r\n";
+	os << "Content-Size: " << 
+	os << std::endl;
+
+	os << res.body;
+
+	return os;
+}

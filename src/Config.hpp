@@ -22,6 +22,7 @@ class Config {
 				res += '.';
 			return (res);
 		}
+
 	public:
 		std::vector<Server> servers;
 
@@ -58,10 +59,11 @@ class Config {
 				else if (info.at(0) == "route")
 					res.routes[trim(info.at(1), WHITESPACE)] = parseRoute(line, lines, 1);
 				else
-					std::cerr << "Error: Wrong config file format." << std::endl;
+					throw Config::InvalidConfig();
 			}
 		}
-		Route	&parseRoute(std::vector<std::string>::iterator line, std::vector<std::string> lines, int dotNb) {
+
+		Route	&parseRoute(std::vector<std::string>::iterator &line, std::vector<std::string> lines, int dotNb) {
 			Route	res = Route();
 
 			std::string dots = createDots(dotNb);
@@ -78,8 +80,10 @@ class Config {
 				/*else if (info.at(0) == "route")
 					res.routes = parseRoute(line, lines, dotNb + 1);*/
 				else
-					std::cerr << "Error: Wrong config file format." << std::endl;
+					throw Config::InvalidConfig();
 			}
 			line--;
 		}
+
+		class InvalidConfig: public std::exception { const char * what () const throw () { return "Error: Invalid configuration file format."; } };
 };
