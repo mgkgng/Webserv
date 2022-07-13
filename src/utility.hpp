@@ -45,6 +45,7 @@ bool exist(const std::string& fname) {
 }
 
 std::vector<std::string> split(std::string s, std::string sep) {
+
 	size_t start = 0, end, sep_len = sep.length();
 	std::string ss;
 	std::vector<std::string> res;
@@ -55,6 +56,7 @@ std::vector<std::string> split(std::string s, std::string sep) {
 		res.push_back(ss);
 	}
 	res.push_back(s.substr(start));
+    std::cout << res.at(1) << std::endl;
 	return (res);
 }
 

@@ -19,24 +19,27 @@ class Config {
 		Config(std::string configFile) {
 			std::string config = getConfigFile(configFile);
 			
-			std::vector<std::string> serverConfig = split(config, "@");
+			std::vector<std::string> serverConfig = split(config, "@server\n");
+			std::cout << serverConfig.at(0) << std::endl;
 			for (std::vector<std::string>::iterator it = serverConfig.begin(); it != serverConfig.end(); it++) {
 				this->servers.push_back(parseServer(*it));
 			}
 		}
 
 		std::string	getConfigFile(std::string configFile) {
+			// peut refaire sans getline mais directement tout foutre dans la variable
 			std::fstream fs(configFile); // should do some error check
 			std::string res;
 
 			for (std::string line; getline(fs, line); )
-				res += line;
+				res += line + "\n";
 			return (res);
 		}
 
 		Server	parseServer(std::string serverConfig) {
 			Server	res = Server();
 
+			std::cout << serverConfig << std::endl;
 			std::vector<std::string> lines = split(serverConfig, "\n");
 			for (std::vector<std::string>::iterator line = lines.begin(); line != lines.end(); line++) {
 				std::vector<std::string> info = split(*line, ":");
@@ -48,8 +51,13 @@ class Config {
 					res.maxBodySize = trim(info.at(1), WHITESPACE);
 				else if (info.at(0) == "route")
 					res.routes[trim(info.at(1), WHITESPACE)] = parseRoute(line, lines, 1);
+				else if (info.at(0) == "error")
+					continue;
 				else
+				{
+					std::cout << info.at(0) << std::endl;
 					throw Config::InvalidConfig();
+				}
 			}
 			return (res);
 		}
@@ -60,16 +68,23 @@ class Config {
 			std::string dots = createDots(dotNb);
 			while (line != lines.end() && strncmp((*line).c_str(), dots.c_str(), dotNb)) {
 				std::vector<string> info = split((*line).erase(0, dotNb), ":");
-				if (info.at(0) == "method")
+				if (info.at(0) == "method"){
+					std::cout << "copucou" << info.at(1) << std::endl;
 					res.methods.push_back(trim(info.at(1), WHITESPACE));
+				}
 				else if (info.at(0) == "root")
 					res.root = trim(info.at(1), WHITESPACE);
-				else if (info.at(0), "index")
+				else if (info.at(0) == "index")
 					res.index = trim(info.at(1), WHITESPACE);
-				else if (info.at(0), "autoindex" && trim(info.at(1), WHITESPACE) == "on")
+				else if (info.at(0) == "autoindex" && trim(info.at(1), WHITESPACE) == "on")
 					res.autoindex = true;
-				/*else if (info.at(0) == "route")
-					res.routes = parseRoute(line, lines, dotNb + 1);*/
+				else if (info.at(0) == "maxbodysize")
+					continue;
+				else if (info.at(0) == "cgi")
+					continue;
+				else if (info.at(0) == "route")
+					continue;
+					//res.routes = parseRoute(line, lines, dotNb + 1);*/
 				else
 					throw Config::InvalidConfig();
 			}
