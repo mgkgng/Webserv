@@ -41,10 +41,7 @@ class Config {
 			for (std::vector<std::string>::iterator line = lines.begin(); line != lines.end(); line++) {
 				std::vector<std::string> info = split(*line, ":");
 				if (info.at(0) == "port")
-				{
-					std::cout << "bibi" << info.at(1) << std::endl;
 					res.port = std::stoul(trim(info.at(1), WHITESPACE));
-				}
 				else if (info.at(0) == "servername")
 					res.serverName = trim(info.at(1), WHITESPACE);
 				else if (info.at(0) == "maxbodysize")
@@ -54,10 +51,7 @@ class Config {
 				else if (info.at(0) == "error")
 					continue;
 				else
-				{
-					std::cout << "bobo" << info.at(0) << info.at(1) << std::endl;
 					throw Config::InvalidConfig();
-				}
 			}
 			return (res);
 		}
@@ -65,7 +59,7 @@ class Config {
 		Route	parseRoute(std::vector<std::string>::iterator &line, std::vector<std::string> lines, int dotNb) {
 			Route	res = Route();
 
-			std::string dots = createDots(dotNb);
+			string dots = createDots(dotNb);
 			while (++line != lines.end() && !strncmp((*line).c_str(), dots.c_str(), dotNb)) {
 				std::vector<string> info = split((*line).erase(0, dotNb), ":");
 				if (info.at(0) == "method")
@@ -77,19 +71,20 @@ class Config {
 				else if (info.at(0) == "autoindex" && trim(info.at(1), WHITESPACE) == "on")
 					res.autoindex = true;
 				else if (info.at(0) == "maxbodysize")
-					continue;
-				else if (info.at(0) == "cgi")
-					continue;
+					res.bodySizeLimit = std::stoul(trim(info.at(1), WHITESPACE));
+				else if (info.at(0) == "cgi") {
+					// maybe should put extension and path differently from the config file?
+					std::vector<string> cgiInfo = split(info.at(1), " ");
+					res.cgiExtension = cgiInfo.at(0);
+					res.cgiPath = cgiInfo.at(1);
+				}
 				else if (info.at(0) == "route")
 					continue;
 					//res.routes = parseRoute(line, lines, dotNb + 1);*/
 				else if (info.at(0) == "redirect")
-					continue;
+					res.redirect = trim(info.at(1), WHITESPACE);
 				else
-				{
-					std::cout << "kiki" << info.at(0) << std::endl;
 					throw Config::InvalidConfig();
-				}
 			}
 			line--;
 			return (res);
