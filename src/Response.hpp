@@ -30,14 +30,22 @@ class Response {
 		}
 
 		void	putBody(Route &route) {
-
 			std::cout << route << std::endl;
 			std::ifstream f(route.root + "/" + route.index);
 			std::stringstream buf;
 
 			buf << f.rdbuf();
 			this->body = buf.str();
-			//this->headers["Content-Length"] = this->body.length();
+			this->headers["Content-Length"] = std::to_string(this->body.length());
+			this->headers["Content-Type"] = "text/html";
+		}
+
+		void	putBody(std::string fName) {
+			std::ifstream f(fName);
+			std::stringstream buf;
+			buf << f.rdbuf();
+			this->body = buf.str();
+			//this->headers["Content-Length"] = std::to_string(this->body.length());
 			//this->headers["Content-Type"] = "text/html";
 		}
 
@@ -45,14 +53,18 @@ class Response {
 
 			this->protocolVer = "HTTP/1.1";
 			std::map<std::string, Route>::iterator it = routes.find(path);
-			if (it == routes.end()) {
-				this->statCode = NotFound;
-				this->statMsg = statusCodeToString(NotFound);
-				//res.putBody(NotFound);
-			} else {
+			if (it != routes.end()) {
 				this->statCode = Ok;
 				this->statMsg = "OK";
 				this->putBody(routes[path]);
+			} else if (exist("www" + path)) {
+				this->statCode = Ok;
+				this->statMsg = "OK";
+				this->putBody("www" + path);
+			} else {
+				this->statCode = NotFound;
+				this->statMsg = statusCodeToString(NotFound);
+				//res.putBody(NotFound);
 			}
 		}
 		

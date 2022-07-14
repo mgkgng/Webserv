@@ -88,20 +88,25 @@ class Server {
 			if (!ret) {
 				chlist.resize(chlist.size() + 2);
 				EV_SET(chlist.end().base() - 2, ev.ident, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-				EV_SET(chlist.end().base() - 1, ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
+				//EV_SET(chlist.end().base() - 1, ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
 				return ;
 			}
 			buf[ret] = '\0';
-			std::cout << "Data received:" << buf << std::endl;
+			std::cout << "Data received:" << std::endl;
+			std::cout << buf << std::endl;
 
 			Request req = Request(buf);
 			req.res.putResponse(req.path, this->routes);
 
 			// send response
 			std::string res = req.res.getStr();	
+
+			std::cout << "response to send" << std::endl;
+			std::cout << res << std::endl;
+
 			send(ev.ident, res.c_str(), res.size(), 0);
 			chlist.resize(chlist.size() + 1);
-			EV_SET(chlist.end().base() - 1, sockfd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+			//EV_SET(chlist.end().base() - 1, sockfd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 		}
 
 		void launch() {
