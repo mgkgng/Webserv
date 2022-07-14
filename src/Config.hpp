@@ -20,10 +20,8 @@ class Config {
 			std::string config = getConfigFile(configFile);
 			
 			std::vector<std::string> serverConfig = split(config, "@server\n");
-			std::cout << serverConfig.at(0) << std::endl;
-			for (std::vector<std::string>::iterator it = serverConfig.begin(); it != serverConfig.end(); it++) {
+			for (std::vector<std::string>::iterator it = serverConfig.begin(); it != serverConfig.end(); it++)
 				this->servers.push_back(parseServer(*it));
-			}
 		}
 
 		std::string	getConfigFile(std::string configFile) {
@@ -39,12 +37,14 @@ class Config {
 		Server	parseServer(std::string serverConfig) {
 			Server	res = Server();
 
-			std::cout << serverConfig << std::endl;
 			std::vector<std::string> lines = split(serverConfig, "\n");
 			for (std::vector<std::string>::iterator line = lines.begin(); line != lines.end(); line++) {
 				std::vector<std::string> info = split(*line, ":");
 				if (info.at(0) == "port")
+				{
+					std::cout << "bibi" << info.at(1) << std::endl;
 					res.port = std::stoul(trim(info.at(1), WHITESPACE));
+				}
 				else if (info.at(0) == "servername")
 					res.serverName = trim(info.at(1), WHITESPACE);
 				else if (info.at(0) == "maxbodysize")
@@ -55,7 +55,7 @@ class Config {
 					continue;
 				else
 				{
-					std::cout << info.at(0) << std::endl;
+					std::cout << "bobo" << info.at(0) << info.at(1) << std::endl;
 					throw Config::InvalidConfig();
 				}
 			}
@@ -66,12 +66,10 @@ class Config {
 			Route	res = Route();
 
 			std::string dots = createDots(dotNb);
-			while (line != lines.end() && strncmp((*line).c_str(), dots.c_str(), dotNb)) {
+			while (++line != lines.end() && !strncmp((*line).c_str(), dots.c_str(), dotNb)) {
 				std::vector<string> info = split((*line).erase(0, dotNb), ":");
-				if (info.at(0) == "method"){
-					std::cout << "copucou" << info.at(1) << std::endl;
+				if (info.at(0) == "method")
 					res.methods.push_back(trim(info.at(1), WHITESPACE));
-				}
 				else if (info.at(0) == "root")
 					res.root = trim(info.at(1), WHITESPACE);
 				else if (info.at(0) == "index")
@@ -85,8 +83,13 @@ class Config {
 				else if (info.at(0) == "route")
 					continue;
 					//res.routes = parseRoute(line, lines, dotNb + 1);*/
+				else if (info.at(0) == "redirect")
+					continue;
 				else
+				{
+					std::cout << "kiki" << info.at(0) << std::endl;
 					throw Config::InvalidConfig();
+				}
 			}
 			line--;
 			return (res);

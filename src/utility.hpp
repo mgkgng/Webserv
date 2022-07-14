@@ -47,16 +47,15 @@ bool exist(const std::string& fname) {
 std::vector<std::string> split(std::string s, std::string sep) {
 
 	size_t start = 0, end, sep_len = sep.length();
-	std::string ss;
 	std::vector<std::string> res;
 
-	while ((end = s.find(sep, start)) != std::string::npos) {
-		ss = s.substr(start, end - start);
-		start = end + sep_len;
-		res.push_back(ss);
-	}
-	res.push_back(s.substr(start));
-    std::cout << res.at(1) << std::endl;
+    while ((end = s.find(sep, start)) != std::string::npos) {
+        if (start != end)
+            res.push_back(s.substr(start, end - start));
+        start = end + sep_len;
+    }
+    if (start < s.length())
+	    res.push_back(s.substr(start));
 	return (res);
 }
 
