@@ -30,33 +30,42 @@ class Response {
 		}
 
 		void	putBody(Route &route) {
+
+			std::cout << route << std::endl;
 			std::ifstream f(route.root + "/" + route.index);
 			std::stringstream buf;
 
 			buf << f.rdbuf();
 			this->body = buf.str();
-			this->headers["Content-Length"] = this->body.length();
-			this->headers["Content-Type"] = "text/html";
+			//this->headers["Content-Length"] = this->body.length();
+			//this->headers["Content-Type"] = "text/html";
 		}
 
-		static Response putResponse(std::string path, std::map<std::string, Route> routes) {
-			Response res = Response();
+		void putResponse(std::string path, std::map<std::string, Route> routes) {
 
+			this->protocolVer = "HTTP/1.1";
 			std::map<std::string, Route>::iterator it = routes.find(path);
 			if (it == routes.end()) {
-				res.statCode = NotFound;
-				res.statMsg = statusCodeToString(NotFound);
+				this->statCode = NotFound;
+				this->statMsg = statusCodeToString(NotFound);
 				//res.putBody(NotFound);
 			} else {
-				res.statCode = Ok;
-				res.statMsg = statusCodeToString(Ok);
-				res.putBody(routes[path]);
+				this->statCode = Ok;
+				this->statMsg = "OK";
+				this->putBody(routes[path]);
 			}
+		}
+		
+		std::string	getStr() {
+			std::string res;
+
+			res += this->protocolVer + ' ' + std::to_string(this->statCode) + ' ' + this->statMsg + ' ' + "\r\n";
+			for (std::map<std::string, std::string>::iterator it = this->headers.begin(); it != this->headers.end(); it++)
+				res += it->first + ": " + it->second + "\r\n";
+			res += '\n';
+			res += this->body;
 			return (res);
 		}
-		/*void	putBody(unsigned int errCode) {
-
-		}*/
 };
 
 std::ostream &operator<<(std::ostream &os, Response &res)

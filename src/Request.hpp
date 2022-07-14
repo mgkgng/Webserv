@@ -45,6 +45,7 @@ class Request {
 
 			// Error check
 			//parseErrorCheck();
+
 		}
 
 		Request(Request const & other) {

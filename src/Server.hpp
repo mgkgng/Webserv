@@ -92,16 +92,16 @@ class Server {
 				return ;
 			}
 			buf[ret] = '\0';
-			std::cout << "Data received:" << std::endl;
-			std::cout << buf << std::endl;
+			std::cout << "Data received:" << buf << std::endl;
 
 			Request req = Request(buf);
-			std::cout << "brrr" << req.res << std::endl;
+			req.res.putResponse(req.path, this->routes);
 
 			// send response
-			//send(ev.ident, s.c_str(), s.size(), 0);
-			//chlist.resize(chlist.size() + 1);
-			//EV_SET(chlist.end().base() - 1, c_fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+			std::string res = req.res.getStr();	
+			send(ev.ident, res.c_str(), res.size(), 0);
+			chlist.resize(chlist.size() + 1);
+			EV_SET(chlist.end().base() - 1, sockfd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 		}
 
 		void launch() {
