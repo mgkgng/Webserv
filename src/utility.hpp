@@ -73,6 +73,14 @@ bool        end_with(const_string &str, const_string &end)
     return end.size() > str.size() ? false : (str.substr(str.size() - end.size()) == end);
 }
 
+// https://www.delftstack.com/howto/cpp/get-current-directory-cpp/
+string current_working_directory() {
+    char dir[PATH_MAX];
+    if (getwd(dir) != NULL)
+        return string(dir);
+    return "";
+}
+
 // Should be called in server, with a cgi (map set in route/config) and uri
 // If true call the execute_CGI
 string      is_CGI(const std::map<string, string> &cgi, const_string &file)
