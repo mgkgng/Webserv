@@ -98,9 +98,9 @@ class Server {
 			if (ret < 0)
 				return ;
 			if (!ret) {
-				chlist.resize(chlist.size() + 1);
-				EV_SET(chlist.end().base() - 1, ev.ident, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-				//EV_SET(chlist.end().base() - 1, ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
+				chlist.resize(chlist.size() + 2);
+				EV_SET(chlist.end().base() - 2, ev.ident, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+				// EV_SET(chlist.end().base() - 1, ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
 				return ;
 			}
 			buf[ret] = '\0';
@@ -110,7 +110,18 @@ class Server {
 				return ;
 			}
 			req.res.putResponse(req.path, this->routes);
-			this->sendData(req, ev);
+
+			// send response
+			std::string res = req.res.getStr();	
+
+			std::cout << "response to send" << std::endl;
+			std::cout << res.size() << std::endl;
+
+			send(ev.ident, res.c_str(), res.size(), 0);
+			// chlist.resize(chlist.size() + 1);
+			// EV_SET(chlist.end().base() - 1, sockfd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+
+			std::cout << "????" << std::endl;
 		}
 
 		void launch() {
@@ -129,6 +140,7 @@ class Server {
 				if (evNb < 0 && errno == EINTR) // protection from CTRL + C (UNIX signal handling)
 					return ;
 				for (int i = 0; i < evNb; i++) {
+					std::cout << "11" << std::endl;
 					if (evlist.at(i).flags & EV_EOF)
 						disconnect(evlist[i].ident);
 					else if (static_cast<int>(evlist.at(i).ident) == sockfd)

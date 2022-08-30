@@ -36,6 +36,7 @@ class Response {
 
 			buf << f.rdbuf();
 			this->body = buf.str();
+			std::cout << buf.str() << std::endl;
 			this->headers["Content-Length"] = std::to_string(this->body.length());
 			this->headers["Content-Type"] = "text/html";
 		}
@@ -43,10 +44,13 @@ class Response {
 		void	putBody(std::string fName) {
 			std::ifstream f(fName);
 			std::stringstream buf;
+
+			std::cout << "fs" << std::endl;
 			buf << f.rdbuf();
 			this->body = buf.str();
-			//this->headers["Content-Length"] = std::to_string(this->body.length());
-			//this->headers["Content-Type"] = "text/html";
+			this->headers["Content-Length"] = std::to_string(this->body.length());
+			this->headers["Content-Type"] = "text/css";\
+			std::cout << "sf" << std::endl;
 		}
 
 		void putResponse(std::string path, std::map<std::string, Route> routes) {
@@ -60,7 +64,12 @@ class Response {
 			} else if (exist("www" + path)) {
 				this->statCode = Ok;
 				this->statMsg = "OK";
+				std::cout << "AAAAAAAAAAAA" << path << std::endl;
 				this->putBody("www" + path);
+			} else if (exist("www/cgi" + split(path, "?").at(0))) {
+				this->statCode = Ok;
+				this->statMsg = "OK";
+				this->putBody("www/cgi" + split(path, "?").at(0));
 			} else {
 				this->statCode = NotFound;
 				this->statMsg = statusCodeToString(NotFound);
