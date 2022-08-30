@@ -109,13 +109,13 @@ class Server {
 				std::cout << "Invalid HTTP request" << std::endl;
 				return ;
 			}
-			req.res.putResponse(req.path, this->routes);
+			req.res.putResponse(req.path, req.headers, this->routes);
 
 			// send response
 			std::string res = req.res.getStr();	
 
 			std::cout << "response to send" << std::endl;
-			std::cout << res.size() << std::endl;
+			std::cout << res << std::endl;
 
 			send(ev.ident, res.c_str(), res.size(), 0);
 			// chlist.resize(chlist.size() + 1);

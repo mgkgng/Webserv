@@ -41,7 +41,7 @@ class Response {
 			this->headers["Content-Type"] = "text/html";
 		}
 
-		void	putBody(std::string fName) {
+		void	putBody(std::string fName, std::map<std::string, std::string> reqHeaders) {
 			std::ifstream f(fName);
 			std::stringstream buf;
 
@@ -49,11 +49,11 @@ class Response {
 			buf << f.rdbuf();
 			this->body = buf.str();
 			this->headers["Content-Length"] = std::to_string(this->body.length());
-			this->headers["Content-Type"] = "text/css";\
-			std::cout << "sf" << std::endl;
+			this->headers["Content-Type"] = split(reqHeaders["Accept"], ",").at(0);
+			std::cout << this->headers["Content-Type"] << "sf" << std::endl;
 		}
 
-		void putResponse(std::string path, std::map<std::string, Route> routes) {
+		void putResponse(std::string path, std::map<std::string, std::string> reqHeaders, std::map<std::string, Route> routes) {
 
 			this->protocolVer = "HTTP/1.1";
 			std::map<std::string, Route>::iterator it = routes.find(path);
@@ -64,16 +64,16 @@ class Response {
 			} else if (exist("www" + path)) {
 				this->statCode = Ok;
 				this->statMsg = "OK";
-				std::cout << "AAAAAAAAAAAA" << path << std::endl;
-				this->putBody("www" + path);
+				//std::cout << "AAAAAAAAAAAA" << path << std::endl;
+				this->putBody("www" + path, reqHeaders);
 			} else if (exist("www/cgi" + split(path, "?").at(0))) {
 				this->statCode = Ok;
 				this->statMsg = "OK";
-				this->putBody("www/cgi" + split(path, "?").at(0));
+				this->putBody("www/cgi" + split(path, "?").at(0), reqHeaders);
 			} else {
 				this->statCode = NotFound;
 				this->statMsg = statusCodeToString(NotFound);
-				//res.putBody(NotFound);
+				this->putBody("www/error_pages/error_404.html", reqHeaders);
 			}
 		}
 		
