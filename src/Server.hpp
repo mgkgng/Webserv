@@ -104,12 +104,12 @@ class Server {
 				return ;
 			}
 			buf[ret] = '\0';
-			std::cout << "Request received:" << std::endl;
-			std::cout << buf << std::endl;
-
 			Request req = Request(buf);
+			if (!req.method.length()) {
+				std::cout << "Invalid HTTP request" << std::endl;
+				return ;
+			}
 			req.res.putResponse(req.path, this->routes);
-
 			this->sendData(req, ev);
 		}
 

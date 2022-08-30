@@ -143,3 +143,8 @@ bool    is_found_in(Elem elem, size_t n, Type first ...)
         va_end(args);
         return (false);
 }
+
+template<typename T>
+inline bool includes(std::vector<T> vec, T elem) {
+    return (std::find(vec.begin(), vec.end(), elem) != vec.end()) ? true : false;
+}

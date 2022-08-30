@@ -2,6 +2,11 @@
 
 #include "Response.hpp"
 
+typedef unsigned int methode_type;
+#define GET 0;
+#define POST 1;
+#define DELETE 2;
+
 class Request {
 	public:
 		std::string 						method;
@@ -16,9 +21,12 @@ class Request {
 
 		Request(std::string s) {
 			std::vector<std::string> req = split(s, "\r\n");
-
-			// head
+			// head 
 			std::vector<std::string> head = split(req.at(0), " ");
+			if (head.at(0) != "GET" && head.at(0) != "POST" && head.at(0) != "DELETE") {
+				this->method = "";
+				return ;
+			}
 			this->method = head.at(0);
 			std::vector<std::string> pq = split(head.at(1), "?");
 			this->path = pq.at(0);
