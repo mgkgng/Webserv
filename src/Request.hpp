@@ -8,15 +8,97 @@ typedef unsigned int methode_type;
 #define DELETE 2;
 
 class Request {
+	private:
+
+	// Struct to help manage the parse and keep a cleaner Request
+	struct Content {
+		string raw;
+		string boundary;
+		int			expected;
+		bool		isMultipart;
+		bool		isChunked;
+		bool		isFullyParsed;
+
+		void		initialize(const_string &data, const std::map<string, string> &headers) {
+			std::map<string, string>::const_iterator iter;
+
+			// Look for Content-Length to know how many byte we are waiting for
+			if ((iter = headers.find("Content-Length")) != headers.end())
+				expected = atoi(iter->second.c_str());
+
+			// Look for Content-Type to manage the multipart / boundary
+			// More information: https://stackoverflow.com/questions/3508338/what-is-the-boundary-in-multipart-form-data
+			if ((iter = headers.find("Content-Type")) != headers.end()) {
+				std::vector<string> line = split(iter->second, ";");
+				if (line[0] == "multipart/form-data" && line.size() == 2) {
+					isMultipart = true;
+					trim(line[1], WHITESPACE);
+					if (start_with(line[1], "boundary="))
+						boundary = line[1].substr(9);
+				}
+			}
+
+			// Check if the Request is chunked
+			if ((iter = headers.find("Transfer-Encoding")) != headers.end()) {
+				std::vector<string> fields = split(iter->second, ", ");
+				if (includes(fields, string("chunked")))
+					isChunked = true;
+			}
+
+			parseByte(data);
+		}
+
+		// If chunked, parse the chunk
+		// Otherwise, apprend the data and check if we do not expect other byte
+		// Technically, that helps to check if Content Length is actually the real one 
+		void parseByte(const_string &data) {
+			if (isChunked) {
+				if (parseChunk(data)) isFullyParsed = true;
+				return;
+			}
+			expected -= data.size();
+			raw += data;
+			if (!(expected > 0)) isFullyParsed = true;
+		}
+
+		// To parse chunks, we take lines 1 by 1 from the data stringstream
+		// When there's no more chunkSize, the data is fullyParsed
+		bool parseChunk(const_string &chunkedData) {
+			std::stringstream	ss(chunkedData);
+			string line;
+			std::getline(ss, line);
+			size_t chunkSize = strtol(line.c_str(), NULL, 16);
+			size_t currentChunkSize = 0;
+
+			while (std::getline(ss, line)) {
+				if (!chunkSize) return true;
+				currentChunkSize += line.length() + 1;
+				if (chunkSize > currentChunkSize) {
+					line = trim(line, "\r");
+					line += "\n";
+					raw += line;
+				}
+				if (currentChunkSize == chunkSize && std::getline(ss, line)) {
+					chunkSize = strtol(line.c_str(), NULL, 16);
+					currentChunkSize = 0;
+				}
+			}
+			return false;
+		}
+
+		Content() : expected(0), isMultipart(false), isChunked(false), isFullyParsed(false) {}
+		~Content() {}
+	};
+
 	public:
 		std::string 						method;
 		std::string							path;
 		std::map<std::string, std::string>	attributes;
 		std::string							protocolVer;
 		std::map<std::string, std::string>	headers;
-		
 		std::string							body;
 		std::string							file;
+		Content				            	content;
 		Response							res;
 
 		Request(std::string s) {
