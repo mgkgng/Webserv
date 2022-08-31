@@ -1,3 +1,6 @@
+#include "utility.hpp"
+#include "Request.hpp"
+
 #pragma once
 
 struct CGI_Environment{
@@ -60,7 +63,7 @@ void execute_cgi(const std::map<int, string> &status_code, Request &request, con
     {
         pipe(fd_request);
         // Apparently, according to Mathias, the easiest way to manage is just to write content and parse/compose in req/res
-        write(fd_request[1], request.content.cstring(), request.content.length());
+        write(fd_request[1], request.content.raw.c_str(), request.content.raw.length());
         close(fd_request[1]), close(fd_response[0]);
 
         CGI_Environment environment;
