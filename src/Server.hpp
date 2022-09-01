@@ -18,6 +18,7 @@ class Server {
 		int							addrlen;
 		std::vector<struct kevent>	chlist;
 		std::vector<struct kevent>	evlist;
+		std::vector<Request> 		reqs;
 
 		Server() {};
 		~Server() {
@@ -38,7 +39,7 @@ class Server {
 			return (*this);
 		};
 		
-		// Server Launch 
+		// Server Launch
 
 		void init_addrinfo() {
 			bzero(&sockaddr, sizeof(struct sockaddr_in));
@@ -50,6 +51,7 @@ class Server {
 
 		void init_server() {
 			sockfd = socket(AF_INET, SOCK_STREAM, 0);
+			fcntl(sockfd, F_SETFL, O_NONBLOCK);
 			assert(sockfd != -1);
 
 			int	option_on = 1;
@@ -71,7 +73,7 @@ class Server {
 
 			chlist.resize(chlist.size() + 1);
 			EV_SET(chlist.end().base() - 1, newConnection, EVFILT_READ, EV_ADD, 0,0, NULL);
-
+			this->req.push_back(Request(newConnection));
 			std::cout << "Connection accepted." << std::endl;
 		};
 		
@@ -80,16 +82,22 @@ class Server {
 			close(fd);
 		};
 
-		void	sendData(Request &req, struct kevent &ev) {
+		void	sendData(struct kevent &ev) {
+
 			// send response
-			std::string res = req.res.getStr();	
+			std::string res = this->getRequest(ev.ident).res.getStr();	
+			std::cout << "response to send" << std::endl;
 
-			//std::cout << "response to send" << std::endl;
-			//std::cout << res << std::endl;
-
-			send(ev.ident, res.c_str(), res.size(), 0);
-			chlist.resize(chlist.size() + 1);
-			//EV_SET(chlist.end().base() - 1, sockfd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+			ssize_t totalBits = res.length();
+			ssize_t readBits = send(ev.ident, res.c_str() /*+ currBits*/, totalBits /*- currBits*/, MSG_DONTWAIT);
+			if (readBits == -1) {
+				std::cout << "send error" << std::strerror(errno) << std::endl;
+				return ;
+			} else if (!readBits) {
+				chlist.resize(chlist.size() + 1);
+				EV_SET(chlist.end().base() - 1, sockfd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+			}
+			//currBits += readBits;
 		}
 
 		void	recvData(struct kevent &ev) {
@@ -98,41 +106,34 @@ class Server {
 
 			ret = recv(ev.ident, buf, 9999, 0);
 			if (ret < 0)
-				return ;
-			if (!ret) {
-				chlist.resize(chlist.size() + 2);
-				EV_SET(chlist.end().base() - 2, ev.ident, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-				// EV_SET(chlist.end().base() - 1, ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
-				return ;
-			}
+				throw WebservError();
 			buf[ret] = '\0';
-			Request req = Request(buf);
-			if (!req.method.length()) {
-				std::cout << "Invalid HTTP request" << std::endl;
+			Request *req = this->getRequest(ev.ident);
+
+			if (ret > std::stoi(this->maxBodySize)) { // Request too big
+				req->res.putResponse(413);
+				chlist.resize(chlist.size() + 1);
+				EV_SET(chlist.end().base() - 1, ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
 				return ;
 			}
-			req.res.putResponse(req.path, req.headers, this->routes);
+			// if (!req.method.length()) {
+			// 	std::cout << "Invalid HTTP request" << std::endl;
+			// 	return ;
+			// }
+			std::cout << "Data read:" << buf << std::endl;
+			chlist.resize(chlist.size() + 1);
+			EV_SET(chlist.end().base() - 1, ev.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 
-			// send response
-			std::string res = req.res.getStr();	
-			std::cout << "response to send" << std::endl;
 
-			ssize_t totalBits = res.length();
-			ssize_t readBits;
-			ssize_t currBits = 0;
-			while (totalBits >= currBits) {
-				readBits = send(ev.ident, res.c_str() + currBits, totalBits - currBits, MSG_DONTWAIT);
-				if (readBits == -1) {
-					std::cout << "send error" << std::strerror(errno) << std::endl;
-					break;
-				} else if (!readBits)
-					break;
-				currBits += readBits;
-			}
-			// chlist.resize(chlist.size() + 1);
-			// EV_SET(chlist.end().base() - 1, sockfd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+			req->res.putResponse(req->path, req->headers, this->routes);
 
-			std::cout << "????" << std::endl;
+		}
+
+		Request *getRequest(uintptr_t ev_ident) {
+			for (std::vector<Request>::iterator it = this->reqs.begin(); it != reqs.end(); it++)
+				if (it->ident == ev_ident)
+					return (&(*it));
+			return (NULL);
 		}
 
 		void launch() {
@@ -151,13 +152,20 @@ class Server {
 				if (evNb < 0 && errno == EINTR) // protection from CTRL + C (UNIX signal handling)
 					return ;
 				for (int i = 0; i < evNb; i++) {
-					std::cout << "11" << std::endl;
 					if (evlist.at(i).flags & EV_EOF)
-						disconnect(evlist[i].ident);
-					else if (static_cast<int>(evlist.at(i).ident) == sockfd)
+						disconnect(evlist.at(i).ident);
+					else if (static_cast<int>(evlist.at(i).ident) == sockfd) {
+						std::cout << "accept here" << std::endl;
 						acceptConnection();
-					else if (evlist.at(i).filter & EVFILT_READ)
+ 					}
+					if (evlist.at(i).filter & EVFILT_READ) {
+						std::cout << "recv data" << std::endl;
 						recvData(evlist[i]);
+					}
+					if (evlist.at(i).filter & EVFILT_WRITE) {
+						std::cout << "send data" << std::endl;
+						sendData(evlist[i]);
+					}
 				}
 			}
 		}
@@ -184,5 +192,12 @@ class Server {
 			}
 			while (1);
 		}
+
+		class WebservError : public std::exception {
+			public:
+				const char *what() const throw() {
+					return ("Error found");
+				}
+		};
 };
 

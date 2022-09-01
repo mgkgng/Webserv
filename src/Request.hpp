@@ -98,13 +98,19 @@ class Request {
 		std::map<std::string, std::string>	headers;
 		std::string							body;
 		std::string							file;
+		uintptr_t							ident;
 		Content				            	content;
 		Response							res;
+		std::string							rawContent;
+
+		Request(uintptr_t ident) {
+			this->ident = ident;
+			this->rawContent = "";
+		}
 
 		Request(std::string s) {
-			std::vector<std::string> getb = split(s, "\n\n");
-			std::cout << "body works?" << getb.at(0) << std::endl;
-			std::vector<std::string> req = split(s, "\r\n");
+			std::vector<std::string> getbody = split(s, "\n\n");
+			std::vector<std::string> req = split(getbody.at(0), "\r\n");
 
 			// head 
 			std::vector<std::string> head = split(req.at(0), " ");
@@ -132,15 +138,7 @@ class Request {
 				this->headers.insert(std::pair<std::string, std::string>(trim(kv.at(0), WHITESPACE), trim(kv.at(1), WHITESPACE)));
 			}
 
-			//this->body = req.at(2);
-			//std::cout << "============================" << this->body << std::endl;
-			// // Body
-			// while (it != req.end())
-			// 	this->body = *(it++) + "\r\n";
-
-			// Error check
-			//parseErrorCheck();
-
+			this->body = (getbody.size() > 1) ? getbody.at(1) : "";
 		}
 
 		Request(Request const & other) {
@@ -155,6 +153,10 @@ class Request {
 			this->headers = rhs.headers;
 			this->body = rhs.body;
 			return (*this);
+		}
+
+		void putContent(std::string s) {
+			this->rawContent += s;
 		}
 
 		/*bool	parseErrorCheck() const {

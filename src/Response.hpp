@@ -13,6 +13,9 @@ class Response {
 		std::map<std::string, std::string> headers;
 		std::string	body;
 
+		size_t	totalBits;
+		size_t	currBits;
+
 		Response() {}
 
 		Response(Response const & other) {
@@ -53,6 +56,16 @@ class Response {
 			//std::cout << this->headers["Content-Type"] << "sf" << std::endl;
 		}
 
+		void	putBody(std::string fName) {
+			std::ifstream f(fName);
+			std::stringstream buf;
+
+			buf << f.rdbuf();
+			this->body = buf.str();
+			this->headers["Content-Length"] = std::to_string(this->body.length());
+			this->headers["Content-Type"] = "text/html";		
+		}
+
 		void putResponse(std::string path, std::map<std::string, std::string> reqHeaders, std::map<std::string, Route> routes) {
 
 			this->protocolVer = "HTTP/1.1";
@@ -74,6 +87,12 @@ class Response {
 				this->statMsg = statusCodeToString(NotFound);
 				this->putBody("www/error_pages/error_404.html", reqHeaders);
 			}
+		}
+
+		void putResponse(unsigned int errCode) {
+			this->statCode = errCode;
+			this->statMsg = statusCodeToString(errCode);
+			this->putBody("www/error_pages/error_404.html");
 		}
 		
 		std::string	getStr() {
