@@ -111,8 +111,12 @@ class Server {
 				std::cout << "Invalid HTTP request" << std::endl;
 				return ;
 			}
-			req.res.putResponse(req.path, req.headers, this->routes);
 
+			if (req.method == "POST")
+				return ;
+				// c'est ici sasso
+
+			req.res.putResponse(req.path, req.headers, this->routes);
 			// send response
 			std::string res = req.res.getStr();	
 			std::cout << "response to send" << std::endl;

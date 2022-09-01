@@ -84,6 +84,9 @@ class Response {
 				res += it->first + ": " + it->second + "\r\n";
 			res += '\n';
 			res += this->body;
+
+			if (this->headers["Content-Type"] == "text/html")
+				std::cout << "-==-==========" << std::endl << res << std::endl;
 			return (res);
 		}
 };
