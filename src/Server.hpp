@@ -113,9 +113,9 @@ class Server {
 
 			// send response
 			std::string res = req.res.getStr();	
-
 			std::cout << "response to send" << std::endl;
-			std::cout << res << std::endl;
+			
+			//std::cout << res << std::endl;
 
 			send(ev.ident, res.c_str(), res.size(), 0);
 			// chlist.resize(chlist.size() + 1);

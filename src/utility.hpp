@@ -67,6 +67,10 @@ std::string	trim(std::string s, std::string set) {
 	return (s);
 }
 
+bool start_with(std::string s1, std::string s2) {
+    return (!std::strncmp(s1.c_str(), s2.c_str(), s2.length()) ? true : false); 
+}
+
 bool        end_with(const_string &str, const_string &end)
 {
     return end.size() > str.size() ? false : (str.substr(str.size() - end.size()) == end);
