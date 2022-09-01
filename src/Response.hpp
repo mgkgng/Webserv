@@ -45,12 +45,12 @@ class Response {
 			std::ifstream f(fName);
 			std::stringstream buf;
 
-			std::cout << "fs" << std::endl;
+			//std::cout << "fs" << std::endl;
 			buf << f.rdbuf();
 			this->body = buf.str();
 			this->headers["Content-Length"] = std::to_string(this->body.length());
 			this->headers["Content-Type"] = split(reqHeaders["Accept"], ",").at(0);
-			std::cout << this->headers["Content-Type"] << "sf" << std::endl;
+			//std::cout << this->headers["Content-Type"] << "sf" << std::endl;
 		}
 
 		void putResponse(std::string path, std::map<std::string, std::string> reqHeaders, std::map<std::string, Route> routes) {
@@ -64,7 +64,6 @@ class Response {
 			} else if (exist("www" + path)) {
 				this->statCode = Ok;
 				this->statMsg = "OK";
-				//std::cout << "AAAAAAAAAAAA" << path << std::endl;
 				this->putBody("www" + path, reqHeaders);
 			} else if (exist("www/cgi" + split(path, "?").at(0))) {
 				this->statCode = Ok;

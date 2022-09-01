@@ -3,6 +3,8 @@
 #include "utility.hpp"
 #include "Request.hpp"
 
+#include <cerrno>
+
 class Server {
 	public:
 		unsigned int				port;
@@ -114,10 +116,19 @@ class Server {
 			// send response
 			std::string res = req.res.getStr();	
 			std::cout << "response to send" << std::endl;
-			
-			//std::cout << res << std::endl;
 
-			send(ev.ident, res.c_str(), res.size(), 0);
+			ssize_t totalBits = res.length();
+			ssize_t readBits;
+			ssize_t currBits = 0;
+			while (totalBits >= currBits) {
+				readBits = send(ev.ident, res.c_str() + currBits, totalBits - currBits, MSG_DONTWAIT);
+				if (readBits == -1) {
+					std::cout << "send error" << std::strerror(errno) << std::endl;
+					break;
+				} else if (!readBits)
+					break;
+				currBits += readBits;
+			}
 			// chlist.resize(chlist.size() + 1);
 			// EV_SET(chlist.end().base() - 1, sockfd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 

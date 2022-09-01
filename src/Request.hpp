@@ -102,7 +102,10 @@ class Request {
 		Response							res;
 
 		Request(std::string s) {
+			std::vector<std::string> getb = split(s, "\n\n");
+			std::cout << "body works?" << getb.at(0) << std::endl;
 			std::vector<std::string> req = split(s, "\r\n");
+
 			// head 
 			std::vector<std::string> head = split(req.at(0), " ");
 			if (head.at(0) != "GET" && head.at(0) != "POST" && head.at(0) != "DELETE") {
@@ -129,9 +132,11 @@ class Request {
 				this->headers.insert(std::pair<std::string, std::string>(trim(kv.at(0), WHITESPACE), trim(kv.at(1), WHITESPACE)));
 			}
 
-			// Body
-			while (it != req.end())
-				this->body = *(it++) + "\r\n";
+			//this->body = req.at(2);
+			//std::cout << "============================" << this->body << std::endl;
+			// // Body
+			// while (it != req.end())
+			// 	this->body = *(it++) + "\r\n";
 
 			// Error check
 			//parseErrorCheck();
