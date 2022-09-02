@@ -14,11 +14,9 @@ class Server {
 	
 		int							sockfd;
 		int							kq;
-		struct sockaddr_in			sockaddr;
-		int							addrlen;
 		std::vector<struct kevent>	chlist;
 		std::vector<struct kevent>	evlist;
-		std::vector<Request> 		reqs;
+		std::map<uintptr_t, Request> client;
 
 		Server() {};
 		~Server() {
@@ -32,27 +30,22 @@ class Server {
 			this->routes = other.routes; 
 			this->sockfd = other.sockfd;
 			this->kq = other.kq;
-			this->sockaddr = other.sockaddr;
-			this->addrlen = other.addrlen;
 			this->chlist = other.chlist;
 			this->evlist = other.evlist;
 			return (*this);
 		};
 		
-		// Server Launch
-
-		void init_addrinfo() {
-			bzero(&sockaddr, sizeof(struct sockaddr_in));
-			sockaddr.sin_family = AF_INET;
-			sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-			sockaddr.sin_port = htons(this->port);
-			addrlen = sizeof(sockaddr);
-		};
+		// Server Launch 
 
 		void init_server() {
+			struct sockaddr_in	sockaddr;
+
 			sockfd = socket(AF_INET, SOCK_STREAM, 0);
-			fcntl(sockfd, F_SETFL, O_NONBLOCK);
 			assert(sockfd != -1);
+
+			sockaddr.sin_family = AF_INET;
+			sockaddr.sin_addr.s_addr = inet_addr(this->serverName == "localhost" ? "127.0.0.1" : this->serverName.c_str());
+			sockaddr.sin_port = htons(this->port);
 
 			int	option_on = 1;
 			assert(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option_on, sizeof(int)) == 0);
@@ -63,17 +56,18 @@ class Server {
 			assert(kq != -1);
 
 			chlist.resize(1);
-			EV_SET(chlist.data(), sockfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
+			EV_SET(&*(chlist.end() - 1), sockfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
 		};
 
 		void acceptConnection() {
-			int	newConnection = accept(sockfd, (struct sockaddr *) &sockaddr, (socklen_t *) &addrlen);
+			int	newConnection = accept(sockfd, NULL, NULL);
 			assert(newConnection != -1);
 			fcntl(newConnection, F_SETFL, O_NONBLOCK);
 
 			chlist.resize(chlist.size() + 1);
-			EV_SET(chlist.end().base() - 1, newConnection, EVFILT_READ, EV_ADD, 0,0, NULL);
-			this->req.push_back(Request(newConnection));
+			EV_SET(&*(chlist.end() - 1), newConnection, EVFILT_READ, EV_ADD, 0,0, NULL);
+
+			client[newConnection] = Request(newConnection);
 			std::cout << "Connection accepted." << std::endl;
 		};
 		
@@ -84,62 +78,55 @@ class Server {
 
 		void	sendData(struct kevent &ev) {
 
+			std::cout << "send" << std::endl;
 			// send response
-			std::string res = this->getRequest(ev.ident).res.getStr();	
-			std::cout << "response to send" << std::endl;
+			Request &req = client[ev.ident];
+			std::string res = req.res.getStr();	
 
-			ssize_t totalBits = res.length();
-			ssize_t readBits = send(ev.ident, res.c_str() /*+ currBits*/, totalBits /*- currBits*/, MSG_DONTWAIT);
-			if (readBits == -1) {
-				std::cout << "send error" << std::strerror(errno) << std::endl;
-				return ;
-			} else if (!readBits) {
-				chlist.resize(chlist.size() + 1);
-				EV_SET(chlist.end().base() - 1, sockfd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-			}
-			//currBits += readBits;
+			send(ev.ident, res.c_str(), res.length(), MSG_DONTWAIT);
+			
+			// Une condition pour dire que response est finie
+			req.clean();
+			chlist.resize(chlist.size() + 1);
+			EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 		}
 
 		void	recvData(struct kevent &ev) {
 			char	buf[10000];
 			int		ret;
 
+			std::cout << "recv" << std::endl;
 			ret = recv(ev.ident, buf, 9999, 0);
-			if (ret < 0)
-				throw WebservError();
-			buf[ret] = '\0';
-			Request *req = this->getRequest(ev.ident);
-
-			if (ret > std::stoi(this->maxBodySize)) { // Request too big
-				req->res.putResponse(413);
-				chlist.resize(chlist.size() + 1);
-				EV_SET(chlist.end().base() - 1, ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
+			if (ret < 0) {
+				std::cout << "c'est la " << std::strerror(errno) << std::endl;
+				return;
+			}
+			if (!ret) {
+				chlist.resize(chlist.size() + 2);
+				EV_SET(chlist.end().base() - 2, ev.ident, EVFILT_READ, EV_DELETE, 0, 0, NULL);
 				return ;
 			}
-			// if (!req.method.length()) {
-			// 	std::cout << "Invalid HTTP request" << std::endl;
-			// 	return ;
-			// }
-			std::cout << "Data read:" << buf << std::endl;
+			buf[ret] = '\0';
+			Request &req = client[ev.ident];
+			// Request req = Request();
+			req.putRequest(buf);
+
+			/* Protection invalid request */
+
+			if (req.method == "POST")
+				return ;
+				// c'est ici sasso
+
+			// une condition pour dire que maintenant je peux faire la reponse
+			req.putResponse(this->routes);
 			chlist.resize(chlist.size() + 1);
-			EV_SET(chlist.end().base() - 1, ev.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-
-
-			req->res.putResponse(req->path, req->headers, this->routes);
-
-		}
-
-		Request *getRequest(uintptr_t ev_ident) {
-			for (std::vector<Request>::iterator it = this->reqs.begin(); it != reqs.end(); it++)
-				if (it->ident == ev_ident)
-					return (&(*it));
-			return (NULL);
+			EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
+			std::cout << "etrange" << std::endl;
 		}
 
 		void launch() {
 			int evNb;
 
-			init_addrinfo();
 			init_server();
 			std::cout << "WEBSERV launched." << std::endl;
 			std::cout << this->port << std::endl;
@@ -152,20 +139,15 @@ class Server {
 				if (evNb < 0 && errno == EINTR) // protection from CTRL + C (UNIX signal handling)
 					return ;
 				for (int i = 0; i < evNb; i++) {
-					if (evlist.at(i).flags & EV_EOF)
-						disconnect(evlist.at(i).ident);
-					else if (static_cast<int>(evlist.at(i).ident) == sockfd) {
-						std::cout << "accept here" << std::endl;
+					struct kevent &ev = evlist[i];
+					if (ev.flags & EV_EOF)
+						disconnect(ev.ident);
+					else if (static_cast<int>(ev.ident) == sockfd)
 						acceptConnection();
- 					}
-					if (evlist.at(i).filter & EVFILT_READ) {
-						std::cout << "recv data" << std::endl;
-						recvData(evlist[i]);
-					}
-					if (evlist.at(i).filter & EVFILT_WRITE) {
-						std::cout << "send data" << std::endl;
-						sendData(evlist[i]);
-					}
+					else if (ev.filter & EVFILT_READ && !client[ev.ident].res.ready)
+						recvData(ev);
+					else if (ev.filter & EVFILT_WRITE)
+						sendData(ev);
 				}
 			}
 		}
