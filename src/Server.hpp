@@ -14,10 +14,9 @@ class Server {
 	
 		int							sockfd;
 		int							kq;
-		struct sockaddr_in			sockaddr;
-		int							addrlen;
 		std::vector<struct kevent>	chlist;
 		std::vector<struct kevent>	evlist;
+		std::map<uintptr_t, Request> client;
 
 		Server() {};
 		~Server() {
@@ -31,8 +30,6 @@ class Server {
 			this->routes = other.routes; 
 			this->sockfd = other.sockfd;
 			this->kq = other.kq;
-			this->sockaddr = other.sockaddr;
-			this->addrlen = other.addrlen;
 			this->chlist = other.chlist;
 			this->evlist = other.evlist;
 			return (*this);
@@ -40,17 +37,15 @@ class Server {
 		
 		// Server Launch 
 
-		void init_addrinfo() {
-			bzero(&sockaddr, sizeof(struct sockaddr_in));
-			sockaddr.sin_family = AF_INET;
-			sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-			sockaddr.sin_port = htons(this->port);
-			addrlen = sizeof(sockaddr);
-		};
-
 		void init_server() {
+			struct sockaddr_in	sockaddr;
+
 			sockfd = socket(AF_INET, SOCK_STREAM, 0);
 			assert(sockfd != -1);
+
+			sockaddr.sin_family = AF_INET;
+			sockaddr.sin_addr.s_addr = inet_addr(this->serverName == "localhost" ? "127.0.0.1" : this->serverName.c_str());
+			sockaddr.sin_port = htons(this->port);
 
 			int	option_on = 1;
 			assert(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option_on, sizeof(int)) == 0);
@@ -65,13 +60,14 @@ class Server {
 		};
 
 		void acceptConnection() {
-			int	newConnection = accept(sockfd, (struct sockaddr *) &sockaddr, (socklen_t *) &addrlen);
+			int	newConnection = accept(sockfd, NULL, NULL);
 			assert(newConnection != -1);
 			fcntl(newConnection, F_SETFL, O_NONBLOCK);
 
 			chlist.resize(chlist.size() + 1);
 			EV_SET(chlist.end().base() - 1, newConnection, EVFILT_READ, EV_ADD, 0,0, NULL);
 
+			client[newConnection] = Request(newConnection);
 			std::cout << "Connection accepted." << std::endl;
 		};
 		
@@ -106,17 +102,17 @@ class Server {
 				return ;
 			}
 			buf[ret] = '\0';
-			Request req = Request(buf);
-			if (!req.method.length()) {
-				std::cout << "Invalid HTTP request" << std::endl;
-				return ;
-			}
+			Request &req = client[ev.ident];
+			// Request req = Request();
+			req.putRequest(buf);
+
+			/* Protection invalid request */
 
 			if (req.method == "POST")
 				return ;
 				// c'est ici sasso
 
-			req.res.putResponse(req.path, req.headers, this->routes);
+			req.putResponse(this->routes);
 			// send response
 			std::string res = req.res.getStr();	
 			std::cout << "response to send" << std::endl;
@@ -133,6 +129,7 @@ class Server {
 					break;
 				currBits += readBits;
 			}
+			req.clean();
 			// chlist.resize(chlist.size() + 1);
 			// EV_SET(chlist.end().base() - 1, sockfd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 
@@ -142,7 +139,6 @@ class Server {
 		void launch() {
 			int evNb;
 
-			init_addrinfo();
 			init_server();
 			std::cout << "WEBSERV launched." << std::endl;
 			std::cout << this->port << std::endl;
@@ -155,7 +151,6 @@ class Server {
 				if (evNb < 0 && errno == EINTR) // protection from CTRL + C (UNIX signal handling)
 					return ;
 				for (int i = 0; i < evNb; i++) {
-					std::cout << "11" << std::endl;
 					if (evlist.at(i).flags & EV_EOF)
 						disconnect(evlist[i].ident);
 					else if (static_cast<int>(evlist.at(i).ident) == sockfd)

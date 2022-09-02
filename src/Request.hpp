@@ -19,7 +19,7 @@ class Request {
 		bool		isChunked;
 		bool		isFullyParsed;
 
-		void		initialize(const_string &data, const std::map<string, string> &headers) {
+		void initialize(const_string &data, const std::map<string, string> &headers) {
 			std::map<string, string>::const_iterator iter;
 
 			// Look for Content-Length to know how many byte we are waiting for
@@ -100,10 +100,14 @@ class Request {
 		std::string							file;
 		Content				            	content;
 		Response							res;
+		uintptr_t							ident;
 
-		Request(std::string s) {
+		Request() {}
+		Request(uintptr_t id) : ident(id) {}
+		~Request() { }
+
+		void putRequest(std::string s) {
 			std::vector<std::string> getb = split(s, "\n\n");
-			std::cout << "body works?" << getb.at(0) << std::endl;
 			std::vector<std::string> req = split(s, "\r\n");
 
 			// head 
@@ -131,23 +135,7 @@ class Request {
 				std::vector<std::string> kv = split(*it, ":");
 				this->headers.insert(std::pair<std::string, std::string>(trim(kv.at(0), WHITESPACE), trim(kv.at(1), WHITESPACE)));
 			}
-
-			//this->body = req.at(2);
-			//std::cout << "============================" << this->body << std::endl;
-			// // Body
-			// while (it != req.end())
-			// 	this->body = *(it++) + "\r\n";
-
-			// Error check
-			//parseErrorCheck();
-
 		}
-
-		Request(Request const & other) {
-			*this = other;
-		}
-
-		~Request() { }
 
 		Request & operator=(Request const & rhs) {
 			this->method = rhs.method;
@@ -155,6 +143,64 @@ class Request {
 			this->headers = rhs.headers;
 			this->body = rhs.body;
 			return (*this);
+		}
+
+		void putResponse(std::map<std::string, Route> routes) {
+
+			this->res.protocolVer = "HTTP/1.1";
+			std::map<std::string, Route>::iterator it = routes.find(this->path);
+			if (it != routes.end()) {
+				this->res.statCode = Ok;
+				this->res.statMsg = "OK";
+				this->putResBody(routes[path]);
+			} else if (exist("www" + path)) {
+				this->res.statCode = Ok;
+				this->res.statMsg = "OK";
+				this->putResBody("www" + path);
+			} else if (exist("www/cgi" + split(path, "?").at(0))) {
+				this->res.statCode = Ok;
+				this->res.statMsg = "OK";
+				this->putResBody("www/cgi" + split(path, "?").at(0));
+			} else {
+				this->res.statCode = NotFound;
+				this->res.statMsg = statusCodeToString(NotFound);
+				this->putResBody("www/error_pages/error_404.html");
+			}
+		}
+
+		void	putResBody(Route &route) {
+			std::cout << route << std::endl;
+			std::ifstream f(route.root + "/" + route.index);
+			std::stringstream buf;
+
+			buf << f.rdbuf();
+			res.body = buf.str();
+			std::cout << buf.str() << std::endl;
+			res.headers["Content-Length"] = std::to_string(res.body.length());
+			res.headers["Content-Type"] = split(this->headers["Accept"], ",").at(0);
+		}
+
+		void	putResBody(std::string fName) {
+			std::ifstream f(fName);
+			std::stringstream buf;
+
+			//std::cout << "fs" << std::endl;
+			buf << f.rdbuf();
+			res.body = buf.str();
+			res.headers["Content-Length"] = std::to_string(res.body.length());
+			res.headers["Content-Type"] = split(this->headers["Accept"], ",").at(0);
+			//std::cout << this->headers["Content-Type"] << "sf" << std::endl;
+		}
+
+		void clean() {
+			this->method = "";
+			this->path = "";
+			this->attributes.clear();
+			this->protocolVer = "";
+			this->headers.clear();
+			this->body = "";
+			this->file = "";
+			this->res.clean();
 		}
 
 		/*bool	parseErrorCheck() const {
@@ -171,4 +217,8 @@ class Request {
 			}
 			return (true);
 		}*/
+
+		void setIdent(uintptr_t id) {
+			this->ident = id;
+		}
 };
