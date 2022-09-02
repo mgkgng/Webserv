@@ -33,8 +33,14 @@
 #include <netdb.h>
 #include <pthread.h>
 #include <string.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <math.h>
 
 #define WHITESPACE " \n\r\t\f\v"
+#define DEFAULT_ERROR_FILE "www/error_pages/error.html"
+#define AUTOINDEX_TEMPLATE_FILE "www/autoindex.html"
+#define READFILE_BUF 2048
 
 using std::string;
 typedef const std::string const_string;
@@ -67,12 +73,11 @@ std::string	trim(std::string s, std::string set) {
 	return (s);
 }
 
-bool start_with(std::string s1, std::string s2) {
-    return (!std::strncmp(s1.c_str(), s2.c_str(), s2.length()) ? true : false); 
+inline bool start_with(const_string &str, const_string &start) {
+    return (!std::strncmp(str.c_str(), start.c_str(), start.length()) ? true : false); 
 }
 
-bool        end_with(const_string &str, const_string &end)
-{
+inline bool end_with(const_string &str, const_string &end) {
     return end.size() > str.size() ? false : (str.substr(str.size() - end.size()) == end);
 }
 
@@ -152,3 +157,39 @@ template<typename T>
 inline bool includes(std::vector<T> vec, T elem) {
     return (std::find(vec.begin(), vec.end(), elem) != vec.end()) ? true : false;
 }
+
+// AUTOINDEX
+// Basically, the entire template page is turned into a string
+// That way, it can be easily manipulated when needed (more info: response)
+string	file_to_string(const_string &filename){
+	std::ifstream f;
+	string s;
+	char buf[READFILE_BUF + 1];
+	f.open(filename.c_str());
+
+	while (f) {
+		f.read(buf, READFILE_BUF);
+        // gcount return the last char read, so put a \0 at the end
+		buf[f.gcount()] = '\0';
+		s += buf;
+	}
+	return (s);
+}
+
+string	file_size(size_t size) {
+	std::ostringstream	ss;
+	float fsize = size;
+	int i = 0;
+	const_string	units[] = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
+	while (fsize > 1024 && ++i) fsize /= 1024;
+	ss << roundf(fsize * 10) / 10 << units[i];
+	return (ss.str());
+}
+
+// Stock the string page, size_t to split in three (head, body, bottom)
+const_string autoidx = file_to_string(AUTOINDEX_TEMPLATE_FILE);
+const size_t autoidx_begin = autoidx.find("{{") == string::npos ? autoidx.size() - 2 : autoidx.find("{{");
+const size_t autoidx_end = autoidx.find("}}") == string::npos ? autoidx.size() - 2 : autoidx.find("}}");
+const_string autoidx_head = autoidx.substr(0, autoidx_begin);
+const_string autoidx_body = autoidx.substr(autoidx_begin + 2, autoidx_end - autoidx_begin - 2);
+const_string autoidx_bottom = autoidx.substr(autoidx_end + 2);
