@@ -83,8 +83,7 @@ class Server {
 			Request &req = client[ev.ident];
 			std::string res = req.res.getStr();	
 
-			size_t bits;
-			bits = send(ev.ident, res.c_str() + req.res.sendBits , res.length(), MSG_DONTWAIT);
+			size_t bits = send(ev.ident, res.c_str() + req.res.sendBits , res.length(), MSG_DONTWAIT);
 			req.res.sendBits += bits;
 			if (req.res.sendBits < res.length())
 				return ;
@@ -100,26 +99,21 @@ class Server {
 
 			std::cout << "recv" << std::endl;
 			ret = recv(ev.ident, buf, 9999, 0);
-			if (ret < 0) {
-				std::cout << "c'est la " << std::strerror(errno) << std::endl;
-				return;
-			}
+			if (ret < 0)
+				throw Server::WebservError();
 			if (!ret) {
-				chlist.resize(chlist.size() + 2);
-				EV_SET(chlist.end().base() - 2, ev.ident, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+				/* Minguk a revoir ici */
 				return ;
 			}
 			buf[ret] = '\0';
 			Request &req = client[ev.ident];
-			// Request req = Request();
 			req.putRequest(buf);
 
-			/* Protection invalid request */
+			/* Minguk Protection invalid request */
 
-			if (req.method == "POST")
-				return ;
-				// c'est ici sasso
+			/* Sasso here CGI */
 
+			/* Sasso here -> chunked request */
 			// une condition pour dire que maintenant je peux faire la reponse
 			req.putResponse(this->routes);
 			chlist.resize(chlist.size() + 1);
