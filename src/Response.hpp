@@ -12,6 +12,7 @@ class Response {
 		std::string 	statMsg;
 		std::map<std::string, std::string> headers;
 		std::string	body;
+		bool		ready;
 
 		Response() {}
 
@@ -48,6 +49,7 @@ class Response {
 			this->statMsg = "";
 			this->headers.clear();
 			this->body = "";
+			this->ready = false;
 		}
 };
 

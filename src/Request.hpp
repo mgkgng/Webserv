@@ -166,6 +166,7 @@ class Request {
 				this->res.statMsg = statusCodeToString(NotFound);
 				this->putResBody("www/error_pages/error_404.html");
 			}
+			this->res.ready = true;
 		}
 
 		void	putResBody(Route &route) {

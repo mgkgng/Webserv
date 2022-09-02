@@ -56,7 +56,7 @@ class Server {
 			assert(kq != -1);
 
 			chlist.resize(1);
-			EV_SET(chlist.data(), sockfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
+			EV_SET(&*(chlist.end() - 1), sockfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
 		};
 
 		void acceptConnection() {
@@ -65,7 +65,7 @@ class Server {
 			fcntl(newConnection, F_SETFL, O_NONBLOCK);
 
 			chlist.resize(chlist.size() + 1);
-			EV_SET(chlist.end().base() - 1, newConnection, EVFILT_READ, EV_ADD, 0,0, NULL);
+			EV_SET(&*(chlist.end() - 1), newConnection, EVFILT_READ, EV_ADD, 0,0, NULL);
 
 			client[newConnection] = Request(newConnection);
 			std::cout << "Connection accepted." << std::endl;
@@ -76,29 +76,34 @@ class Server {
 			close(fd);
 		};
 
-		void	sendData(Request &req, struct kevent &ev) {
+		void	sendData(struct kevent &ev) {
+
+			std::cout << "send" << std::endl;
 			// send response
+			Request &req = client[ev.ident];
 			std::string res = req.res.getStr();	
 
-			//std::cout << "response to send" << std::endl;
-			//std::cout << res << std::endl;
-
-			send(ev.ident, res.c_str(), res.size(), 0);
+			send(ev.ident, res.c_str(), res.length(), MSG_DONTWAIT);
+			
+			// Une condition pour dire que response est finie
+			req.clean();
 			chlist.resize(chlist.size() + 1);
-			//EV_SET(chlist.end().base() - 1, sockfd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+			EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 		}
 
 		void	recvData(struct kevent &ev) {
 			char	buf[10000];
 			int		ret;
 
+			std::cout << "recv" << std::endl;
 			ret = recv(ev.ident, buf, 9999, 0);
-			if (ret < 0)
-				return ;
+			if (ret < 0) {
+				std::cout << "c'est la " << std::strerror(errno) << std::endl;
+				return;
+			}
 			if (!ret) {
 				chlist.resize(chlist.size() + 2);
 				EV_SET(chlist.end().base() - 2, ev.ident, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-				// EV_SET(chlist.end().base() - 1, ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
 				return ;
 			}
 			buf[ret] = '\0';
@@ -112,28 +117,11 @@ class Server {
 				return ;
 				// c'est ici sasso
 
+			// une condition pour dire que maintenant je peux faire la reponse
 			req.putResponse(this->routes);
-			// send response
-			std::string res = req.res.getStr();	
-			std::cout << "response to send" << std::endl;
-
-			ssize_t totalBits = res.length();
-			ssize_t readBits;
-			ssize_t currBits = 0;
-			while (totalBits >= currBits) {
-				readBits = send(ev.ident, res.c_str() + currBits, totalBits - currBits, MSG_DONTWAIT);
-				if (readBits == -1) {
-					std::cout << "send error" << std::strerror(errno) << std::endl;
-					break;
-				} else if (!readBits)
-					break;
-				currBits += readBits;
-			}
-			req.clean();
-			// chlist.resize(chlist.size() + 1);
-			// EV_SET(chlist.end().base() - 1, sockfd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-
-			std::cout << "????" << std::endl;
+			chlist.resize(chlist.size() + 1);
+			EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
+			std::cout << "etrange" << std::endl;
 		}
 
 		void launch() {
@@ -151,12 +139,15 @@ class Server {
 				if (evNb < 0 && errno == EINTR) // protection from CTRL + C (UNIX signal handling)
 					return ;
 				for (int i = 0; i < evNb; i++) {
-					if (evlist.at(i).flags & EV_EOF)
-						disconnect(evlist[i].ident);
-					else if (static_cast<int>(evlist.at(i).ident) == sockfd)
+					struct kevent &ev = evlist[i];
+					if (ev.flags & EV_EOF)
+						disconnect(ev.ident);
+					else if (static_cast<int>(ev.ident) == sockfd)
 						acceptConnection();
-					else if (evlist.at(i).filter & EVFILT_READ)
-						recvData(evlist[i]);
+					else if (ev.filter & EVFILT_READ && !client[ev.ident].res.ready)
+						recvData(ev);
+					else if (ev.filter & EVFILT_WRITE)
+						sendData(ev);
 				}
 			}
 		}
