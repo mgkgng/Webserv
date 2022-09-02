@@ -83,8 +83,11 @@ class Server {
 			Request &req = client[ev.ident];
 			std::string res = req.res.getStr();	
 
-			send(ev.ident, res.c_str(), res.length(), MSG_DONTWAIT);
-			
+			size_t bits;
+			bits = send(ev.ident, res.c_str() + req.res.sendBits , res.length(), MSG_DONTWAIT);
+			req.res.sendBits += bits;
+			if (req.res.sendBits < res.length())
+				return ;
 			// Une condition pour dire que response est finie
 			req.clean();
 			chlist.resize(chlist.size() + 1);
@@ -121,7 +124,6 @@ class Server {
 			req.putResponse(this->routes);
 			chlist.resize(chlist.size() + 1);
 			EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
-			std::cout << "etrange" << std::endl;
 		}
 
 		void launch() {

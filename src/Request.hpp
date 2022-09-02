@@ -102,6 +102,8 @@ class Request {
 		Response							res;
 		uintptr_t							ident;
 
+		std::string							rawContent;
+
 		Request() {}
 		Request(uintptr_t id) : ident(id) {}
 		~Request() { }

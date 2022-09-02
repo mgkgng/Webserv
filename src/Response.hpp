@@ -13,8 +13,9 @@ class Response {
 		std::map<std::string, std::string> headers;
 		std::string	body;
 		bool		ready;
+		size_t		sendBits;
 
-		Response() {}
+		Response() : ready(false), sendBits(0) {}
 
 		Response(Response const & other) {
 			*this = other;
@@ -47,6 +48,7 @@ class Response {
 			this->headers.clear();
 			this->body = "";
 			this->ready = false;
+			this->sendBits = 0;
 		}
 
 		void replaceAutoIndexBody(string &body, const_string &url, char *date, struct stat &statistics, struct dirent &current_directory) {
