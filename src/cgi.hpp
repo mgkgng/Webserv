@@ -1,7 +1,8 @@
+#pragma once
+
 #include "utility.hpp"
 #include "Request.hpp"
 
-#pragma once
 
 struct CGI_Environment{
 

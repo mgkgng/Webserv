@@ -3,8 +3,6 @@
 #include "utility.hpp"
 #include "Request.hpp"
 
-#include <cerrno>
-
 class Server {
 	public:
 		typedef std::map<std::string, Route>	routes_t;
