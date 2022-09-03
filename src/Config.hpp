@@ -6,8 +6,8 @@
 
 class Config {
 	private:
-		std::string createDots(int nb) {
-			std::string res;
+		string createDots(int nb) {
+			string res;
 			for (int i = 0; i < nb; i++)
 				res += '.';
 			return (res);
@@ -16,30 +16,30 @@ class Config {
 	public:
 		std::vector<Server> servers;
 
-		Config(std::string configFile) {
-			std::string config = getConfigFile(configFile);
+		Config(string configFile) {
+			string config = getConfigFile(configFile);
 			
-			std::vector<std::string> serverConfig = split(config, "@server\n");
-			for (std::vector<std::string>::iterator it = serverConfig.begin(); it != serverConfig.end(); it++)
+			std::vector<string> serverConfig = split(config, "@server\n");
+			for (std::vector<string>::iterator it = serverConfig.begin(); it != serverConfig.end(); it++)
 				this->servers.push_back(parseServer(*it));
 		}
 
-		std::string	getConfigFile(std::string configFile) {
+		string	getConfigFile(string configFile) {
 			// peut refaire sans getline mais directement tout foutre dans la variable
 			std::fstream fs(configFile); // should do some error check
-			std::string res;
+			string res;
 
-			for (std::string line; getline(fs, line); )
+			for (string line; getline(fs, line); )
 				res += line + "\n";
 			return (res);
 		}
 
-		Server	parseServer(std::string serverConfig) {
+		Server	parseServer(string serverConfig) {
 			Server	res = Server();
 
-			std::vector<std::string> lines = split(serverConfig, "\n");
-			for (std::vector<std::string>::iterator line = lines.begin(); line != lines.end(); line++) {
-				std::vector<std::string> info = split(*line, ":");
+			std::vector<string> lines = split(serverConfig, "\n");
+			for (std::vector<string>::iterator line = lines.begin(); line != lines.end(); line++) {
+				std::vector<string> info = split(*line, ":");
 				if (info.at(0) == "port")
 					res.port = std::stoul(trim(info.at(1), WHITESPACE));
 				else if (info.at(0) == "servername")
@@ -56,7 +56,7 @@ class Config {
 			return (res);
 		}
 
-		Route	parseRoute(std::vector<std::string>::iterator &line, std::vector<std::string> lines, int dotNb) {
+		Route	parseRoute(std::vector<string>::iterator &line, std::vector<string> lines, int dotNb) {
 			Route	res = Route();
 
 			string dots = createDots(dotNb);

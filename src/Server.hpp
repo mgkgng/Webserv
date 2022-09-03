@@ -7,33 +7,23 @@
 
 class Server {
 	public:
-		unsigned int				port;
-		std::string					serverName;
-		std::string					maxBodySize;
-		std::map<std::string, Route> routes;
+		typedef std::map<std::string, Route>	routes_t;
+		typedef std::vector<struct kevent>		events_t;
+		typedef std::map<uintptr_t, Request>	clients_t;
+
+		/* from config */
+		unsigned int	port;
+		string			serverName;
+		string			maxBodySize;
+		routes_t		routes;
 	
-		int							sockfd;
-		int							kq;
-		std::vector<struct kevent>	chlist;
-		std::vector<struct kevent>	evlist;
-		std::map<uintptr_t, Request> client;
+		/* for server operation */
+		int				sockfd, kq;
+		events_t		chlist, evlist;
+		clients_t		client;
 
 		Server() {};
-		~Server() {
-			if (this->kq == -1)
-				close(this->kq);
-		};
-		Server & operator=(const Server & other) {
-			this->port = other.port;
-			this->serverName = other.serverName;
-			this->maxBodySize = other.maxBodySize;
-			this->routes = other.routes; 
-			this->sockfd = other.sockfd;
-			this->kq = other.kq;
-			this->chlist = other.chlist;
-			this->evlist = other.evlist;
-			return (*this);
-		};
+		~Server() {};
 		
 		// Server Launch 
 
@@ -73,15 +63,19 @@ class Server {
 		
 		void	disconnect(int fd) {
 			std::cout << "disconnect" << std::endl;
+			this->client.erase(fd);
 			close(fd);
 		};
 
 		void	sendData(struct kevent &ev) {
-			Request &req = client[ev.ident];
-			std::string res = req.res.getStr();	
+			Request	&req = client[ev.ident];
+			string	res = req.res.getStr();	
 
+			/* send */
 			size_t bits = send(ev.ident, res.c_str() + req.res.sendBits , res.length(), MSG_DONTWAIT);
 			req.res.sendBits += bits;
+			
+			/* check if send all data */
 			if (req.res.sendBits < res.length())
 				return ;
 			req.clean();
@@ -93,6 +87,7 @@ class Server {
 			char	buf[10000];
 			int		ret;
 
+			/* recv */
 			ret = recv(ev.ident, buf, 9999, 0);
 			if (ret < 0)
 				throw Server::WebservError();
@@ -102,8 +97,9 @@ class Server {
 			}
 			buf[ret] = '\0';
 			Request &req = client[ev.ident];
+
+			/* check chunked request */
 			if (!req.content.expected) {
-				std::cout << "empty" << std::endl;
 			 	req.parseRequest(buf);
 				req.content.initialize(buf, req.headers);
 			} else

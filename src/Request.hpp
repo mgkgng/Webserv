@@ -2,22 +2,15 @@
 
 #include "Response.hpp"
 
-typedef unsigned int methode_type;
-#define GET 0;
-#define POST 1;
-#define DELETE 2;
-
 class Request {
 	private:
 
 	// Struct to help manage the parse and keep a cleaner Request
 	struct Content {
-		string 		raw;
-		string 		boundary;
+		string 		raw, boundary;
+		bool		isMultipart, isChunked, isFullyParsed;
 		int			expected;
-		bool		isMultipart;
-		bool		isChunked;
-		bool		isFullyParsed;
+
 
 		void initialize(const_string &data, const std::map<string, string> &headers) {
 			std::map<string, string>::const_iterator iter;
@@ -95,73 +88,58 @@ class Request {
 			this->boundary = "";
 		}
 
-		Content() : expected(0), isMultipart(false), isChunked(false), isFullyParsed(false) {}
+		Content() : isMultipart(false), isChunked(false), isFullyParsed(false), expected(0) {}
 		~Content() {}
 	};
 
 	public:
-		std::string 						method;
-		std::string							path;
-		std::map<std::string, std::string>	attributes;
-		std::string							protocolVer;
-		std::map<std::string, std::string>	headers;
-		std::string							body;
-		std::string							file;
-		Content				            	content;
-		Response							res;
-		uintptr_t							ident;
+		string 						method, path, protocolVer, body, file;
+		std::map<string, string>	attributes, headers;
+		Content						content;
+		Response					res;
+		uintptr_t					ident;
 
-		std::string							rawContent;
+		Request() { this->content = Content(); }
+		Request(uintptr_t id) : ident(id) { this->content = Content(); }
+		~Request() {}
 
-		Request() {}
-		Request(uintptr_t id) : ident(id) {
-			this->content = Content();
-		}
-		~Request() { }
-
-		void parseRequest(std::string buf) {
-			std::vector<std::string> getb = split(buf, "\n\n");
-			std::vector<std::string> req = split(buf, "\r\n");
+		void parseRequest(string s) {
+			std::vector<string> getb = split(s, "\n\n");
+			std::vector<string> req = split(s, "\r\n");
 
 			// head 
-			std::vector<std::string> head = split(req.at(0), " ");
+			std::vector<string> head = split(req.at(0), " ");
 			if (head.at(0) != "GET" && head.at(0) != "POST" && head.at(0) != "DELETE") {
 				this->method = "";
 				return ;
 			}
 			this->method = head.at(0);
-			std::vector<std::string> pq = split(head.at(1), "?");
+			std::vector<string> pq = split(head.at(1), "?");
 			this->path = pq.at(0);
 			this->attributes.empty();
 			if (pq.size() > 1) {
-				std::vector<std::string> query = split(pq.at(1), "&");
-				for (std::vector<std::string>::iterator it = query.begin(); it != query.end(); it++) {
-					std::vector<std::string> kv = split(*it, "=");
-					this->attributes.insert(std::pair<std::string, std::string>(kv.at(0), kv.at(1)));
+				std::vector<string> query = split(pq.at(1), "&");
+				for (std::vector<string>::iterator it = query.begin(); it != query.end(); it++) {
+					std::vector<string> kv = split(*it, "=");
+					this->attributes.insert(std::pair<string, string>(kv.at(0), kv.at(1)));
 				}
 			}
 			this->protocolVer = head.at(2);
 
 			// headers
-			std::vector<std::string>::iterator it;
-			for (it = req.begin() + 1; it != req.end() && it->find(":") != std::string::npos; it++) {
-				std::vector<std::string> kv = split(*it, ":");
-				this->headers.insert(std::pair<std::string, std::string>(trim(kv.at(0), WHITESPACE), trim(kv.at(1), WHITESPACE)));
+			std::vector<string>::iterator it;
+			for (it = req.begin() + 1; it != req.end() && it->find(":") != string::npos; it++) {
+				std::vector<string> kv = split(*it, ":");
+				this->headers.insert(std::pair<string, string>(trim(kv.at(0), WHITESPACE), trim(kv.at(1), WHITESPACE)));
 			}
+
+			/* should put body */
 		}
 
-		Request & operator=(Request const & rhs) {
-			this->method = rhs.method;
-			this->path = rhs.path;
-			this->headers = rhs.headers;
-			this->body = rhs.body;
-			return (*this);
-		}
-
-		void putResponse(std::map<std::string, Route> routes) {
+		void putResponse(std::map<string, Route> routes) {
 
 			this->res.protocolVer = "HTTP/1.1";
-			std::map<std::string, Route>::iterator it = routes.find(this->path);
+			std::map<string, Route>::iterator it = routes.find(this->path);
 			if (it != routes.end()) {
 				this->res.statCode = Ok;
 				this->res.statMsg = "OK";
@@ -183,27 +161,23 @@ class Request {
 		}
 
 		void	putResBody(Route &route) {
-			std::cout << route << std::endl;
 			std::ifstream f(route.root + "/" + route.index);
 			std::stringstream buf;
 
 			buf << f.rdbuf();
 			res.body = buf.str();
-			//std::cout << buf.str() << std::endl;
 			res.headers["Content-Length"] = std::to_string(res.body.length());
 			res.headers["Content-Type"] = split(this->headers["Accept"], ",").at(0);
 		}
 
-		void	putResBody(std::string fName) {
+		void	putResBody(string fName) {
 			std::ifstream f(fName);
 			std::stringstream buf;
 
-			//std::cout << "fs" << std::endl;
 			buf << f.rdbuf();
 			res.body = buf.str();
 			res.headers["Content-Length"] = std::to_string(res.body.length());
 			res.headers["Content-Type"] = split(this->headers["Accept"], ",").at(0);
-			//std::cout << this->headers["Content-Type"] << "sf" << std::endl;
 		}
 
 		void clean() {
@@ -216,28 +190,5 @@ class Request {
 			this->file = "";
 			this->res.clean();
 			this->content.clean();
-		}
-
-		void putContent(std::string s) {
-			this->rawContent += s;
-		}
-
-		/*bool	parseErrorCheck() const {
-			if (!this->method.length() || !this->path.length() || !this->protocolVer.length()
-				|| (this->method != "GET" && this->method != "POST" && this->method != "DELETE")
-				|| this->protocolVer != "HTTP/1.1")
-				return (false);
-			if (!this->headers.size())
-				return (false);
-			if (this->method == "GET" && this->body.size() > 0)
-				;
-			else if (this->method == "POST") { // TODO: Need a way to handle chunked requests
-				return ;
-			}
-			return (true);
-		}*/
-
-		void setIdent(uintptr_t id) {
-			this->ident = id;
 		}
 };

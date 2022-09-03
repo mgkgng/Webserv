@@ -45,17 +45,17 @@
 using std::string;
 typedef const std::string const_string;
 
-bool exist(const std::string& fname) {
+bool exist(const string& fname) {
   struct stat buffer;
   return (stat(fname.c_str(), &buffer) == 0);
 }
 
-std::vector<std::string> split(std::string s, std::string sep) {
+std::vector<string> split(string s, string sep) {
 
 	size_t start = 0, end, sep_len = sep.length();
-	std::vector<std::string> res;
+	std::vector<string> res;
 
-    while ((end = s.find(sep, start)) != std::string::npos) {
+    while ((end = s.find(sep, start)) != string::npos) {
         if (start != end)
             res.push_back(s.substr(start, end - start));
         start = end + sep_len;
@@ -65,10 +65,10 @@ std::vector<std::string> split(std::string s, std::string sep) {
 	return (res);
 }
 
-std::string	trim(std::string s, std::string set) {
-	for (std::string::iterator c = s.begin(); c != s.end() && set.find(*c, 0) != std::string::npos; c++)
+string	trim(string s, string set) {
+	for (string::iterator c = s.begin(); c != s.end() && set.find(*c, 0) != string::npos; c++)
 		s.erase(c);
-	for (std::string::iterator c = s.end() - 1; c != s.begin() && set.find(*c, 0) != std::string::npos; c--)
+	for (string::iterator c = s.end() - 1; c != s.begin() && set.find(*c, 0) != string::npos; c--)
 		s.erase(c);
 	return (s);
 }
