@@ -77,9 +77,6 @@ class Server {
 		};
 
 		void	sendData(struct kevent &ev) {
-
-			std::cout << "send" << std::endl;
-			// send response
 			Request &req = client[ev.ident];
 			std::string res = req.res.getStr();	
 
@@ -87,7 +84,6 @@ class Server {
 			req.res.sendBits += bits;
 			if (req.res.sendBits < res.length())
 				return ;
-			// Une condition pour dire que response est finie
 			req.clean();
 			chlist.resize(chlist.size() + 1);
 			EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
@@ -97,7 +93,6 @@ class Server {
 			char	buf[10000];
 			int		ret;
 
-			std::cout << "recv" << std::endl;
 			ret = recv(ev.ident, buf, 9999, 0);
 			if (ret < 0)
 				throw Server::WebservError();
@@ -107,14 +102,20 @@ class Server {
 			}
 			buf[ret] = '\0';
 			Request &req = client[ev.ident];
-			req.putRequest(buf);
+			if (!req.content.expected) {
+				std::cout << "empty" << std::endl;
+			 	req.parseRequest(buf);
+				req.content.initialize(buf, req.headers);
+			} else
+				req.content.parseByte(buf);
 
 			/* Minguk Protection invalid request */
 
 			/* Sasso here CGI */
-
-			/* Sasso here -> chunked request */
-			// une condition pour dire que maintenant je peux faire la reponse
+			
+			if (!req.content.isFullyParsed)
+			 	return ;
+			req.parseRequest(req.content.raw);
 			req.putResponse(this->routes);
 			chlist.resize(chlist.size() + 1);
 			EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);

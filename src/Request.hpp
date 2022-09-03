@@ -12,8 +12,8 @@ class Request {
 
 	// Struct to help manage the parse and keep a cleaner Request
 	struct Content {
-		string raw;
-		string boundary;
+		string 		raw;
+		string 		boundary;
 		int			expected;
 		bool		isMultipart;
 		bool		isChunked;
@@ -23,7 +23,7 @@ class Request {
 			std::map<string, string>::const_iterator iter;
 
 			// Look for Content-Length to know how many byte we are waiting for
-			if ((iter = headers.find("Content-Length")) != headers.end())
+			if (!expected && (iter = headers.find("Content-Length")) != headers.end())
 				expected = atoi(iter->second.c_str());
 
 			// Look for Content-Type to manage the multipart / boundary
@@ -86,6 +86,15 @@ class Request {
 			return false;
 		}
 
+		void clean() {
+			this->expected = 0;
+			this->isMultipart = false;
+			this->isChunked = false;
+			this->isFullyParsed = false;
+			this->raw = "";
+			this->boundary = "";
+		}
+
 		Content() : expected(0), isMultipart(false), isChunked(false), isFullyParsed(false) {}
 		~Content() {}
 	};
@@ -105,12 +114,14 @@ class Request {
 		std::string							rawContent;
 
 		Request() {}
-		Request(uintptr_t id) : ident(id) {}
+		Request(uintptr_t id) : ident(id) {
+			this->content = Content();
+		}
 		~Request() { }
 
-		void putRequest(std::string s) {
-			std::vector<std::string> getb = split(s, "\n\n");
-			std::vector<std::string> req = split(s, "\r\n");
+		void parseRequest(std::string buf) {
+			std::vector<std::string> getb = split(buf, "\n\n");
+			std::vector<std::string> req = split(buf, "\r\n");
 
 			// head 
 			std::vector<std::string> head = split(req.at(0), " ");
@@ -178,7 +189,7 @@ class Request {
 
 			buf << f.rdbuf();
 			res.body = buf.str();
-			std::cout << buf.str() << std::endl;
+			//std::cout << buf.str() << std::endl;
 			res.headers["Content-Length"] = std::to_string(res.body.length());
 			res.headers["Content-Type"] = split(this->headers["Accept"], ",").at(0);
 		}
@@ -204,6 +215,7 @@ class Request {
 			this->body = "";
 			this->file = "";
 			this->res.clean();
+			this->content.clean();
 		}
 
 		void putContent(std::string s) {
