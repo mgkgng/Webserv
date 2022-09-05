@@ -11,4 +11,4 @@ setcookie("eval_test", "it works!", time()+3600);
 ?>
 
 <!-- With an href, we redirect to state.php which will be test asked by the subject -->
-<a href="./state/state.php">Let's test if that worked!</a>
+<a href="./state.php">Let's test if that worked!</a>
