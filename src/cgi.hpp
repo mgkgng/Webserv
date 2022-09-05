@@ -73,11 +73,11 @@ void execute_cgi(const std::map<int, string> &status_code, Request &request, con
             environment.add_variable(iter->first, iter->second);
 
         // We set the env variable needed; must update with the actual source
-        environment.add_variable("REQUEST_METHOD", request.type); // -> Member of Request
-		environment.add_variable("PATH_TRANSLATED", uri); // -> Argument from function call
-		environment.add_variable("SCRIPT_NAME", request.url); // -> Member of Request
-		environment.add_variable("QUERY_STRING", request.query); // -> Member of Request
-		environment.add_variable("PATH_INFO", path); // -> Argument from function call
+        environment.add_variable("REQUEST_METHOD", request.method); // -> Member of Request
+		// environment.add_variable("PATH_TRANSLATED", uri); // -> Argument from function call
+		// environment.add_variable("SCRIPT_NAME", request.url); // -> Member of Request
+		// environment.add_variable("QUERY_STRING", request.query); // -> Member of Request
+		// environment.add_variable("PATH_INFO", path); // -> Argument from function call
 
         dup2(fd_request[0], 0), close(fd_request[0]);
         dup2(fd_response[1], 1), close(fd_response[1]);
