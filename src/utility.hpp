@@ -91,12 +91,9 @@ string current_working_directory() {
 
 // Should be called in server, with a cgi (map set in route/config) and uri
 // If true call the execute_CGI
-string      is_CGI(const std::map<string, string> &cgi, const_string &file)
+inline bool      is_CGI(const_string &path)
 {
-    for (std::map<string, string>::const_iterator iter = cgi.begin(); iter != cgi.end(); iter++)
-        if (end_with(file, iter->first))
-            return iter->second;
-    return NULL;
+    return (start_with(path, "/cgi/php/") || start_with(path, "/cgi/python")) ? true : false;
 }
 
 string     to_lower_string(string str)

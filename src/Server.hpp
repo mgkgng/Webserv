@@ -104,13 +104,22 @@ class Server {
 				req.content.parseByte(buf);
 
 			/* Minguk Protection invalid request */
-
-			/* Sasso here CGI */
 			
 			if (!req.content.isFullyParsed)
 			 	return ;
+
 			req.parseRequest(req.content.raw);
-			req.putResponse(this->routes);
+
+			if (is_CGI(req.path)) {
+				if (exist("www" + req.path))
+					return ;
+					/* Sasso CGI */
+				// else
+					//req.putResponse(404);
+
+			} else
+				req.putResponse(this->routes);
+
 			chlist.resize(chlist.size() + 1);
 			EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
 		}
