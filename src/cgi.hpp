@@ -57,8 +57,9 @@ void execute_cgi(const std::map<int, string> &status_code, Request &request, con
         // O_NONBLOCK: Nonblock.
         // Actually, the subject impose to use fcntl like that
         fcntl(fd_response[0], F_SETFL, O_NONBLOCK);
+        // === TODO ===
         // "Something" to be changed, obv. Ideally, we set headers and stuffs
-        // response.set_whatweset("HTTP/1.1 200 OK\r\n", fd_response[0], &status_code, pid, true); // ---> TODO
+        // response.set_whatweset("HTTP/1.1 200 OK\r\n", fd_response[0], &status_code, pid, true);
     }
     else 
     {

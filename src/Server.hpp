@@ -109,8 +109,23 @@ class Server {
 			 	return ;
 
 			req.parseRequest(req.content.raw);
-			
-			if (is_CGI(req.path)) {
+
+			// TODO: Retrieve absolute path of the selected file to delete it (arg of remove)
+			if (req.method == "DELETE") {
+				// std::cout << "I entered the delete method if" << std::endl;
+				// std::cout << "I'm trying to remove: " << req.path.c_str() << std::endl;
+				if (!remove("/Users/sspina/Music/Webserv/www/error_pages/error_404.html")) {
+					// === TODO ===
+					// set 204 no content
+					// std::cout << "I successfully removed" << std::endl;
+					req.put404();
+				} else {
+					// === TODO ===
+					// set 500 internal server error
+					// std::cout << "I didn't remove" << std::endl;
+					req.put404();
+				}
+			} else if (is_CGI(req.path)) {
 				if (exist("www" + req.path))
 					return ;
 					/* Sasso CGI */

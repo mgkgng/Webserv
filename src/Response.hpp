@@ -38,9 +38,9 @@ class Response {
 
 		void replaceAutoIndexBody(string &body, const_string &url, char *date, struct stat &statistics, struct dirent &current_directory) {
 			body = replace_all_occurrency(autoidx_body, "$NAME", current_directory.d_name);
-			body = replace_all_occurrency(body, "$URL", url + current_directory.d_name),
-			body = replace_all_occurrency(body, "$DATE", string(date)),
-			body = replace_all_occurrency(body, "$SIZE", file_size(statistics.st_size)),
+			body = replace_all_occurrency(body, "$URL", url + "/" + current_directory.d_name);
+			body = replace_all_occurrency(body, "$DATE", string(date));
+			body = replace_all_occurrency(body, "$SIZE", file_size(statistics.st_size));
 			body = replace_all_occurrency(body, "$ISDIR", statistics.st_mode & S_IFDIR ? "1" : "");
 		}
 
