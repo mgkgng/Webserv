@@ -109,16 +109,25 @@ class Server {
 			 	return ;
 
 			req.parseRequest(req.content.raw);
-
+			
 			if (is_CGI(req.path)) {
 				if (exist("www" + req.path))
 					return ;
 					/* Sasso CGI */
 				// else
 					//req.putResponse(404);
-
-			} else
+			
+			} else if (is_autoindex(req.path)) {
+				string body = req.res.putAutoIndex(req.path);
+				if (body == "")
+					req.put404(); // TODO: Change (?)
+				else {
+					req.putAutoIndexRes(body);
+				}
+			}
+			else {
 				req.putResponse(this->routes);
+			}
 
 			chlist.resize(chlist.size() + 1);
 			EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);

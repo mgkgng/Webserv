@@ -48,14 +48,15 @@ class Response {
 		// Basically we look into our page, take the top part, then parse all the file in a while
 		// For each file found the "body" part will be appended with the needed data
 		// Then we append the bottom and the html page is finished
-		void putAutoIndex(const std::map<int, string> &status, const_string &url, const_string &path) {
+		// TODO @Minguk: How can server retrieve the Path?
+		string putAutoIndex(const_string &url, const_string &path = "/Users/sspina/Music/Webserv/www/error_pages") {
 			DIR *directory;
 			// https://stackoverflow.com/questions/12991334/members-of-dirent-structure
 			struct dirent *current_directory;
 			string tmp, autoidxpage = autoidx_head;
 
 			if (!(directory = opendir(path.c_str())))
-				return (void)(status); // To do: Response set error, technically
+				return "";
 			while ((current_directory = readdir(directory))) {
 				if (!strcmp(current_directory->d_name, ".") || (!strcmp(current_directory->d_name, "..") && url == "/"))
 					continue;
@@ -70,8 +71,6 @@ class Response {
 			}
 			closedir(directory);
 			autoidxpage += autoidx_bottom;
-			// Here should set:
-			// Header: 200 as status, autoidx.size() as size, "text/html" as type
-			// Body: autoidx as body
+			return autoidxpage;
 		}
 };

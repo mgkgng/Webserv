@@ -160,6 +160,14 @@ class Request {
 			this->res.ready = true;
 		}
 
+		void put404(void) {
+			this->res.protocolVer = "HTTP/1.1";
+			this->res.statCode = NotFound;
+			this->res.statMsg = statusCodeToString(NotFound);
+			this->putResBody("www/error_pages/error_404.html");
+			this->res.ready = true;
+		}
+
 		void	putResBody(Route &route) {
 			std::ifstream f(route.root + "/" + route.index);
 			std::stringstream buf;
@@ -178,6 +186,16 @@ class Request {
 			res.body = buf.str();
 			res.headers["Content-Length"] = std::to_string(res.body.length());
 			res.headers["Content-Type"] = split(this->headers["Accept"], ",").at(0);
+		}
+
+		void	putAutoIndexRes(const_string &page) {
+			res.protocolVer = "HTTP/1.1";
+			res.statCode = Ok;
+			res.statMsg = "OK";
+			res.body = page;
+			res.headers["Content-Length"] = std::to_string(res.body.length());
+			res.headers["Content-Type"] = split(this->headers["Accept"], ",").at(0);
+			res.ready = true;
 		}
 
 		void clean() {
