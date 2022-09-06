@@ -99,7 +99,6 @@ inline bool      is_CGI(const_string &path)
     return (start_with(path, "/cgi/php/") || start_with(path, "/cgi/python")) ? true : false;
 }
 
-// TODO: Should have something to be checked in Request, not bruteforce like that
 inline bool      is_autoindex_on(const_string &path, routes_t routes) {
     return (routes[path].autoindex) ? true : false;
 }

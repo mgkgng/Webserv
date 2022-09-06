@@ -47,7 +47,6 @@ class Response {
 		// Basically we look into our page, take the top part, then parse all the file in a while
 		// For each file found the "body" part will be appended with the needed data
 		// Then we append the bottom and the html page is finished
-		// TODO @Minguk: How can server retrieve the Path?
 		string putAutoIndex(const_string &url, const_string &path) {
 			DIR *directory;
 			// https://stackoverflow.com/questions/12991334/members-of-dirent-structure

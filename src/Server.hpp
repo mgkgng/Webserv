@@ -109,7 +109,6 @@ class Server {
 			 	return ;
 
 			req.parseRequest(req.content.raw);
-			// TODO: Retrieve absolute path of the selected file to delete it (arg of remove)
 			if (req.method == "DELETE") {
 				if (!remove(("www" + req.path).c_str()))
 					req.putCustomError(204);
