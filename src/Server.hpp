@@ -2,6 +2,7 @@
 
 #include "utility.hpp"
 #include "Request.hpp"
+#include "cgi.hpp"
 
 class Server {
 	public:
@@ -116,7 +117,7 @@ class Server {
 					req.putCustomError(500);
 			} else if (is_CGI(req.path)) {
 				if (exist("www" + req.path))
-					req.putCustomError(502);
+					execute_cgi(req);
 					/* Sasso CGI */
 				// else
 					//req.putResponse(404);

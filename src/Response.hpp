@@ -11,18 +11,23 @@ class Response {
 		std::map<string, string>	headers;
 		bool						ready;
 		size_t						sendBits;
+		int							cgi_fd;
+		pid_t						cgi_pid;
 
-		Response() : ready(false), sendBits(0) {}
+		Response() : ready(false), sendBits(0), cgi_fd(0), cgi_pid(0) {}
 		~Response() {}
 
 		string	getStr() {
 			string res;
 
 			res += this->protocolVer + ' ' + this->status + ' ' + "\r\n";
+			if (this->cgi_fd)
+				this->readFromFd();
 			for (std::map<string, string>::iterator it = this->headers.begin(); it != this->headers.end(); it++)
 				res += it->first + ": " + it->second + "\r\n";
 			res += '\n';
 			res += this->body;
+
 			return (res);
 		}
 
@@ -70,5 +75,25 @@ class Response {
 			closedir(directory);
 			autoidxpage += autoidx_bottom;
 			return autoidxpage;
+		}
+
+		void readFromFd() {
+			char	buf[10000];
+			int		ret = read(this->cgi_fd, buf, 9999);
+			if (ret == 0)
+			{
+				int	status;
+
+				waitpid(this->cgi_pid, &status, 0);
+				// if (WEXITSTATUS(status))
+				// 	;
+				// return false;
+			}
+			// if (ret == -1 || ret == 0)
+			// 	return (false);
+			buf[ret] = '\0';
+			this->body += buf;
+			this->headers["Content-Length"] = std::to_string(this->body.length());
+			this->headers["Content-Type"] = "text/html";
 		}
 };

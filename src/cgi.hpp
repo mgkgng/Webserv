@@ -3,7 +3,6 @@
 #include "utility.hpp"
 #include "Request.hpp"
 
-
 struct CGI_Environment{
 
     std::vector<char *> variable;
@@ -14,7 +13,7 @@ struct CGI_Environment{
         size_t i;
         for (i = 0; i < variable.size(); i++)
             env_execveable[i] = variable[i];
-        env_execveable[i] = '\0';
+        env_execveable[i] = NULL;
         return env_execveable;
     }
 
@@ -42,13 +41,58 @@ struct CGI_Environment{
 };
 
 // Call that after is_CGI, look at utility is_CGI
-void execute_cgi(const std::map<int, string> &status_code, Request &request, const_string &uri, const_string &cgi, const_string &path)
+void execute_cgi(Request &req)
 {
-    int fd_request[2], fd_response[2];
+    int fd_req[2], fd_response[2];
     pipe(fd_response);
 
     int pid = fork();
-    if (pid)
+    if (!pid) 
+    {
+        pipe(fd_req);
+        // Apparently, according to Mathias, the easiest way to manage is just to write content and parse/compose in req/res
+        write(fd_req[1], req.content.raw.c_str(), req.content.raw.length());
+        close(fd_req[1]), close(fd_response[0]);
+
+        CGI_Environment environment;
+
+        for (std::map<string, string>::const_iterator iter = req.headers.begin(); iter != req.headers.end(); iter++)
+            environment.add_variable(iter->first, iter->second);
+
+
+        std::string cgi = (end_with(req.path, "php")) ? "/usr/bin/php" : "/usr/local/bin/python3";
+        std::string uri = "/Users/sspina/Music/Webserv/www" + req.path;
+
+        std::cout << req.path << std::endl;
+        // We set the env variable needed; must update with the actual source
+        environment.add_variable("REQUEST_METHOD", req.method); // -> Member of req
+		environment.add_variable("PATH_TRANSLATED", uri); // -> Argument from function call
+		environment.add_variable("SCRIPT_NAME", req.path); // -> Member of req
+		environment.add_variable("QUERY_STRING", ""); // -> Member of req
+		environment.add_variable("PATH_INFO", "/"); // -> Argument from function call
+        std::cerr << "===== TEST ARGUMENTS CGI =====\n"
+			<< "req.type " << req.method << "\n"
+			<< "uri " << uri << "\n"
+			<< "req.url " << req.path << "\n"
+			<< "req.query " << "" << "\n" 
+			<< "path_info " << "/" << "\n"
+		<< "===== END TEST ARGUMENTS CGI =====" << std::endl;
+
+
+        dup2(fd_req[0], 0), close(fd_req[0]);
+        dup2(fd_response[1], 1), close(fd_response[1]);
+
+        std::cerr << "execve arguments:\nCgi " << cgi << "\nUri: " << uri << std::endl;
+        char *execve_av[] = {
+            const_cast<char *>(cgi.c_str()), 
+            const_cast<char *>(uri.c_str()), 
+            NULL
+        };
+        // https://forhjy.medium.com/42-webserv-cgi-programming-66d63c3b22db
+        execve(cgi.c_str(), execve_av, environment.env_to_execve());
+        close(0), close(1);
+        exit(1);
+    } else 
     {
         close(fd_response[1]);
         // https://man7.org/linux/man-pages/man2/fcntl.2.html
@@ -60,38 +104,14 @@ void execute_cgi(const std::map<int, string> &status_code, Request &request, con
         // === TODO ===
         // "Something" to be changed, obv. Ideally, we set headers and stuffs
         // response.set_whatweset("HTTP/1.1 200 OK\r\n", fd_response[0], &status_code, pid, true);
+        // char buf[10000];
+        req.res.protocolVer = "HTTP/1.1";
+        req.res.status = statusCodeToString(Ok);
+        req.res.body = "";
+        req.res.ready = true;
+        req.res.cgi_fd = fd_response[0];
+        req.res.cgi_pid = pid;
+        //req.res.headers = std::map<string, string>();
     }
-    else 
-    {
-        pipe(fd_request);
-        // Apparently, according to Mathias, the easiest way to manage is just to write content and parse/compose in req/res
-        write(fd_request[1], request.content.raw.c_str(), request.content.raw.length());
-        close(fd_request[1]), close(fd_response[0]);
-
-        CGI_Environment environment;
-
-        for (std::map<string, string>::const_iterator iter = request.headers.begin(); iter != request.headers.end(); iter++)
-            environment.add_variable(iter->first, iter->second);
-
-        // We set the env variable needed; must update with the actual source
-        environment.add_variable("REQUEST_METHOD", request.method); // -> Member of Request
-		// environment.add_variable("PATH_TRANSLATED", uri); // -> Argument from function call
-		// environment.add_variable("SCRIPT_NAME", request.url); // -> Member of Request
-		// environment.add_variable("QUERY_STRING", request.query); // -> Member of Request
-		// environment.add_variable("PATH_INFO", path); // -> Argument from function call
-
-        dup2(fd_request[0], 0), close(fd_request[0]);
-        dup2(fd_response[1], 1), close(fd_response[1]);
-
-        char *execve_av[] = {
-            const_cast<char *>(cgi.c_str()), 
-            const_cast<char *>(uri.c_str()), 
-            NULL
-        };
-
-        // https://forhjy.medium.com/42-webserv-cgi-programming-66d63c3b22db
-        execve(cgi.c_str(), execve_av, environment.env_to_execve());
-        close(0), close(1);
-        exit(1);
-    }
+    
 }
