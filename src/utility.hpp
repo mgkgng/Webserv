@@ -37,8 +37,11 @@
 #include <sys/stat.h>
 #include <math.h>
 
+#include "Route.hpp"
+typedef std::map<std::string, Route>	routes_t;
+
 #define WHITESPACE " \n\r\t\f\v"
-#define DEFAULT_ERROR_FILE "www/error_pages/error.html"
+#define DEFAULT_ERROR_FILE "www/error.html"
 #define AUTOINDEX_TEMPLATE_FILE "www/autoindex.html"
 #define READFILE_BUF 2048
 
@@ -97,8 +100,8 @@ inline bool      is_CGI(const_string &path)
 }
 
 // TODO: Should have something to be checked in Request, not bruteforce like that
-inline bool      is_autoindex(const_string &path) {
-    return (path == "/autoindex") ? true : false;
+inline bool      is_autoindex_on(const_string &path, routes_t routes) {
+    return (routes[path].autoindex) ? true : false;
 }
 
 string     to_lower_string(string str)
@@ -195,3 +198,4 @@ const size_t autoidx_end = autoidx.find("}}") == string::npos ? autoidx.size() -
 const_string autoidx_head = autoidx.substr(0, autoidx_begin);
 const_string autoidx_body = autoidx.substr(autoidx_begin + 2, autoidx_end - autoidx_begin - 2);
 const_string autoidx_bottom = autoidx.substr(autoidx_end + 2);
+const_string custom_error = file_to_string(DEFAULT_ERROR_FILE);

@@ -1,5 +1,7 @@
 #pragma once
 
+using std::string;
+
 class Route {
 	public:
 		string				index, root, redirect, cgiExtension, cgiPath;

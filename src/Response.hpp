@@ -7,9 +7,8 @@
 
 class Response {
 	public:
-		string 						body, statMsg, protocolVer;
+		string 						body, status, protocolVer;
 		std::map<string, string>	headers;
-		unsigned int				statCode;
 		bool						ready;
 		size_t						sendBits;
 
@@ -19,7 +18,7 @@ class Response {
 		string	getStr() {
 			string res;
 
-			res += this->protocolVer + ' ' + std::to_string(this->statCode) + ' ' + this->statMsg + ' ' + "\r\n";
+			res += this->protocolVer + ' ' + this->status + ' ' + "\r\n";
 			for (std::map<string, string>::iterator it = this->headers.begin(); it != this->headers.end(); it++)
 				res += it->first + ": " + it->second + "\r\n";
 			res += '\n';
@@ -29,7 +28,7 @@ class Response {
 
 		void clean() {
 			this->protocolVer = "";
-			this->statMsg = "";
+			this->status = "";
 			this->headers.clear();
 			this->body = "";
 			this->ready = false;
@@ -49,7 +48,7 @@ class Response {
 		// For each file found the "body" part will be appended with the needed data
 		// Then we append the bottom and the html page is finished
 		// TODO @Minguk: How can server retrieve the Path?
-		string putAutoIndex(const_string &url, const_string &path = "/Users/sspina/Music/Webserv/www/error_pages") {
+		string putAutoIndex(const_string &url, const_string &path) {
 			DIR *directory;
 			// https://stackoverflow.com/questions/12991334/members-of-dirent-structure
 			struct dirent *current_directory;

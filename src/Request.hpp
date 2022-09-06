@@ -141,30 +141,16 @@ class Request {
 			this->res.protocolVer = "HTTP/1.1";
 			std::map<string, Route>::iterator it = routes.find(this->path);
 			if (it != routes.end()) {
-				this->res.statCode = Ok;
-				this->res.statMsg = "OK";
+				this->res.status = statusCodeToString(Ok);
 				this->putResBody(routes[path]);
 			} else if (exist("www" + path)) {
-				this->res.statCode = Ok;
-				this->res.statMsg = "OK";
+				this->res.status = statusCodeToString(Ok);
 				this->putResBody("www" + path);
 			} else if (exist("www/cgi" + split(path, "?").at(0))) {
-				this->res.statCode = Ok;
-				this->res.statMsg = "OK";
+				this->res.status = statusCodeToString(Ok);
 				this->putResBody("www/cgi" + split(path, "?").at(0));
-			} else {
-				this->res.statCode = NotFound;
-				this->res.statMsg = statusCodeToString(NotFound);
-				this->putResBody("www/error_pages/error_404.html");
-			}
-			this->res.ready = true;
-		}
-
-		void put404(void) {
-			this->res.protocolVer = "HTTP/1.1";
-			this->res.statCode = NotFound;
-			this->res.statMsg = statusCodeToString(NotFound);
-			this->putResBody("www/error_pages/error_404.html");
+			} else
+				putCustomError(404);
 			this->res.ready = true;
 		}
 
@@ -190,9 +176,18 @@ class Request {
 
 		void	putAutoIndexRes(const_string &page) {
 			res.protocolVer = "HTTP/1.1";
-			res.statCode = Ok;
-			res.statMsg = "OK";
+			res.status = statusCodeToString(Ok);
 			res.body = page;
+			res.headers["Content-Length"] = std::to_string(res.body.length());
+			res.headers["Content-Type"] = split(this->headers["Accept"], ",").at(0);
+			res.ready = true;
+		}
+
+		void	putCustomError(int code) {
+			string	file = replace_all_occurrency(replace_all_occurrency(custom_error, "$NAME", statusCodeToString(code)), "$CODE", to_string(code));
+			res.protocolVer = "HTTP/1.1";
+			res.status = statusCodeToString(code);
+			res.body = file;
 			res.headers["Content-Length"] = std::to_string(res.body.length());
 			res.headers["Content-Type"] = split(this->headers["Accept"], ",").at(0);
 			res.ready = true;

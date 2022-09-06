@@ -109,36 +109,24 @@ class Server {
 			 	return ;
 
 			req.parseRequest(req.content.raw);
-
 			// TODO: Retrieve absolute path of the selected file to delete it (arg of remove)
 			if (req.method == "DELETE") {
-				// std::cout << "I entered the delete method if" << std::endl;
-				// std::cout << "I'm trying to remove: " << req.path.c_str() << std::endl;
-				if (!remove("/Users/sspina/Music/Webserv/www/error_pages/error_404.html")) {
-					// === TODO ===
-					// set 204 no content
-					// std::cout << "I successfully removed" << std::endl;
-					req.put404();
-				} else {
-					// === TODO ===
-					// set 500 internal server error
-					// std::cout << "I didn't remove" << std::endl;
-					req.put404();
-				}
+				if (!remove(("www" + req.path).c_str()))
+					req.putCustomError(204);
+				else
+					req.putCustomError(500);
 			} else if (is_CGI(req.path)) {
 				if (exist("www" + req.path))
-					return ;
+					req.putCustomError(502);
 					/* Sasso CGI */
 				// else
 					//req.putResponse(404);
-			
-			} else if (is_autoindex(req.path)) {
-				string body = req.res.putAutoIndex(req.path);
+			} else if (is_autoindex_on(req.path, this->routes)) {
+				string body = req.res.putAutoIndex(req.path, this->routes["/autoindex"].root);
 				if (body == "")
-					req.put404(); // TODO: Change (?)
-				else {
+					req.putCustomError(404);
+				else
 					req.putAutoIndexRes(body);
-				}
 			}
 			else {
 				req.putResponse(this->routes);
