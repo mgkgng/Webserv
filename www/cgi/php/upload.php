@@ -2,7 +2,7 @@
 
 # https://www.php.net/manual/fr/features.file-upload.post-method.php
 
-$uploaddir = '/var/www/uploads/';
+$uploaddir = '../upload';
 
 if (isset($_FILES['userfile']))
 {

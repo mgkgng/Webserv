@@ -145,3 +145,13 @@
   {
     display: inline-block;
   }
+
+  /* .toto {
+    display: grid;
+    grid-template-columns: repeat(2, 30px);
+  }
+
+  .titi {
+    display: flex;
+    flex-direction: column;
+  } */
