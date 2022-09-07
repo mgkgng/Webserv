@@ -24,10 +24,11 @@ class Request {
 			if ((iter = headers.find("Content-Type")) != headers.end()) {
 				std::vector<string> line = split(iter->second, ";");
 				if (line[0] == "multipart/form-data" && line.size() == 2) {
+					std::cout << "YOYOYOYOYOY THERE IS MULTIPART" << std::endl;
 					isMultipart = true;
-					trim(line[1], WHITESPACE);
-					if (start_with(line[1], "boundary="))
-						boundary = line[1].substr(9);
+					string tmp = trim(line[1], WHITESPACE);
+					if (start_with(tmp, "boundary="))
+						boundary = tmp.substr(9);
 				}
 			}
 
@@ -193,6 +194,28 @@ class Request {
 			res.body = file;
 			res.headers["Content-Length"] = std::to_string(res.body.length());
 			res.headers["Content-Type"] = split(this->headers["Accept"], ",").at(0);
+			res.ready = true;
+		}
+
+		void	postContent(Request &req) {
+			// std::cout << "boundary: " << req.content.boundary << std::endl;
+			// std::cout << "raw: " << req.content.raw << std::endl;
+			std::vector<string> multiportData = split(req.content.raw, req.content.boundary);
+			std::vector<string> fileData = split(multiportData[2], "\r\n");
+			string fileName = trim(split(fileData[0], ";")[2].substr(11), "\""); // i know it's not perfect but come on
+			string fileContent;
+			for (size_t i = 2; i < fileData.size(); i++)
+				fileContent += fileData[i];
+			// std::cout << "test: " << fileContent << std::endl;
+
+		    std::ofstream out("www/cgi/upload/" + fileName);
+			out << fileContent;
+
+			res.protocolVer = "HTTP/1.1";
+			res.status = statusCodeToString(Ok);
+			res.body = "IT'S ALL GOOD SASSO";
+			res.headers["Content-Length"] = std::to_string(res.body.length());
+			res.headers["Content-Type"] = "text/html";
 			res.ready = true;
 		}
 
