@@ -9,7 +9,7 @@ class Route {
 		std::vector<string>	methods;
 		bool				autoindex;
 
-		Route() {}
+		Route() : autoindex(false) {}
 		~Route() {}
 };
 

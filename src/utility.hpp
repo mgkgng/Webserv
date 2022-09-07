@@ -100,7 +100,7 @@ inline bool      is_CGI(const_string &path)
 }
 
 inline bool      is_autoindex_on(const_string &path, routes_t routes) {
-    return (routes[path].autoindex) ? true : false;
+    return (routes[path].autoindex);
 }
 
 string     to_lower_string(string str)
