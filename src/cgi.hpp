@@ -47,7 +47,6 @@ void execute_cgi(Request &req)
     pipe(fd_response);
 
     int pid = fork();
-    std::cerr << "it's alright until here!1311" << std::endl;
     if (!pid) 
     {
         pipe(fd_req);
@@ -63,7 +62,6 @@ void execute_cgi(Request &req)
         std::string cgi = (end_with(req.path, "php")) ? "/usr/bin/php" : "/usr/local/bin/python3";
         std::string uri = "www" + req.path;
 
-        std::cerr << "it's alright until here!11" << std::endl;
         // We set the env variable needed; must update with the actual source
         environment.add_variable("REQUEST_METHOD", req.method); // -> Member of req
 		environment.add_variable("PATH_TRANSLATED", uri); // -> Argument from function call
@@ -80,7 +78,6 @@ void execute_cgi(Request &req)
             NULL
         };
 
-        std::cerr << "it's alright until here!" << std::endl;
         // https://forhjy.medium.com/42-webserv-cgi-programming-66d63c3b22db
         execve(cgi.c_str(), execve_av, environment.env_to_execve());
         close(0), close(1);

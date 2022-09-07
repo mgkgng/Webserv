@@ -110,7 +110,8 @@ class Server {
 			 	return ;
 
 			req.parseRequest(req.content.raw);
-			// std::cout << req.content.raw << std::endl;
+			if (req.method == "POST")
+				std::cout << req.content.raw << std::endl;
 			if (req.method == "DELETE") {
 				if (!remove(("www" + req.path).c_str()))
 					req.putCustomError(204);
@@ -132,7 +133,6 @@ class Server {
 			else {
 				req.putResponse(this->routes);
 			}
-
 			chlist.resize(chlist.size() + 1);
 			EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
 		}
