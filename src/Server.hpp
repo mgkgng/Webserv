@@ -120,9 +120,8 @@ class Server {
 			} else if (is_CGI(req.path)) {
 				if (exist("www" + req.path))
 					execute_cgi(req);
-					/* Sasso CGI */
-				// else
-					//req.putResponse(404);
+				else
+					req.putCustomError(404);
 			} else if (is_autoindex_on(req.path, this->routes)) {
 				string body = req.res.putAutoIndex(req.path, this->routes["/autoindex"].root);
 				if (body == "")
