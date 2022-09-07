@@ -4,26 +4,29 @@
   <meta charset="UTF-8">
   <title>Webserv Project</title>
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,800' rel='stylesheet' type='text/css'>
-  <link href='https://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'><link rel="stylesheet" href="./style.css">
-</head> 
+  <link href='https://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'><link rel="stylesheet" href="../style.css">
+</head>
 <body>
 
 <div class="full-screen">
-  <div>
-    <h1>Team JMS (to change!(?))</h1>
+  <div style="margin: 1.5em">
+    <h1>Here, we test POST method!</h1>
     <br>
-    <a class="button-line" href="./post.html">Post Test</a>
-    <a class="button-line" href="./error_pages/index.html">Error pages</a>  
-    <a class="button-line" href="./cgi/index.html">CGI</a> 
-    <a class="button-line" href="./autoindex">Autoindex</a>  
+    <div class="coco">
+      <form class="gogo" method="post" enctype="multipart/form-data">
+        <input class="what" type="file" name="file" required>
+        <input class="dodo" type="submit" value="upload" name="submit">
+      </form>
+    </div>
+    <a class="button-line" href="../index.html">Home</a>
   </div>
   <br/>
 
 <!-- partial -->
 
   <footer>
-			<span><h3>WebServ - 2022, made by</h3></span>
-			<div id="outer">
+    <span><h3>WebServ - 2022, made by</h3></span>
+      <div id="outer">
         <div class="inner"><a class="button-line-mini" target="_blank" href="https://github.com/mgkgng">min-kang</a></div>
         <div class="inner"><a class="button-line-mini" target="_blank" href="https://github.com/SalvatoreSpina">sspina</a></div>
         <div class="inner"><a class="button-line-mini" target="_blank" href="https://github.com/blenderwizard">jrathelo</a></div>

@@ -155,3 +155,56 @@
     display: flex;
     flex-direction: column;
   } */
+
+  .coco {
+    margin: 2em;
+  }
+  .gogo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .5em;
+  }
+  .soso {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .what {
+    width: 16em;
+    display: flex;
+    align-items: center;
+  }
+  .dodo{
+    font-size: 1em;
+  }
+
+  input {
+    border: none;
+    background-color: rgba(255, 255, 255, 0.4);
+    padding: 1em;
+    border-radius: 2em;
+    font-family: 'Open Sans', sans-serif;
+    text-transform: uppercase;
+    text-align: center;
+    font-size: .5em;
+    text-decoration: none;
+    color: #fff;
+  }
+  input::file-selector-button {
+    padding: 1em;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.4);
+    padding: 1em;
+    border-radius: 2em;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    font-family: 'Open Sans', sans-serif;
+    text-transform: uppercase;
+    color: #fff;
+    text-align: center;
+    font-size: 2em;
+    text-decoration: none;
+  }

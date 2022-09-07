@@ -24,7 +24,6 @@ class Request {
 			if ((iter = headers.find("Content-Type")) != headers.end()) {
 				std::vector<string> line = split(iter->second, ";");
 				if (line[0] == "multipart/form-data" && line.size() == 2) {
-					std::cout << "YOYOYOYOYOY THERE IS MULTIPART" << std::endl;
 					isMultipart = true;
 					string tmp = trim(line[1], WHITESPACE);
 					if (start_with(tmp, "boundary="))
