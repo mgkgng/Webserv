@@ -110,6 +110,7 @@ class Server {
 			 	return ;
 
 			req.parseRequest(req.content.raw);
+			// std::cout << req.content.raw << std::endl;
 			if (req.method == "DELETE") {
 				if (!remove(("www" + req.path).c_str()))
 					req.putCustomError(204);

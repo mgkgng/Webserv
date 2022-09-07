@@ -133,7 +133,10 @@ class Request {
 				this->headers.insert(std::pair<string, string>(trim(kv.at(0), WHITESPACE), trim(kv.at(1), WHITESPACE)));
 			}
 
-			/* should put body */
+			while (it != req.end()) // je vais tester
+				this->body += *it++ + "\r\n";
+			
+			// std::cout << this->body << std::endl;
 		}
 
 		void putResponse(std::map<string, Route> routes) {

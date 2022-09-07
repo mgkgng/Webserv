@@ -47,6 +47,7 @@ void execute_cgi(Request &req)
     pipe(fd_response);
 
     int pid = fork();
+    std::cerr << "it's alright until here!1311" << std::endl;
     if (!pid) 
     {
         pipe(fd_req);
@@ -59,35 +60,27 @@ void execute_cgi(Request &req)
         for (std::map<string, string>::const_iterator iter = req.headers.begin(); iter != req.headers.end(); iter++)
             environment.add_variable(iter->first, iter->second);
 
-
         std::string cgi = (end_with(req.path, "php")) ? "/usr/bin/php" : "/usr/local/bin/python3";
-        std::string uri = "/Users/sspina/Music/Webserv/www" + req.path;
+        std::string uri = "www" + req.path;
 
-        std::cout << req.path << std::endl;
+        std::cerr << "it's alright until here!11" << std::endl;
         // We set the env variable needed; must update with the actual source
         environment.add_variable("REQUEST_METHOD", req.method); // -> Member of req
 		environment.add_variable("PATH_TRANSLATED", uri); // -> Argument from function call
 		environment.add_variable("SCRIPT_NAME", req.path); // -> Member of req
 		environment.add_variable("QUERY_STRING", ""); // -> Member of req
 		environment.add_variable("PATH_INFO", "/"); // -> Argument from function call
-        // std::cerr << "===== TEST ARGUMENTS CGI =====\n"
-		// 	<< "req.type " << req.method << "\n"
-		// 	<< "uri " << uri << "\n"
-		// 	<< "req.url " << req.path << "\n"
-		// 	<< "req.query " << "" << "\n" 
-		// 	<< "path_info " << "/" << "\n"
-		// << "===== END TEST ARGUMENTS CGI =====" << std::endl;
-
 
         dup2(fd_req[0], 0), close(fd_req[0]);
         dup2(fd_response[1], 1), close(fd_response[1]);
 
-        std::cerr << "execve arguments:\nCgi " << cgi << "\nUri: " << uri << std::endl;
         char *execve_av[] = {
             const_cast<char *>(cgi.c_str()), 
             const_cast<char *>(uri.c_str()), 
             NULL
         };
+
+        std::cerr << "it's alright until here!" << std::endl;
         // https://forhjy.medium.com/42-webserv-cgi-programming-66d63c3b22db
         execve(cgi.c_str(), execve_av, environment.env_to_execve());
         close(0), close(1);
@@ -110,7 +103,6 @@ void execute_cgi(Request &req)
         req.res.status = statusCodeToString(Ok);
         req.res.body = "";
         req.res.ready = true;
-        std::cout << "HERE IN CGI FD: " << fd_response[0] << std::endl;
         req.res.cgi_fd = fd_response[0];
         req.res.cgi_pid = pid;
         //req.res.headers = std::map<string, string>();
