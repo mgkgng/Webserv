@@ -10,7 +10,6 @@ file = form["file"]
 
 #If file uploaded
 if file.file:
-	
 	#Wb means write & binary, is a filemod of open
 	with open(f"www/cgi/upload/{file.filename}", 'wb') as f:
 		try:

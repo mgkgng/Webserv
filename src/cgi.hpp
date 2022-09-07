@@ -13,7 +13,7 @@ struct CGI_Environment{
         size_t i;
         for (i = 0; i < variable.size(); i++)
             env_execveable[i] = variable[i];
-        env_execveable[i] = NULL;
+        env_execveable[i] = 0;
         return env_execveable;
     }
 
@@ -92,7 +92,8 @@ void execute_cgi(Request &req)
         execve(cgi.c_str(), execve_av, environment.env_to_execve());
         close(0), close(1);
         exit(1);
-    } else 
+    }
+    else 
     {
         close(fd_response[1]);
         // https://man7.org/linux/man-pages/man2/fcntl.2.html
