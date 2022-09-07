@@ -79,12 +79,13 @@ class Response {
 
 		void readFromFd() {
 			char	buf[10000];
+			int	status;
+			waitpid(this->cgi_pid, &status, 0);
 			int		ret = read(this->cgi_fd, buf, 9999);
+			std::cout << "i gotta feeling" << cgi_fd << std::endl;
 			if (ret == 0)
 			{
-				int	status;
 
-				waitpid(this->cgi_pid, &status, 0);
 				// if (WEXITSTATUS(status))
 				// 	;
 				// return false;
@@ -95,5 +96,6 @@ class Response {
 			this->body += buf;
 			this->headers["Content-Length"] = std::to_string(this->body.length());
 			this->headers["Content-Type"] = "text/html";
+			std::cout << "this is body: " << ret << "lol" << buf << std::endl;
 		}
 };

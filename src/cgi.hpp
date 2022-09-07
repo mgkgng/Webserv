@@ -70,13 +70,13 @@ void execute_cgi(Request &req)
 		environment.add_variable("SCRIPT_NAME", req.path); // -> Member of req
 		environment.add_variable("QUERY_STRING", ""); // -> Member of req
 		environment.add_variable("PATH_INFO", "/"); // -> Argument from function call
-        std::cerr << "===== TEST ARGUMENTS CGI =====\n"
-			<< "req.type " << req.method << "\n"
-			<< "uri " << uri << "\n"
-			<< "req.url " << req.path << "\n"
-			<< "req.query " << "" << "\n" 
-			<< "path_info " << "/" << "\n"
-		<< "===== END TEST ARGUMENTS CGI =====" << std::endl;
+        // std::cerr << "===== TEST ARGUMENTS CGI =====\n"
+		// 	<< "req.type " << req.method << "\n"
+		// 	<< "uri " << uri << "\n"
+		// 	<< "req.url " << req.path << "\n"
+		// 	<< "req.query " << "" << "\n" 
+		// 	<< "path_info " << "/" << "\n"
+		// << "===== END TEST ARGUMENTS CGI =====" << std::endl;
 
 
         dup2(fd_req[0], 0), close(fd_req[0]);
@@ -110,6 +110,7 @@ void execute_cgi(Request &req)
         req.res.status = statusCodeToString(Ok);
         req.res.body = "";
         req.res.ready = true;
+        std::cout << "HERE IN CGI FD: " << fd_response[0] << std::endl;
         req.res.cgi_fd = fd_response[0];
         req.res.cgi_pid = pid;
         //req.res.headers = std::map<string, string>();
