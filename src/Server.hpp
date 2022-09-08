@@ -198,10 +198,8 @@ class Server {
 						recvData(ev);
 					else if (ev.filter & EVFILT_WRITE)
 						sendData(ev);
-					std::cout << "end of boucle" << evNb << std::endl;
 				}
 			}
-			std::cout << "what?" << std::endl;
 		}
 
 		static void thread_launch(void *ptr) {
