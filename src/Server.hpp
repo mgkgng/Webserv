@@ -48,22 +48,28 @@ class Server {
 			EV_SET(&*(chlist.end() - 1), sockfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
 		};
 
-		void acceptConnection() {
-			int	newConnection = accept(sockfd, NULL, NULL);
-			assert(newConnection != -1);
-			fcntl(newConnection, F_SETFL, O_NONBLOCK);
+		void acceptConnection(struct kevent &ev) {
+			while (ev.data--) {
+				int	newConnection = accept(sockfd, NULL, NULL);
+				if (newConnection == -1)
+				assert(newConnection != -1);
+				fcntl(newConnection, F_SETFL, O_NONBLOCK);
 
-			chlist.resize(chlist.size() + 1);
-			EV_SET(&*(chlist.end() - 1), newConnection, EVFILT_READ, EV_ADD, 0,0, NULL);
+				chlist.resize(chlist.size() + 2);
+				EV_SET(&*(chlist.end() - 2), newConnection, EVFILT_READ, EV_ADD, 0,0, NULL);
+				EV_SET(&*(chlist.end() - 1), newConnection, EVFILT_TIMER, EV_ADD | EV_ONESHOT, 0, 6000, NULL); // TIMEOUT 
 
-			client[newConnection] = Request(newConnection);
-			std::cout << "Connection accepted." << std::endl;
+				client[newConnection] = Request(newConnection);
+				std::cout << "Connection accepted." << std::endl;
+			}
 		};
 		
-		void	disconnect(int fd) {
+		void	disconnect(struct kevent &ev) {
 			std::cout << "disconnect" << std::endl;
-			this->client.erase(fd);
-			close(fd);
+			client.erase(ev.ident);
+			chlist.resize(chlist.size() + 1);
+			EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
+			close(ev.ident);
 		};
 
 		void	sendData(struct kevent &ev) {
@@ -88,29 +94,29 @@ class Server {
 
 			/* recv */
 			ret = recv(ev.ident, buf, 9999, 0);
-			if (ret < 0)
-				throw Server::WebservError();
-			if (!ret) {
-				/* Minguk a revoir ici */
+			if (ret <= 0)
 				return ;
-			}
 			buf[ret] = '\0';
 			Request &req = client[ev.ident];
 
 			/* check chunked request */
 			if (!req.content.expected) {
-			 	req.parseRequest(buf);
+				int reqCode = req.parseRequest(buf);
+				if (reqCode != 200) {
+					req.putCustomError(reqCode);
+					return ;
+				}
 				req.content.initialize(buf, req.headers);
 			} else
 				req.content.parseByte(buf);
-
-			/* Minguk Protection invalid request */
 			
 			if (!req.content.isFullyParsed)
 			 	return ;
 
-			req.parseRequest(req.content.raw);
-			if (req.method == "POST") {
+			int reqCode = req.parseRequest(req.content.raw);
+			if (reqCode != 200) {
+				req.putCustomError(reqCode);
+			} else if (req.method == "POST") {
 				req.postContent(req);				
 			} else if (req.method == "DELETE") {
 				if (!remove(("www" + req.path).c_str()))
@@ -136,6 +142,14 @@ class Server {
 			EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
 		}
 
+		void setTimeOut(struct kevent &ev) {
+			Request &req = client[ev.ident];
+			
+			req.putCustomError(408);
+			chlist.resize(chlist.size() + 1);
+			EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
+		}
+
 		void launch() {
 			int evNb;
 
@@ -153,13 +167,16 @@ class Server {
 				for (int i = 0; i < evNb; i++) {
 					struct kevent &ev = evlist[i];
 					if (ev.flags & EV_EOF)
-						disconnect(ev.ident);
+						disconnect(ev);
 					else if (static_cast<int>(ev.ident) == sockfd)
-						acceptConnection();
+						acceptConnection(ev);
+					// else if (ev.flags & EV_CLEAR)
+					// 	setTimeOut(ev);
 					else if (ev.filter & EVFILT_READ && !client[ev.ident].res.ready)
 						recvData(ev);
 					else if (ev.filter & EVFILT_WRITE)
 						sendData(ev);
+
 				}
 			}
 		}

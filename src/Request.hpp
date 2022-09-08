@@ -99,21 +99,20 @@ class Request {
 		Response					res;
 		uintptr_t					ident;
 
-		Request() { this->content = Content(); }
+		Request() : method(""), path(""), protocolVer(""), body(""), file("") {
+			this->content = Content();
+		}
 		Request(uintptr_t id) : ident(id) { this->content = Content(); }
 		~Request() {}
 
-		void parseRequest(string s) {
-			std::vector<string> getb = split(s, "\n\n");
+		int parseRequest(string s) {
 			std::vector<string> req = split(s, "\r\n");
 
 			// head 
 			std::vector<string> head = split(req.at(0), " ");
-			if (head.at(0) != "GET" && head.at(0) != "POST" && head.at(0) != "DELETE") {
-				this->method = "";
-				return ;
-			}
 			this->method = head.at(0);
+			if (head.size() != 3 || (method != "GET" && method != "POST" && method != "DELETE"))
+				return (400);
 			std::vector<string> pq = split(head.at(1), "?");
 			this->path = pq.at(0);
 			this->attributes.empty();
@@ -132,10 +131,10 @@ class Request {
 				std::vector<string> kv = split(*it, ":");
 				this->headers.insert(std::pair<string, string>(trim(kv.at(0), WHITESPACE), trim(kv.at(1), WHITESPACE)));
 			}
-
 			while (it != req.end()) // je vais tester
 				this->body += *it++ + "\r\n";
 			
+			return (200);
 			// std::cout << this->body << std::endl;
 		}
 
@@ -197,22 +196,26 @@ class Request {
 		}
 
 		void	postContent(Request &req) {
-			// std::cout << "boundary: " << req.content.boundary << std::endl;
-			// std::cout << "raw: " << req.content.raw << std::endl;
 			std::vector<string> multiportData = split(req.content.raw, req.content.boundary);
 			std::vector<string> fileData = split(multiportData[2], "\r\n");
 			string fileName = trim(split(fileData[0], ";")[2].substr(11), "\""); // i know it's not perfect but come on
 			string fileContent;
-			for (size_t i = 2; i < fileData.size(); i++)
+			unsigned int fileSize = 0;
+			for (size_t i = 2; i < fileData.size(); i++) {
 				fileContent += fileData[i];
-			// std::cout << "test: " << fileContent << std::endl;
+				fileSize += fileData[i].length();
+				if (fileSize > 1024) {
+					req.putCustomError(413);
+					return ;
+				}
+			}
 
 		    std::ofstream out("www/cgi/upload/" + fileName);
 			out << fileContent;
 
 			res.protocolVer = "HTTP/1.1";
 			res.status = statusCodeToString(Ok);
-			res.body = "IT'S ALL GOOD SASSO";
+			res.body = "file upload success";
 			res.headers["Content-Length"] = std::to_string(res.body.length());
 			res.headers["Content-Type"] = "text/html";
 			res.ready = true;
