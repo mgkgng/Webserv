@@ -150,7 +150,7 @@ class Request {
 				this->putResBody("www" + path);
 			} else if (exist("www/cgi" + split(path, "?").at(0))) {
 				this->res.status = statusCodeToString(Ok);
-				this->putResBody("www/cgi" + split(path, "?").at(0));
+				this->putResBody("www/cgi" + split(path, "?").at(0), true);
 			} else
 				putCustomError(404);
 			this->res.ready = true;
@@ -163,17 +163,17 @@ class Request {
 			buf << f.rdbuf();
 			res.body = buf.str();
 			res.headers["Content-Length"] = std::to_string(res.body.length());
-			res.headers["Content-Type"] = split(this->headers["Accept"], ",").at(0);
+			res.headers["Content-Type"] = mime(route.index);
 		}
 
-		void	putResBody(string fName) {
+		void	putResBody(string fName, bool cgi = false) {
 			std::ifstream f(fName);
 			std::stringstream buf;
 
 			buf << f.rdbuf();
 			res.body = buf.str();
 			res.headers["Content-Length"] = std::to_string(res.body.length());
-			res.headers["Content-Type"] = split(this->headers["Accept"], ",").at(0);
+			res.headers["Content-Type"] = (!cgi) ? mime(fName) : split(this->headers["Accept"], ",").at(0);
 		}
 
 		void	putAutoIndexRes(const_string &page) {
@@ -181,7 +181,7 @@ class Request {
 			res.status = statusCodeToString(Ok);
 			res.body = page;
 			res.headers["Content-Length"] = std::to_string(res.body.length());
-			res.headers["Content-Type"] = split(this->headers["Accept"], ",").at(0);
+			res.headers["Content-Type"] = "text/html";
 			res.ready = true;
 		}
 

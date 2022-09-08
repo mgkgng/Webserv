@@ -38,6 +38,8 @@
 #include <math.h>
 
 #include "Route.hpp"
+#include "mime.hpp"
+
 typedef std::map<std::string, Route>	routes_t;
 
 #define WHITESPACE " \n\r\t\f\v"

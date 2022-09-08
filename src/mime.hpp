@@ -1,10 +1,8 @@
 #pragma once
 
-#include <utility.hpp>
-
 struct MimeMap {
 	public:
-	std::map<std::string, const char *> map;
+	std::map<std::string, const char *> mime;
 
 	MimeMap() {
 		mime["aac"] = "audio/aac";
@@ -91,9 +89,9 @@ struct MimeMap {
 
 const MimeMap	mimeMap;
 
-const char	*mime(const_string &name)
+const char	*mime(const std::string &name)
 {
 	string str = name.substr(name.find_last_of('.') + 1);
-	std::map<string, const char *>::const_iterator iter = mimeMap.map.find(str);
-	return (iter == mimeMap.map.end() ? "text/plain" : it->second);
+	std::map<string, const char *>::const_iterator iter = mimeMap.mime.find(str);
+	return (iter == mimeMap.mime.end() ? "text/plain" : iter->second);
 }
