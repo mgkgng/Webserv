@@ -22,7 +22,6 @@ class Server {
 		int				sockfd, kq;
 		events_t		chlist;
 		struct kevent	evlist[1024];
-		struct kevent	tt;
 		clients_t		client;
 
 		Server() {};
@@ -49,9 +48,6 @@ class Server {
 
 			chlist.resize(1);
 			EV_SET(&*(chlist.end() - 1), sockfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
-		
-			// EV_SET(&tt, sockfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-			// kevent(kq, &tt, 1, NULL, 0, NULL);
 		};
 
 		void acceptConnection(struct kevent &ev) {
@@ -65,36 +61,22 @@ class Server {
 				EV_SET(&*(chlist.end() - 2), newConnection, EVFILT_READ, EV_ADD, 0,0, NULL);
 				EV_SET(&*(chlist.end() - 1), newConnection, EVFILT_TIMER, EV_ADD | EV_ONESHOT, 0, 6000, NULL); // TIMEOUT 
 
-				// EV_SET(&tt, newConnection, EVFILT_READ, EV_ADD, 0, 0, NULL);
-				// kevent(kq, &tt, 1, NULL, 0, NULL);
-				// EV_SET(&tt, newConnection, EVFILT_TIMER, EV_ADD | EV_ONESHOT, 0, 1000, NULL); // TIMEOUT 
-				// kevent(kq, &tt, 1, NULL, 0, NULL);
-
 				client[newConnection] = Request(newConnection);
-				std::cout << "Connection accepted." << std::endl;
 			}
 		};
 		
 		void	disconnect(struct kevent &ev) {
-			std::cout << "disconnect" << std::endl;
 			client.erase(ev.ident);
-			// chlist.resize(chlist.size() + 1);
-			// EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-			// EV_SET(&tt, ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
-			// kevent(kq, &tt, 1, NULL, 0, NULL);
 			close(ev.ident);
 		};
 
 		void	sendData(struct kevent &ev) {
-
-			// std::cout << "send" << std::endl;
 			Request	&req = client[ev.ident];
 			string	res = req.res.getStr();	
 
 			/* send */
 			size_t bits = send(ev.ident, res.c_str() + req.res.sendBits , res.length(), MSG_DONTWAIT);
 			req.res.sendBits += bits;
-			// std::cout << bits << std::endl;
 			/* check if send all data */
 			if (req.res.sendBits < res.length())
 				return ;
@@ -103,8 +85,6 @@ class Server {
 			EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
 			client.erase(ev.ident);
 			close(ev.ident);
-			// EV_SET(&tt, ev.ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-			// kevent(kq, &tt, 1, NULL, 0, NULL);
 		}
 
 		void	recvData(struct kevent &ev) {
@@ -159,9 +139,6 @@ class Server {
 			}
 			chlist.resize(chlist.size() + 1);
 			EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
-			// EV_SET(&tt, ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
-			// kevent(kq, &tt, 1, NULL, 0, NULL);
-			//close(ev.ident);
 		}
 
 		void setTimeOut(struct kevent &ev) {
@@ -170,8 +147,6 @@ class Server {
 			req.putCustomError(408);
 			chlist.resize(chlist.size() + 1);
 			EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
-			// EV_SET(&tt, ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
-			// kevent(kq, &tt, 1, NULL, 0, NULL);
 		}
 
 		void launch() {
@@ -184,7 +159,7 @@ class Server {
 			while (1) {
 				evNb = kevent(kq, chlist.data(), chlist.size(), evlist, 1024, NULL);
 				chlist.clear();
-				if (evNb <= 0 && errno == EINTR) // protection from CTRL + C (UNIX signal handling)
+				if (evNb < 0 && errno == EINTR) // protection from CTRL + C (UNIX signal handling)
 					return ;
 				for (int i = 0; i < evNb; i++) {
 					struct kevent &ev = evlist[i];

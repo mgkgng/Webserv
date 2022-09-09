@@ -102,7 +102,6 @@ void execute_cgi(Request &req)
         req.res.ready = true;
         req.res.cgi_fd = fd_response[0];
         req.res.cgi_pid = pid;
-        //req.res.headers = std::map<string, string>();
     }
     
 }
