@@ -1,3 +1,5 @@
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 import random
  
@@ -115,6 +117,7 @@ def gameLoop():
         clock.tick(snake_speed)
  
     pygame.quit()
+    print("Thanks for playing!")
     quit()
 
 gameLoop()
