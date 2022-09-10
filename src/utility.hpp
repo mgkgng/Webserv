@@ -96,9 +96,8 @@ string current_working_directory() {
 
 // Should be called in server, with a cgi (map set in route/config) and uri
 // If true call the execute_CGI
-inline bool      is_CGI(const_string &path)
-{
-    return (start_with(path, "/cgi/php/") || start_with(path, "/cgi/python")) ? true : false;
+inline bool      is_CGI(const_string &path) {
+    return (start_with(path, "/cgi/perl/") || start_with(path, "/cgi/python")) ? true : false;
 }
 
 inline bool      is_autoindex_on(const_string &path, routes_t routes) {
