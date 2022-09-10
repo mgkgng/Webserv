@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: min-kang <minguk.gaang@gmail.com>          +#+  +:+       +#+         #
+#    By: sspina <sspina@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/25 15:25:19 by jrathelo          #+#    #+#              #
-#    Updated: 2022/07/12 11:11:27 by min-kang         ###   ########.fr        #
+#    Updated: 2022/09/10 15:43:50 by sspina           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -82,5 +82,8 @@ fclean: clean
 clean:
 	@echo "$(_RED)Cleaning object files$(_COLOR_RESET)"
 	@rm -rf $(OUTS)
+
+double ports: fclean 
+	@make && ./webserv config/double_port.config
 	
 .PHONY: clean fclean re all
