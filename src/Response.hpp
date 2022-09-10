@@ -83,6 +83,16 @@ class Response {
 			char	buf[10000];
 			int		ret = read(this->cgi_fd, buf, 9999);
 			buf[ret] = '\0';
+			if (start_with(buf, "Set-Cookie") || start_with(buf, "Content-Type")) {
+				std::vector<string> lines = split(buf, "\r\n");
+				std::vector<string>::iterator it;
+				for (it = lines.begin(); it != lines.end() - 1; it++) {
+					std::vector<string> kv = split(*it, ":");
+					this->headers[kv[0]] = trim(kv[1], WHITESPACE);
+				}
+				this->body += *it++;
+				return;
+			}
 			this->body += buf;
 			this->headers["Content-Length"] = std::to_string(this->body.length());
 			this->headers["Content-Type"] = "text/html";
