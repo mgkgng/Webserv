@@ -35,7 +35,7 @@ def snake(snake_tile, snake_list):
  
 def message(msg, color):
     mesg = font_style.render(msg, True, color)
-    dis.blit(mesg, [window_width / 6, window_height / 3])
+    dis.blit(mesg, [window_width / 4.5, window_height / 5])
  
  
 def gameLoop():
@@ -58,7 +58,7 @@ def gameLoop():
  
         while game_close == True:
             dis.fill(black)
-            message("You Lost!", red)
+            message("You Lost! Press Q to quit or R to restart", red)
             score(snake_length - 1)
             pygame.display.update()
  
@@ -67,7 +67,7 @@ def gameLoop():
                     if event.key == pygame.K_q:
                         game_over = True
                         game_close = False
-                    if event.key == pygame.K_c:
+                    if event.key == pygame.K_r:
                         gameLoop()
  
         for event in pygame.event.get():
