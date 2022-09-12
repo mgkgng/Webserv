@@ -6,7 +6,7 @@
 #    By: sspina <sspina@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/25 15:25:19 by jrathelo          #+#    #+#              #
-#    Updated: 2022/09/10 15:43:50 by sspina           ###   ########.fr        #
+#    Updated: 2022/09/12 12:55:49 by sspina           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -78,12 +78,30 @@ re: fclean
 fclean: clean
 	@echo "$(_RED)Cleaning output files$(_COLOR_RESET)"
 	@rm -rf $(NAME)
+	@rm -rf siege
 
 clean:
 	@echo "$(_RED)Cleaning object files$(_COLOR_RESET)"
 	@rm -rf $(OUTS)
 
-double ports: fclean 
+double_ports: fclean 
 	@make && ./webserv config/double_port.config
+
+siege: siege_install siege_site
+
+siege_install:
+	@curl -C - -O https://download.joedog.org/siege/siege-latest.tar.gz > /dev/null 2>&1
+	@rm -rf siege > /dev/null 2>&1
+	@mkdir siege > /dev/null 2>&1
+	@tar -xvf siege-latest.tar.gz -C siege --strip-components 1 > /dev/null 2>&1
+	@rm -rf  siege-latest.tar.gz > /dev/null 2>&1
+	@cd siege && ./configure > /dev/null 2>&1
+	@cd siege && make > /dev/null 2>&1
+
+siege_site:
+	@cd siege/src && ./siege --rc=../../.siegerc http://localhost:8080
+	
+siege_cgi:
+	@cd siege/src && ./siege --rc=../../.siegerc http://localhost:8080/cgi/python/hello.py
 	
 .PHONY: clean fclean re all
