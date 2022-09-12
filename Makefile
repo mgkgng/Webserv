@@ -6,7 +6,7 @@
 #    By: sspina <sspina@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/25 15:25:19 by jrathelo          #+#    #+#              #
-#    Updated: 2022/09/12 12:55:49 by sspina           ###   ########.fr        #
+#    Updated: 2022/09/12 13:14:07 by sspina           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -87,9 +87,7 @@ clean:
 double_ports: fclean 
 	@make && ./webserv config/double_port.config
 
-siege: siege_install siege_site
-
-siege_install:
+siege:
 	@curl -C - -O https://download.joedog.org/siege/siege-latest.tar.gz > /dev/null 2>&1
 	@rm -rf siege > /dev/null 2>&1
 	@mkdir siege > /dev/null 2>&1
