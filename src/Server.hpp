@@ -2,17 +2,21 @@
 
 #include "utility.hpp"
 #include "Request.hpp"
+#include "HandleCode.hpp"
 #include "cgi.hpp"
 
 class Server {
 	public:
-		typedef std::map<std::string, Route>	routes_t;
-		typedef std::vector<struct kevent>		events_t;
-		typedef std::map<uintptr_t, Request>	clients_t;
+		typedef std::map<std::string, Route>		routes_t;
+		typedef std::map<std::string, HandleCode>	codes_t;
+		typedef std::vector<struct kevent>			events_t;
+		typedef std::map<uintptr_t, Request>		clients_t;
 
 		/* from config */
+		bool			isdefault;
 		unsigned int	port;
 		string			serverName;
+		string			host;
 		string			maxBodySize;
 		routes_t		routes;
 		struct sockaddr_in	sockaddr;
@@ -23,8 +27,17 @@ class Server {
 		events_t		chlist;
 		struct kevent	evlist[1024];
 		clients_t		client;
+		codes_t			codes;
 
-		Server() {};
+		Server() : isdefault(false) {};
+		Server(string serverName, string host, unsigned int port, bool isdefault, routes_t & routes, codes_t & codes) : 
+			isdefault(isdefault), 
+			port(port), 
+			serverName(serverName),
+			host(host),
+			routes(routes), 
+			codes(codes)
+		{};
 		~Server() {};
 		
 		// Server Launch 
@@ -35,7 +48,7 @@ class Server {
 			assert(sockfd != -1);
 
 			sockaddr.sin_family = AF_INET;
-			sockaddr.sin_addr.s_addr = inet_addr(this->serverName == "localhost" ? "127.0.0.1" : this->serverName.c_str());
+			sockaddr.sin_addr.s_addr = inet_addr(this->host == "localhost" ? "127.0.0.1" : this->host.c_str());
 			sockaddr.sin_port = htons(this->port);
 
 			int	option_on = 1;
