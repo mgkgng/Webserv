@@ -109,7 +109,7 @@ class Config {
 			ret.port = 42069;
 			ret.servername = "default";
 			ret.code = 0;
-			ret.redirect = "/500";
+			ret.redirect = "";
 			ret.responsecode = 0;
 			ret.clientmaxbodysize = "5M";
 			ret.pythoncgiextension = "";
@@ -133,7 +133,7 @@ class Config {
 			if (words.empty() != 1) {
 				words.push_back(sinfo.allowedHTTPmethods);
 			}
-			Route ret = Route(sinfo.islistingdirectory, sinfo.directoryfile, sinfo.isuploadable, sinfo.uploadroot, sinfo.index, sinfo.root, sinfo.path, std::stoul(sinfo.clientmaxbodysize), words, sinfo.pythoncgiextension, sinfo.perlcgiextextension);
+			Route ret = Route(sinfo.islistingdirectory, sinfo.directoryfile, sinfo.isuploadable, sinfo.uploadroot, sinfo.index, sinfo.root, sinfo.path, sinfo.redirect, std::stoul(sinfo.clientmaxbodysize), words, sinfo.pythoncgiextension, sinfo.perlcgiextextension);
 			return (ret);
 		}
 

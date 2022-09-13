@@ -10,14 +10,15 @@ class Route {
 		bool				autoindex, uploadable;
 
 		Route() : autoindex(false) {}
-		Route(bool autoindex, string & rootFile, bool uploadable, string & uploadRoot, string & index, string & root, string & path, unsigned int bodySizeLimit, std::vector<string> & methods, string & pythoncgiExtension, string & perlcgiExtension) : 
+		Route(bool autoindex, string & rootFile, bool uploadable, string & uploadRoot, string & index, string & root, string & path, string & redirect, unsigned int bodySizeLimit, std::vector<string> & methods, string & pythoncgiExtension, string & perlcgiExtension) : 
 			index(index),
 			root(root), 
+			redirect(redirect),
 			pythoncgiExtension(pythoncgiExtension),
 			perlcgiExtension(perlcgiExtension), 
 			rootFile(rootFile),
 			uploadRoot(uploadRoot),
-			path(path), 
+			path(path),
 			bodySizeLimit(bodySizeLimit),
 			methods(methods),
 			autoindex(autoindex), 
