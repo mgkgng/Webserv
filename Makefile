@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: sspina <sspina@student.42.fr>              +#+  +:+       +#+         #
+#    By: jrathelo <student.42nice.fr>               +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/25 15:25:19 by jrathelo          #+#    #+#              #
-#    Updated: 2022/09/12 13:14:07 by sspina           ###   ########.fr        #
+#    Updated: 2022/09/13 10:55:05 by jrathelo         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -57,7 +57,7 @@ OUT = $(subst $(SRC_DIR)/, $(OUTS)/, $(patsubst %.cpp, %.opp, $(SRC_PLUS_PATH)))
 NAME = webserv
 
 CC = c++
-CFLAGS = -Wall -Wextra -Werror -std=c++98 -g #-fsanitize=address
+CFLAGS = -Wall -Wextra -Werror -std=c++98 -g -O3 #-fsanitize=address
 
 all : $(NAME)
 
@@ -85,7 +85,7 @@ clean:
 	@rm -rf $(OUTS)
 
 double_ports: fclean 
-	@make && ./webserv config/double_port.config
+	@make && ./webserv config/double.json
 
 siege:
 	@curl -C - -O https://download.joedog.org/siege/siege-latest.tar.gz > /dev/null 2>&1

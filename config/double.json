@@ -15,13 +15,13 @@
 		"index": "post.html"
 	},
 	"route autoindex": {
-		"path": "/autoindex",
+		"path": "/post",
 		"autoindex": true,
 		"index": "autoindex.html",
 		"root": "./www/autoindex"
 	},
 	"route bonus": {
-		"path": "/bonus",
+		"path": "/post",
 		"index": "bonus.html"
 	},
 	"server0": {
@@ -39,8 +39,28 @@
 		},
 		"route 404": {
 			"index": "error_404.html",
-			"path": "/404",
 			"autoindex": true,
+			"path": "/404",
+			"root": "./www/error_pages"
+		}
+	},
+	"server1": {
+		"host": "localhost",
+		"port": 8090,
+		"server_name": null, 
+		"code 404": {
+			"code": 404,
+			"redirect": "/404"
+		},
+		"code 401": {
+			"code": 401,
+			"redirect": "/404",
+			"response_code": 301
+		},
+		"route 404": {
+			"index": "error_404.html",
+			"autoindex": true,
+			"path": "/404",
 			"root": "./www/error_pages"
 		}
 	}

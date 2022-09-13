@@ -37,7 +37,7 @@ class Config {
 			std::string		clientmaxbodysize;
 			std::string		allowedHTTPmethods;
 			std::string		pythoncgiextension;
-			std::string		phpcgiextextension;
+			std::string		perlcgiextextension;
 		}	sbh_t;
 
 		sbh_t	getInformation(const JSON & json, sbh_t ret) {
@@ -90,7 +90,7 @@ class Config {
 				ret.pythoncgiextension = json.getStrings().at("python_cgi_extension");
 			} catch (std::exception & e) { }
 			try {
-				ret.phpcgiextextension = json.getStrings().at("php_cgi_extensions");
+				ret.perlcgiextextension = json.getStrings().at("perl_cgi_extensions");
 			} catch (std::exception & e) { }
 			return (ret);
 		}
@@ -113,7 +113,7 @@ class Config {
 			ret.responsecode = 0;
 			ret.clientmaxbodysize = "5M";
 			ret.pythoncgiextension = "";
-			ret.phpcgiextextension = "";
+			ret.perlcgiextextension = "";
 			return (ret);
 		}
 
@@ -133,7 +133,7 @@ class Config {
 			if (words.empty() != 1) {
 				words.push_back(sinfo.allowedHTTPmethods);
 			}
-			Route ret = Route(sinfo.islistingdirectory, sinfo.directoryfile, sinfo.isuploadable, sinfo.uploadroot, sinfo.index, sinfo.root, sinfo.path, std::stoul(sinfo.clientmaxbodysize), words, sinfo.pythoncgiextension, sinfo.phpcgiextextension);
+			Route ret = Route(sinfo.islistingdirectory, sinfo.directoryfile, sinfo.isuploadable, sinfo.uploadroot, sinfo.index, sinfo.root, sinfo.path, std::stoul(sinfo.clientmaxbodysize), words, sinfo.pythoncgiextension, sinfo.perlcgiextextension);
 			return (ret);
 		}
 
@@ -144,6 +144,7 @@ class Config {
 			sinfo = getInformation(json, sinfo);
 
 			for (std::map<std::string, Route>::iterator it = routes.begin(); it != routes.end(); it++) {
+				std::cout << (*it).second.path << " " << sinfo.redirect << std::endl;
 				if ((*it).second.path == sinfo.redirect) {
 					return (HandleCode(sinfo.code, sinfo.responsecode, (*it).second));
 				}
