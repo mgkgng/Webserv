@@ -37,3 +37,4 @@ webserv
 .vscode
 *.dSYM
 .DS_Store
+*test*

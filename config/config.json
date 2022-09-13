@@ -49,7 +49,7 @@
 		"root": "./www/error_pages"
 	},
 	"server0": {
-		"host": "localhost",
+		"host": "c4r1p6.42nice.fr",
 		"port": 8080
 	}
 }

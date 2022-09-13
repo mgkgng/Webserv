@@ -4,6 +4,8 @@
 #include "Request.hpp"
 #include "HandleCode.hpp"
 #include "cgi.hpp"
+#include <netdb.h>
+#include <arpa/inet.h>
 
 class Server {
 	public:
@@ -43,12 +45,16 @@ class Server {
 		// Server Launch 
 
 		void init_server() {
+			struct hostent *hp;
 
 			sockfd = socket(AF_INET, SOCK_STREAM, 0);
 			assert(sockfd != -1);
 
 			sockaddr.sin_family = AF_INET;
-			sockaddr.sin_addr.s_addr = inet_addr(this->host == "localhost" ? "127.0.0.1" : this->host.c_str());
+
+			hp = gethostbyname(this->host.c_str());
+			assert(hp != NULL);
+			sockaddr.sin_addr.s_addr = inet_addr(inet_ntoa(*((struct in_addr *) hp->h_addr_list[0])));
 			sockaddr.sin_port = htons(this->port);
 
 			int	option_on = 1;
