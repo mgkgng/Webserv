@@ -144,7 +144,6 @@ class Config {
 			sinfo = getInformation(json, sinfo);
 
 			for (std::map<std::string, Route>::iterator it = routes.begin(); it != routes.end(); it++) {
-				std::cout << (*it).second.path << " " << sinfo.redirect << std::endl;
 				if ((*it).second.path == sinfo.redirect) {
 					return (HandleCode(sinfo.code, sinfo.responsecode, (*it).second));
 				}
