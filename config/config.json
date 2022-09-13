@@ -3,7 +3,7 @@
 	"allowed_methods": "GET POST",
 	"python_cgi_extension": "py",
 	"perl_cgi_extension": "pl",
-	"upload_root": "./media",
+	"upload_root": "./www/cgi/upload",
 	"root": "./www/",
 	"uploadable": false,
 	"autoindex": false,
@@ -11,11 +11,13 @@
 		"path": "/"
 	},
 	"route post": {
+		"uploadable": true,
 		"path": "/post",
 		"index": "post.html"
 	},
 	"route autoindex": {
 		"path": "/autoindex",
+		"method": "GET POST DELETE",
 		"autoindex": true,
 		"index": "autoindex.html",
 		"root": "./www/autoindex"
@@ -24,24 +26,18 @@
 		"path": "/bonus",
 		"index": "bonus.html"
 	},
+	"code 404": {
+		"code": 404,
+		"redirect": "/404"
+	},
+	"route 404": {
+		"index": "error_404.html",
+		"autoindex": true,
+		"path": "/404",
+		"root": "./www/error_pages"
+	},
 	"server0": {
 		"host": "localhost",
-		"port": 8080,
-		"server_name": null, 
-		"code 404": {
-			"code": 404,
-			"redirect": "/404"
-		},
-		"code 401": {
-			"code": 401,
-			"redirect": "/404",
-			"response_code": 301
-		},
-		"route 404": {
-			"index": "error_404.html",
-			"path": "/404",
-			"autoindex": true,
-			"root": "./www/error_pages"
-		}
+		"port": 8080
 	}
 }

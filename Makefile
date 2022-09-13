@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: jrathelo <student.42nice.fr>               +#+  +:+       +#+         #
+#    By: sspina <sspina@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/25 15:25:19 by jrathelo          #+#    #+#              #
-#    Updated: 2022/09/13 10:55:05 by jrathelo         ###   ########.fr        #
+#    Updated: 2022/09/13 11:12:48 by sspina           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -102,4 +102,4 @@ siege_site:
 siege_cgi:
 	@cd siege/src && ./siege --rc=../../.siegerc http://localhost:8080/cgi/python/hello.py
 	
-.PHONY: clean fclean re all
+.PHONY: clean fclean re all double_ports siege siege_site siege_cgi
