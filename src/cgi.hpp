@@ -103,5 +103,4 @@ void execute_cgi(Request &req, bool type)
         req.res.cgi_fd = fd_response[0];
         req.res.cgi_pid = pid;
     }
-    
 }

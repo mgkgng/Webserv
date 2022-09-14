@@ -19,6 +19,8 @@ class Server {
 		unsigned int	port;
 		string			serverName;
 		string			host;
+		string			maxBodySize;
+		string			root;
 		routes_t		routes;
 		struct sockaddr_in	sockaddr;
 
@@ -79,7 +81,7 @@ class Server {
 				EV_SET(&*(chlist.end() - 2), newConnection, EVFILT_READ, EV_ADD, 0,0, NULL);
 				EV_SET(&*(chlist.end() - 1), newConnection, EVFILT_TIMER, EV_ADD | EV_ONESHOT, 0, 6000, NULL); // TIMEOUT 
 
-				client[newConnection] = Request(newConnection);
+				client[newConnection] = Request(newConnection, this->root);
 			}
 		};
 		
@@ -276,6 +278,7 @@ class Server {
 			if (req.method == "POST") {
 				req.postContent(req, *this);				
 			} else if (req.method == "DELETE") {
+<<<<<<< HEAD
 				if (!remove(("www" + req.path).c_str())) {
 					findCodeHandler(204, req);
 					return ;
@@ -286,6 +289,15 @@ class Server {
 			} else if (is_CGI(req.path)) {
 				if (exist("www" + req.path))
 					return;
+=======
+				if (!remove((this->root + req.path).c_str()))
+					req.putCustomError(204);
+				else
+					req.putCustomError(500);
+			} else if (is_CGI(req.path)) {
+				if (exist(this->root + req.path))
+					execute_cgi(req);
+>>>>>>> origin/avant
 				else
 					findCodeHandler(404, req);
 			} else if (is_autoindex_on(req.path, this->routes)) {
@@ -295,9 +307,8 @@ class Server {
 				else
 					req.putAutoIndexRes(body);
 			}
-			else {
+			else
 				req.putResponse(this->routes);
-			}
 			chlist.resize(chlist.size() + 1);
 			EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
 		}
@@ -328,8 +339,10 @@ class Server {
 						disconnect(ev);
 					else if (static_cast<int>(ev.ident) == sockfd)
 						acceptConnection(ev);
-					// else if (ev.flags & EV_CLEAR)
-					// 	setTimeOut(ev);
+					// else if (ev.flags & EV_CLEAR) {
+					// 	std::cout << "TIMEOUT" << std::endl;
+					//  	setTimeOut(ev);
+					// }
 					else if (ev.filter & EVFILT_READ && !client[ev.ident].res.ready)
 						recvData(ev);
 					else if (ev.filter & EVFILT_WRITE)
