@@ -6,7 +6,7 @@
 #    By: jrathelo <student.42nice.fr>               +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/25 15:25:19 by jrathelo          #+#    #+#              #
-#    Updated: 2022/09/14 19:58:47 by jrathelo         ###   ########.fr        #
+#    Updated: 2022/09/14 20:05:34 by jrathelo         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -99,7 +99,4 @@ siege:
 siege_site:
 	@cd siege/src && ./siege --rc=../../.siegerc http://localhost:42069
 	
-siege_cgi:
-	@cd siege/src && ./siege --rc=../../.siegerc http://localhost:42069/cgi/python/hello.py
-	
-.PHONY: clean fclean re all double_ports siege siege_site siege_cgi
+.PHONY: clean fclean re all double_ports siege siege_site
