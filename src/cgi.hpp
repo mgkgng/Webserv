@@ -41,7 +41,7 @@ struct CGI_Environment{
 };
 
 // Call that after is_CGI, look at utility is_CGI
-void execute_cgi(Request &req)
+void execute_cgi(Request &req, bool type)
 {
     int fd_req[2], fd_response[2];
     pipe(fd_response);
@@ -59,7 +59,7 @@ void execute_cgi(Request &req)
         for (std::map<string, string>::const_iterator iter = req.headers.begin(); iter != req.headers.end(); iter++)
             environment.add_variable(iter->first, iter->second);
 
-        std::string cgi = (end_with(req.path, "pl")) ? "/usr/bin/perl" : "/usr/local/bin/python3";
+        std::string cgi = type ? "/usr/bin/perl" : "/usr/local/bin/python3";
         std::string uri = "www" + req.path;
 
         // We set the env variable needed; must update with the actual source

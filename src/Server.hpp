@@ -19,7 +19,6 @@ class Server {
 		unsigned int	port;
 		string			serverName;
 		string			host;
-		string			maxBodySize;
 		routes_t		routes;
 		struct sockaddr_in	sockaddr;
 
@@ -106,6 +105,114 @@ class Server {
 			close(ev.ident);
 		}
 
+		void	findCodeHandler(int code, Request & req) {
+			codes_t::iterator it = this->codes.begin();
+			for (; it != this->codes.end(); it++) {
+				if (it->second.code == code) {
+					// req.putCustomError(code);
+					// TODO HANDLE REDIRECTION
+					return;
+				}
+			}
+			req.putCustomError(code);
+		}
+
+		std::string find_extension(std::string path) {
+			std::string temp = path;
+			while (temp.find(".") != std::string::npos) {
+				temp.erase(0, temp.find(".") + 1);
+			}
+			if (path.length() == temp.length()) {
+				return "";
+			}
+			if (temp.find('/') != std::string::npos) {
+				return "";
+			}
+			return temp;
+		}
+
+		std::string get_file_from_path(std::string path, std::string route) {
+			std::string ret = path.substr(route.length());
+			if ((*ret.rbegin()) == '/') {
+				ret.pop_back();
+			} 
+			return ret;
+		}
+
+		std::string get_file_full_path(std::string requested_file, std::string root) {
+			char buf [MAXPATHLEN];
+			getcwd(buf, MAXPATHLEN);
+			if (root.find('.') == 0 && root.find('/') == 1) {
+				root.replace(0, 1, buf);
+			} else if (root.find('/') != 0) {
+				root.insert(0, 1, '/');
+				root.insert(0, buf);
+			}
+			if (root.find('/', root.length() - 1) == std::string::npos && requested_file.find('/') != 0) {
+				root.push_back('/');
+			}
+			return root + requested_file;
+		}
+
+		void doResBasedOnReq(Request & req, Route & match) {
+			if (req.path.length() == match.path.length()) {
+				std::string file = get_file_full_path(match.index, match.root);
+				std::string extension = find_extension(match.index);
+				if (check_if_file_exists(file)) {
+					if (extension == "") {
+						
+					} else if (extension == match.perlcgiExtension) {
+						execute_cgi(req, true);
+					} else if (extension == match.pythoncgiExtension) {
+						execute_cgi(req, false);
+					} else {
+
+					}
+				} else if (check_if_file_is_dir(file) && match.autoindex) {
+					req.res.putAutoIndex(req.path, match.root);
+				} else {
+					findCodeHandler(404, req);
+				}
+			} else {
+				std::string extension = find_extension(req.path);
+				std::string file = get_file_from_path(req.path, match.path);
+				file = get_file_full_path(file, match.root);
+				if (extension == "") {
+					if (check_if_file_exists(file)) {
+
+					} else if (check_if_file_is_dir(file) && match.autoindex) {
+						req.res.putAutoIndex(req.path, match.root);
+					} else {
+						findCodeHandler(404, req);
+					}
+				} else if (extension == match.perlcgiExtension) {
+					if (check_if_file_exists(file)) {
+						execute_cgi(req, true);
+					} else if (check_if_file_is_dir(file) && match.autoindex) {
+						req.res.putAutoIndex(req.path, match.root);
+					} else {
+						findCodeHandler(404, req);
+					}
+				} else if (extension == match.pythoncgiExtension) {
+					if (check_if_file_exists(file)) {
+						execute_cgi(req, true);
+					} else if (check_if_file_is_dir(file) && match.autoindex) {
+						req.res.putAutoIndex(req.path, match.root);
+					} else {
+						findCodeHandler(404, req);
+					}
+				} else {
+					if (check_if_file_exists(file)) {
+						
+					} else if (check_if_file_is_dir(file) && match.autoindex) {
+						req.res.putAutoIndex(req.path, match.root);
+					} else {
+						findCodeHandler(404, req);
+					}
+				}
+			}
+		}
+
 		void	recvData(struct kevent &ev) {
 			char	buf[10000];
 			int		ret;
@@ -121,7 +228,7 @@ class Server {
 			if (!req.content.expected) {
 				int reqCode = req.parseRequest(buf);
 				if (reqCode != 200) {
-					req.putCustomError(reqCode);
+					findCodeHandler(reqCode, req);
 					return ;
 				}
 				req.content.initialize(buf, req.headers);
@@ -132,24 +239,59 @@ class Server {
 			 	return ;
 
 			int reqCode = req.parseRequest(req.content.raw);
+
 			if (reqCode != 200) {
-				req.putCustomError(reqCode);
-			} else if (req.method == "POST") {
-				req.postContent(req);				
+				findCodeHandler(reqCode, req);
+				return ;
+			} 
+
+			std::vector<Route> matches;
+			for (routes_t::iterator it = routes.begin(); it != routes.end(); it++ ) {
+				if (req.path.substr(0, it->second.path.length()) == it->second.path) {
+					std::vector<Route>::iterator mit = matches.begin();
+					for (; mit != matches.end(); mit++ ) {
+						if (mit->path == it->second.path) {
+							break ;
+						}
+					}
+					if (mit != matches.end())
+						continue;
+					matches.push_back(it->second);
+				}
+			}
+			std::sort(matches.begin(), matches.end(), sortByComplex);
+			Route matchingRoute = *(matches.begin());
+			std::vector<std::string> a = matchingRoute.methods;
+			if (std::find(a.begin(), a.end(), req.method) == a.end()) {
+				findCodeHandler(405, req);
+				return;
+			} else if (req.method == "GET" || req.method == "POST" || req.method == "DELETE") {
+				doResBasedOnReq(req, matchingRoute);
+				return;
+			} else {
+				findCodeHandler(501, req);
+				return;
+			}
+
+			if (req.method == "POST") {
+				req.postContent(req, *this);				
 			} else if (req.method == "DELETE") {
-				if (!remove(("www" + req.path).c_str()))
-					req.putCustomError(204);
-				else
-					req.putCustomError(500);
+				if (!remove(("www" + req.path).c_str())) {
+					findCodeHandler(204, req);
+					return ;
+				} else {
+					findCodeHandler(500, req);
+					return ;
+				}
 			} else if (is_CGI(req.path)) {
 				if (exist("www" + req.path))
-					execute_cgi(req);
+					return;
 				else
-					req.putCustomError(404);
+					findCodeHandler(404, req);
 			} else if (is_autoindex_on(req.path, this->routes)) {
 				string body = req.res.putAutoIndex(req.path, this->routes["/autoindex"].root);
 				if (body == "")
-					req.putCustomError(404);
+					findCodeHandler(404, req);
 				else
 					req.putAutoIndexRes(body);
 			}
@@ -163,7 +305,7 @@ class Server {
 		void setTimeOut(struct kevent &ev) {
 			Request &req = client[ev.ident];
 			
-			req.putCustomError(408);
+			findCodeHandler(408, req);
 			chlist.resize(chlist.size() + 1);
 			EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
 		}
@@ -173,7 +315,7 @@ class Server {
 
 			init_server();
 			std::cout << "WEBSERV launched." << std::endl;
-			std::cout << this->port << std::endl;
+			std::cout << this->host << ":" << this->port << std::endl;
 
 			while (1) {
 				evNb = kevent(kq, chlist.data(), chlist.size(), evlist, 1024, NULL);

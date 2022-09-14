@@ -199,3 +199,37 @@ const_string autoidx_head = autoidx.substr(0, autoidx_begin);
 const_string autoidx_body = autoidx.substr(autoidx_begin + 2, autoidx_end - autoidx_begin - 2);
 const_string autoidx_bottom = autoidx.substr(autoidx_end + 2);
 const_string custom_error = file_to_string(DEFAULT_ERROR_FILE);
+
+std::string ltrim(const std::string &s) {
+    size_t start = s.find_first_not_of(WHITESPACE);
+    return (start == std::string::npos) ? "" : s.substr(start);
+}
+ 
+std::string rtrim(const std::string &s) {
+    size_t end = s.find_last_not_of(WHITESPACE);
+    return (end == std::string::npos) ? "" : s.substr(0, end + 1);
+}
+
+std::string trim(const std::string & s) {
+	return rtrim(ltrim(s));
+}
+
+struct sortByComplex { 
+	inline bool operator() (const Route & struct1, const Route & struct2) {
+        return (struct1.path.length() > struct2.path.length());
+    }
+}	sortByComplex;
+
+bool check_if_file_exists(const std::string name) {
+	std::fstream f(name.c_str());
+	bool ret = f.good();
+	f.close();
+	return ret;
+}
+
+bool check_if_file_is_dir(const std::string name) {
+   struct stat statbuf;
+   if (stat(name.c_str(), &statbuf) != 0)
+       return 0;
+   return S_ISDIR(statbuf.st_mode);
+}

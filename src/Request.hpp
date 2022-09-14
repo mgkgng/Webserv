@@ -107,12 +107,15 @@ class Request {
 
 		int parseRequest(string s) {
 			std::vector<string> req = split(s, "\r\n");
-
-			// head 
 			std::vector<string> head = split(req.at(0), " ");
-			this->method = head.at(0);
-			if (head.size() != 3 || (method != "GET" && method != "POST" && method != "DELETE"))
+			if (head.size() != 3)
 				return (400);
+			this->method = head.at(0);
+			if (method != "GET" && method != "POST" && method != "DELETE")
+				return (501);
+			this->protocolVer = head.at(2);
+			if (protocolVer != "HTTP/v1.1")
+				return (501);
 			std::vector<string> pq = split(head.at(1), "?");
 			this->path = pq.at(0);
 			this->attributes.empty();
@@ -123,7 +126,6 @@ class Request {
 					this->attributes.insert(std::pair<string, string>(kv.at(0), kv.at(1)));
 				}
 			}
-			this->protocolVer = head.at(2);
 
 			// headers
 			std::vector<string>::iterator it;
@@ -133,13 +135,11 @@ class Request {
 			}
 			while (it != req.end()) // je vais tester
 				this->body += *it++ + "\r\n";
-			
+
 			return (200);
-			// std::cout << this->body << std::endl;
 		}
 
 		void putResponse(std::map<string, Route> routes) {
-
 			this->res.protocolVer = "HTTP/1.1";
 			std::map<string, Route>::iterator it = routes.find(this->path);
 			if (it != routes.end()) {
@@ -195,7 +195,7 @@ class Request {
 			res.ready = true;
 		}
 
-		void	postContent(Request &req) {
+		void	postContent(Request &req, Server & server) {
 			std::vector<string> multiportData = split(req.content.raw, req.content.boundary);
 			std::vector<string> fileData = split(multiportData[2], "\r\n");
 			string fileName = trim(split(fileData[0], ";")[2].substr(11), "\""); // i know it's not perfect but come on
@@ -204,13 +204,13 @@ class Request {
 			for (size_t i = 2; i < fileData.size(); i++) {
 				fileContent += fileData[i];
 				fileSize += fileData[i].length();
-				if (fileSize > 1024) {
-					req.putCustomError(413);
+				if (fileSize > 1024) { // Need the route
+					server.findCodeHandler(413, req);
 					return ;
 				}
 			}
 
-		    std::ofstream out("www/cgi/upload/" + fileName);
+		    std::ofstream out("www/cgi/upload/" + fileName); // Need the route
 			out << fileContent;
 
 			res.protocolVer = "HTTP/1.1";
