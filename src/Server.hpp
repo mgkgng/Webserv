@@ -58,7 +58,7 @@ class Server {
 
 				chlist.resize(chlist.size() + 2);
 				EV_SET(&*(chlist.end() - 2), newConnection, EVFILT_READ, EV_ADD, 0,0, NULL);
-				EV_SET(&*(chlist.end() - 1), newConnection, EVFILT_TIMER, EV_ADD | EV_ONESHOT, 0, 6000, NULL); // TIMEOUT 
+				EV_SET(&*(chlist.end() - 1), newConnection, EVFILT_TIMER, EV_ADD | EV_ONESHOT, 0, 5000, NULL); 
 
 				client[newConnection] = Request(newConnection, this->root, this->uploadRoot);
 			}
@@ -155,10 +155,8 @@ class Server {
 						disconnect(ev);
 					else if (static_cast<int>(ev.ident) == sockfd)
 						acceptConnection(ev);
-					// else if (ev.flags & EV_CLEAR) {
-					// 	std::cout << "TIMEOUT" << std::endl;
-					//  	setTimeOut(ev);
-					// }
+					else if (ev.flags & EV_CLEAR)
+					 	setTimeOut(ev);
 					else if (ev.filter & EVFILT_READ && !client[ev.ident].res.ready)
 						recvData(ev);
 					else if (ev.filter & EVFILT_WRITE)
