@@ -5,7 +5,7 @@
 
 class HandleCode {
 	public:
-		unsigned int code, responsecode;
+		int code, responsecode;
 		Route route;
 		
 		HandleCode() : responsecode(0) {}

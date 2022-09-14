@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: sspina <sspina@student.42.fr>              +#+  +:+       +#+         #
+#    By: jrathelo <student.42nice.fr>               +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/10/25 15:25:19 by jrathelo          #+#    #+#              #
-#    Updated: 2022/09/13 11:12:48 by sspina           ###   ########.fr        #
+#    Updated: 2022/09/14 16:07:48 by jrathelo         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -47,7 +47,7 @@ SRC_DIR = src
 OUTS = objs
 
 # Source Files
-SRC = main.cpp
+SRC = main.cpp Request.cpp cgi.cpp Server.cpp Config.cpp Response.cpp utility.cpp
 
 SRC_PLUS_PATH = $(addprefix $(SRC_DIR)/, $(SRC))
 

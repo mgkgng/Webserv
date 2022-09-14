@@ -1,8 +1,11 @@
-#include "utility.hpp"
+#include <string>
+#include <iostream>
+
 #include "statusCodes.hpp"
 #include "Server.hpp"
 #include "Config.hpp"
 #include "JSON.hpp"
+#include "utility.hpp"
 
 int main(int argc, char **argv) {
 	if (argc > 2)

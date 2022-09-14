@@ -50,146 +50,38 @@ typedef std::map<std::string, Route>	routes_t;
 using std::string;
 typedef const std::string const_string;
 
-bool exist(const string& fname) {
-  struct stat buffer;
-  return (stat(fname.c_str(), &buffer) == 0);
-}
+bool exist(const string& fname);
 
-std::vector<string> split(string s, string sep) {
+std::vector<string> split(string s, string sep);
 
-	size_t start = 0, end, sep_len = sep.length();
-	std::vector<string> res;
+string	trim(string s, string set);
 
-    while ((end = s.find(sep, start)) != string::npos) {
-        if (start != end)
-            res.push_back(s.substr(start, end - start));
-        start = end + sep_len;
-    }
-    if (start < s.length())
-	    res.push_back(s.substr(start));
-	return (res);
-}
+bool start_with(const_string &str, const_string &start);
 
-string	trim(string s, string set) {
-	for (string::iterator c = s.begin(); c != s.end() && set.find(*c, 0) != string::npos; c++)
-		s.erase(c);
-	for (string::iterator c = s.end() - 1; c != s.begin() && set.find(*c, 0) != string::npos; c--)
-		s.erase(c);
-	return (s);
-}
-
-inline bool start_with(const_string &str, const_string &start) {
-    return (!std::strncmp(str.c_str(), start.c_str(), start.length()) ? true : false); 
-}
-
-inline bool end_with(const_string &str, const_string &end) {
-    return end.size() > str.size() ? false : (str.substr(str.size() - end.size()) == end);
-}
+bool end_with(const_string &str, const_string &end);
 
 // https://www.delftstack.com/howto/cpp/get-current-directory-cpp/
-string current_working_directory() {
-    char dir[PATH_MAX];
-    if (getwd(dir) != NULL)
-        return string(dir);
-    return "";
-}
+string current_working_directory();
 
-// Should be called in server, with a cgi (map set in route/config) and uri
-// If true call the execute_CGI
-inline bool      is_CGI(const_string &path) {
-    return (start_with(path, "/cgi/perl/") || start_with(path, "/cgi/python")) ? true : false;
-}
+string to_lower_string(string str);
 
-inline bool      is_autoindex_on(const_string &path, routes_t routes) {
-    return (routes[path].autoindex);
-}
-
-string     to_lower_string(string str)
-{
-    for (string::iterator it = str.begin(); it != str.end(); it++)
-        *it = tolower(*it);
-    return (str);
-}
-
-string     to_upper_string(string str)
-{
-    for (string::iterator it = str.begin(); it != str.end(); it++)
-        *it = toupper(*it);
-    return (str);
-}
+string to_upper_string(string str);
 
 // http://www.cplusplus.com/articles/D9j2Nwbp/
-template<typename T>
-string to_string(const T &status_code)
-{  
-	std::ostringstream in_string;
-	in_string << status_code;
-	return (in_string.str());
-}
+template<typename T> string to_string(const T &status_code);
 
-string replace_all_occurrency(string s, const_string &to_replace, const_string &replace)
-{
-    size_t  current = 0;
-    while (true)
-    {
-        size_t  found = s.find(to_replace, current);
-        if (found == string::npos) break;
-        s.replace(found, to_replace.size(), replace);
-        current = found + replace.size();
-    }
-    return (s);
-}
+string replace_all_occurrency(string s, const_string &to_replace, const_string &replace);
 
-template<typename Elem, typename Type>
-bool    is_found_in(Elem elem, size_t n, Type first ...)
-{
-        va_list         args;
-        va_start(args, first);
+template<typename Elem, typename Type> bool is_found_in(Elem elem, size_t n, Type first, ...);
 
-        while (n--)
-        {
-            if (elem == first) {
-                va_end(args);
-                return (true);
-            }
-            first = va_arg(args, Type);
-        }
-        va_end(args);
-        return (false);
-}
-
-template<typename T>
-inline bool includes(std::vector<T> vec, T elem) {
-    return (std::find(vec.begin(), vec.end(), elem) != vec.end()) ? true : false;
-}
+template<typename T> bool includes(std::vector<T> vec, T elem);
 
 // AUTOINDEX
 // Basically, the entire template page is turned into a string
 // That way, it can be easily manipulated when needed (more info: response)
-string	file_to_string(const_string &filename){
-	std::ifstream f;
-	string s;
-	char buf[READFILE_BUF + 1];
-	f.open(filename.c_str());
+string	file_to_string(const_string &filename);
 
-	while (f) {
-		f.read(buf, READFILE_BUF);
-        // gcount return the last char read, so put a \0 at the end
-		buf[f.gcount()] = '\0';
-		s += buf;
-	}
-	return (s);
-}
-
-string	file_size(size_t size) {
-	std::ostringstream	ss;
-	float fsize = size;
-	int i = 0;
-	const_string	units[] = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
-	while (fsize > 1024 && ++i) fsize /= 1024;
-	ss << roundf(fsize * 10) / 10 << units[i];
-	return (ss.str());
-}
+string	file_size(size_t size);
 
 // Stock the string page, size_t to split in three (head, body, bottom)
 const_string autoidx = file_to_string(AUTOINDEX_TEMPLATE_FILE);
@@ -200,36 +92,16 @@ const_string autoidx_body = autoidx.substr(autoidx_begin + 2, autoidx_end - auto
 const_string autoidx_bottom = autoidx.substr(autoidx_end + 2);
 const_string custom_error = file_to_string(DEFAULT_ERROR_FILE);
 
-std::string ltrim(const std::string &s) {
-    size_t start = s.find_first_not_of(WHITESPACE);
-    return (start == std::string::npos) ? "" : s.substr(start);
-}
+std::string ltrim(const std::string &s);
  
-std::string rtrim(const std::string &s) {
-    size_t end = s.find_last_not_of(WHITESPACE);
-    return (end == std::string::npos) ? "" : s.substr(0, end + 1);
-}
+std::string rtrim(const std::string &s);
 
-std::string trim(const std::string & s) {
-	return rtrim(ltrim(s));
-}
+std::string trim(const std::string & s);
 
 struct sortByComplex { 
-	inline bool operator() (const Route & struct1, const Route & struct2) {
-        return (struct1.path.length() > struct2.path.length());
-    }
+	bool operator() (const Route & struct1, const Route & struct2);
 }	sortByComplex;
 
-bool check_if_file_exists(const std::string name) {
-	std::fstream f(name.c_str());
-	bool ret = f.good();
-	f.close();
-	return ret;
-}
+bool check_if_file_exists(const std::string name);
 
-bool check_if_file_is_dir(const std::string name) {
-   struct stat statbuf;
-   if (stat(name.c_str(), &statbuf) != 0)
-       return 0;
-   return S_ISDIR(statbuf.st_mode);
-}
+bool check_if_file_is_dir(const std::string name);
