@@ -1,6 +1,6 @@
 {
 	"index": "index.html",
-	"allowed_methods": "GET POST",
+	"method": "GET POST",
 	"python_cgi_extension": "py",
 	"perl_cgi_extension": "pl",
 	"upload_root": "./www/cgi/upload",

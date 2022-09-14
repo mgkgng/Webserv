@@ -91,7 +91,7 @@ int Request::parseRequest(string s) {
 		return (400);
 	this->method = head.at(0);
 	if (method != "GET" && method != "POST" && method != "DELETE")
-		return (501); //TODO
+		return (501);
 	this->protocolVer = head.at(2);
 	if (protocolVer != "HTTP/1.1")
 		return (501);
@@ -163,13 +163,20 @@ void Request::putCustomError(int code) {
 	res.ready = true;
 }
 
-void	Request::getContent(string raw, Server & server) {
-	if (this->empty)
-		this->parseRequest(raw);
-	else
+bool	Request::getContent(string raw, Server & server) {
+	if (this->empty) {
+		int code = this->parseRequest(raw);
+		if (code != 200) {
+			server.findCodeHandler(code, *this);
+			return (false);
+		}
+	} else
 		content.parseByte(raw);
-	if (!content.isMultipart && content.raw.size() > headers.count("Content-Length") ? std::atoi(this->headers["Content-Length"].c_str()) : 0)
+	if (!content.isMultipart && content.raw.size() > headers.count("Content-Length") ? std::atoi(this->headers["Content-Length"].c_str()) : 0) {
 		server.findCodeHandler(413, *this);
+		return (false);
+	}
+	return (true);
 }
 
 void Request::postContent(Server & server, Route & route) {

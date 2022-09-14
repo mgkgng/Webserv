@@ -251,7 +251,12 @@ void Server::recvData(struct kevent &ev) {
 	buf[ret] = '\0';
 	Request &req = client[ev.ident];
 
-	req.getContent(buf, *this);
+	bool res = req.getContent(buf, *this);
+	if (!res) {
+		chlist.resize(chlist.size() + 1);
+		EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
+		return ;
+	}
 
 	std::vector<Route> matches;
 	for (routes_t::iterator it = routes.begin(); it != routes.end(); it++ ) {
@@ -277,7 +282,6 @@ void Server::recvData(struct kevent &ev) {
 	if (!req.content.isFullyParsed)
 	 	return ;
 
-	std::cout << matchingRoute.path << " " << req.path << std::endl;
 	std::vector<std::string> a = matchingRoute.methods;
 	if (matchingRoute.redirect.length()) {
 		req.redirect(matchingRoute.redirect);

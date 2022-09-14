@@ -91,7 +91,7 @@ class Request {
 
 		void putAutoIndexRes(const_string &page);
 
-		void getContent(string raw, Server & server);
+		bool getContent(string raw, Server & server);
 		
 		void putCustomError(int code);
 
