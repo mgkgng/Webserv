@@ -96,26 +96,15 @@ class Server {
 				return ;
 			buf[ret] = '\0';
 			Request &req = client[ev.ident];
-			std::cout << buf << std::endl;
 
-			/* check chunked request */
-			if (!req.content.expected) {
-				int reqCode = req.parseRequest(buf);
-				if (reqCode != 200) {
-					req.putCustomError(reqCode);
-					return ;
-				}
-				req.content.initialize(buf, req.headers);
-			} else
-				req.content.parseByte(buf);
+			req.getContent(buf);
+			if (req.content.raw.size() > (unsigned long) atoi(this->maxBodySize.c_str()))
+				req.putCustomError(413);
 			
 			if (!req.content.isFullyParsed)
 			 	return ;
 
-			int reqCode = req.parseRequest(req.content.raw);
-			if (reqCode != 200) {
-				req.putCustomError(reqCode);
-			} else if (req.method == "POST") {
+			if (req.method == "POST") {
 				req.postContent(req, this->routes);			
 			} else if (req.method == "DELETE") {
 				if (!remove((this->root + req.path).c_str()))

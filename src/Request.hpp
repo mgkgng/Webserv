@@ -46,10 +46,14 @@ class Request {
 			if (isChunked) {
 				if (parseChunk(data)) isFullyParsed = true;
 				return;
-			}
+			} 
 			expected -= data.size();
 			raw += data;
-			if (!(expected > 0)) isFullyParsed = true;
+			if (isMultipart) {
+				if (data.find(boundary + "--") != std::string::npos)
+					isFullyParsed = true;
+			} else if (!(expected > 0))
+				isFullyParsed = true;
 		}
 
 		// To parse chunks, we take lines 1 by 1 from the data stringstream
@@ -92,16 +96,16 @@ class Request {
 
 	public:
 		string 						method, path, protocolVer, body, file, root, uploadRoot;
-		bool						uploadable;
+		bool						empty, uploadable;
 		std::map<string, string>	attributes, headers;
 		Content						content;
 		Response					res;
 		uintptr_t					ident;
 
-		Request() : method(""), path(""), protocolVer(""), body(""), file(""), uploadable(true) {
+		Request() : method(""), path(""), protocolVer(""), body(""), file(""), empty(true), uploadable(true) {
 			this->content = Content();
 		}
-		explicit Request(uintptr_t id, string root="", string uploadRoot="") : method(""), path(""), protocolVer(""), body(""), file(""), root(root), uploadRoot(uploadRoot), uploadable(true), ident(id) { this->content = Content(); }
+		explicit Request(uintptr_t id, string root="", string uploadRoot="") : method(""), path(""), protocolVer(""), body(""), file(""), root(root), uploadRoot(uploadRoot), empty(true), uploadable(true), ident(id) { this->content = Content(); }
 		~Request() {}
 
 		int parseRequest(string s) {
@@ -132,6 +136,9 @@ class Request {
 			}
 			while (it != req.end()) // je vais tester
 				this->body += *it++ + "\r\n";
+
+			content.initialize(s, this->headers);
+			this->empty = false;
 			return (200);
 		}
 
@@ -199,6 +206,15 @@ class Request {
 			res.ready = true;
 		}
 
+		void	getContent(string raw) {
+			if (this->empty)
+				this->parseRequest(raw);
+			else
+				content.parseByte(raw);
+			if (!content.isMultipart && content.raw.size() > headers.count("Content-Length") ? std::atoi(this->headers["Content-Length"].c_str()) : 0)
+				this->putCustomError(413);
+		}
+
 		void	postContent(Request &req, std::map<string, Route> routes) {
 			if (!req.uploadable) {
 				req.putCustomError(403);
@@ -206,16 +222,12 @@ class Request {
 			}
 			Route &target = routes[req.path];
 
-			std::cout << "boundary is:" << req.content.boundary << std::endl;
-
-			std::cout << req.content.raw << std::endl;
 			std::vector<string> multiportData = split(req.content.raw, req.content.boundary);
 			std::vector<string> fileData = split(multiportData[2], "\r\n");
 			string fileName = trim(split(fileData[0], ";")[2].substr(11), "\""); // i know it's not perfect but come on
 			string fileContent;
 			unsigned int fileSize = 0;
 
-			std::cout << "what?" << std::endl;
 			for (size_t i = 2; i < fileData.size(); i++) {
 				fileContent += fileData[i];
 				fileSize += fileData[i].length();
@@ -224,14 +236,9 @@ class Request {
 					return ;
 				}
 			}
-			std::cout << "dingding " << std::endl;
-
-			std::cout << req.uploadRoot << fileName << std::endl;
 
 		    std::ofstream out(req.uploadRoot + fileName);
 			out << fileContent;
-
-			std::cout << "coucou" << std::endl;
 
 			res.protocolVer = "HTTP/1.1";
 			res.status = statusCodeToString(Ok);
