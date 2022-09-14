@@ -12,9 +12,7 @@ class Server {
 
 		/* from config */
 		unsigned int	port;
-		string			serverName;
-		string			maxBodySize;
-		string			root;
+		string			serverName, maxBodySize, root, uploadRoot;
 		routes_t		routes;
 		struct sockaddr_in	sockaddr;
 
@@ -62,7 +60,7 @@ class Server {
 				EV_SET(&*(chlist.end() - 2), newConnection, EVFILT_READ, EV_ADD, 0,0, NULL);
 				EV_SET(&*(chlist.end() - 1), newConnection, EVFILT_TIMER, EV_ADD | EV_ONESHOT, 0, 6000, NULL); // TIMEOUT 
 
-				client[newConnection] = Request(newConnection, this->root);
+				client[newConnection] = Request(newConnection, this->root, this->uploadRoot);
 			}
 		};
 		
@@ -98,6 +96,7 @@ class Server {
 				return ;
 			buf[ret] = '\0';
 			Request &req = client[ev.ident];
+			std::cout << buf << std::endl;
 
 			/* check chunked request */
 			if (!req.content.expected) {
@@ -117,7 +116,7 @@ class Server {
 			if (reqCode != 200) {
 				req.putCustomError(reqCode);
 			} else if (req.method == "POST") {
-				req.postContent(req);				
+				req.postContent(req, this->routes);			
 			} else if (req.method == "DELETE") {
 				if (!remove((this->root + req.path).c_str()))
 					req.putCustomError(204);

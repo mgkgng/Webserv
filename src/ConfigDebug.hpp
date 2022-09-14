@@ -50,6 +50,8 @@ class Config {
 					res.root = trim(info.at(1), WHITESPACE);
 				else if (info.at(0) == "route")
 					res.routes[trim(info.at(1), WHITESPACE)] = parseRoute(line, lines, 1);
+				else if (info.at(0) == "upload_root")
+					res.uploadRoot = trim(info.at(1), WHITESPACE);
 				else
 					throw Config::InvalidConfig();
 			}

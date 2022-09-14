@@ -7,9 +7,9 @@ class Route {
 		string				index, root, redirect, cgiExtension, cgiPath;
 		unsigned int		bodySizeLimit;
 		std::vector<string>	methods;
-		bool				autoindex;
+		bool				autoindex, uploadable;
 
-		Route() : index(""), root(""), redirect(""), cgiExtension(""), cgiPath(""), bodySizeLimit(INT32_MAX), autoindex(false) {}
+		Route() : index(""), root(""), redirect(""), cgiExtension(""), cgiPath(""), bodySizeLimit(INT32_MAX), autoindex(false), uploadable(true) {}
 		~Route() {}
 };
 

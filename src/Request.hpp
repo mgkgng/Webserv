@@ -91,16 +91,17 @@ class Request {
 	};
 
 	public:
-		string 						method, path, protocolVer, body, file, root;
+		string 						method, path, protocolVer, body, file, root, uploadRoot;
+		bool						uploadable;
 		std::map<string, string>	attributes, headers;
 		Content						content;
 		Response					res;
 		uintptr_t					ident;
 
-		Request() : method(""), path(""), protocolVer(""), body(""), file("") {
+		Request() : method(""), path(""), protocolVer(""), body(""), file(""), uploadable(true) {
 			this->content = Content();
 		}
-		explicit Request(uintptr_t id, string root="") : method(""), path(""), protocolVer(""), body(""), file(""), root(root), ident(id) { this->content = Content(); }
+		explicit Request(uintptr_t id, string root="", string uploadRoot="") : method(""), path(""), protocolVer(""), body(""), file(""), root(root), uploadRoot(uploadRoot), uploadable(true), ident(id) { this->content = Content(); }
 		~Request() {}
 
 		int parseRequest(string s) {
@@ -198,23 +199,39 @@ class Request {
 			res.ready = true;
 		}
 
-		void	postContent(Request &req) {
+		void	postContent(Request &req, std::map<string, Route> routes) {
+			if (!req.uploadable) {
+				req.putCustomError(403);
+				return ;
+			}
+			Route &target = routes[req.path];
+
+			std::cout << "boundary is:" << req.content.boundary << std::endl;
+
+			std::cout << req.content.raw << std::endl;
 			std::vector<string> multiportData = split(req.content.raw, req.content.boundary);
 			std::vector<string> fileData = split(multiportData[2], "\r\n");
 			string fileName = trim(split(fileData[0], ";")[2].substr(11), "\""); // i know it's not perfect but come on
 			string fileContent;
 			unsigned int fileSize = 0;
+
+			std::cout << "what?" << std::endl;
 			for (size_t i = 2; i < fileData.size(); i++) {
 				fileContent += fileData[i];
 				fileSize += fileData[i].length();
-				if (fileSize > 1024) {
+				if (fileSize > target.bodySizeLimit) {
 					req.putCustomError(413);
 					return ;
 				}
 			}
+			std::cout << "dingding " << std::endl;
 
-		    std::ofstream out("www/cgi/upload/" + fileName);
+			std::cout << req.uploadRoot << fileName << std::endl;
+
+		    std::ofstream out(req.uploadRoot + fileName);
 			out << fileContent;
+
+			std::cout << "coucou" << std::endl;
 
 			res.protocolVer = "HTTP/1.1";
 			res.status = statusCodeToString(Ok);
