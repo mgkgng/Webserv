@@ -73,11 +73,12 @@ class Request {
 		Content						content;
 		Response					res;
 		uintptr_t					ident;
+		bool						empty;
 
-		Request() : method(""), path(""), protocolVer(""), body(""), file("") {
+		Request() : method(""), path(""), protocolVer(""), body(""), file(""), empty(true) {
 			this->content = Content();
 		}
-		explicit Request(uintptr_t id, string root="") : method(""), path(""), protocolVer(""), body(""), file(""), root(root), ident(id) { this->content = Content(); }
+		explicit Request(uintptr_t id, string root="") : method(""), path(""), protocolVer(""), body(""), file(""), root(root), ident(id), empty(true) { this->content = Content(); }
 		~Request() {}
 
 		int parseRequest(string s);
@@ -90,6 +91,8 @@ class Request {
 
 		void putAutoIndexRes(const_string &page);
 
+		void getContent(string raw, Server & server);
+		
 		void putCustomError(int code);
 
 		void postContent(Server & server, Route & route);

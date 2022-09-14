@@ -15,7 +15,7 @@ Config::sbh_t Config::getInformation(const JSON & json, sbh_t ret) {
 		ret.root = json.getStrings().at("root");
 	} catch (std::exception & e) { }
 	try {
-		ret.allowedHTTPmethods = json.getStrings().at("allowed_methods");
+		ret.allowedHTTPmethods = json.getStrings().at("method");
 	} catch (std::exception & e) { }
 	try {
 		ret.path = json.getStrings().at("path");
@@ -30,7 +30,7 @@ Config::sbh_t Config::getInformation(const JSON & json, sbh_t ret) {
 		ret.isuploadable= json.getBooleans().at("uploadable");
 	} catch (std::exception & e) { }
 	try {
-		ret.directoryfile = json.getStrings().at("upload_root");
+		ret.uploadroot = json.getStrings().at("upload_root");
 	} catch (std::exception & e) { }
 	try {
 		ret.host = json.getStrings().at("host");
@@ -57,7 +57,7 @@ Config::sbh_t Config::getInformation(const JSON & json, sbh_t ret) {
 		ret.pythoncgiextension = json.getStrings().at("python_cgi_extension");
 	} catch (std::exception & e) { }
 	try {
-		ret.perlcgiextextension = json.getStrings().at("perl_cgi_extensions");
+		ret.perlcgiextextension = json.getStrings().at("perl_cgi_extension");
 	} catch (std::exception & e) { }
 	return (ret);
 }

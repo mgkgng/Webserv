@@ -78,8 +78,7 @@ void Server::findCodeHandler(int code, Request & req) {
 	codes_t::iterator it = this->codes.begin();
 	for (; it != this->codes.end(); it++) {
 		if (it->second.code == code) {
-			req.putCustomError(code);
-			// TODO HANDLE REDIRECTION
+			req.redirect(it->second.route.path);
 			return;
 		}
 	}
@@ -101,11 +100,9 @@ std::string Server::find_extension(std::string path) {
 }
 
 std::string Server::get_file_from_path(std::string path, std::string route) {
-	std::string ret = path.substr(route.length());
-	if ((*ret.rbegin()) == '/') {
-		ret.pop_back();
-	} 
-	return ret;
+	if (end_with(path, "/"))
+		path = trim(path, "/");
+	return path + route;
 }
 
 std::string Server::get_file_full_path(std::string requested_file, std::string root) {
@@ -117,9 +114,11 @@ std::string Server::get_file_full_path(std::string requested_file, std::string r
 		root.insert(0, 1, '/');
 		root.insert(0, buf);
 	}
-	if (root.find('/', root.length() - 1) == std::string::npos && requested_file.find('/') != 0) {
+	if (!end_with(root, "/")) {
 		root.push_back('/');
 	}
+	if (start_with(requested_file, "/"))
+		requested_file = requested_file.substr(1);
 	return root + requested_file;
 }
 
@@ -168,8 +167,8 @@ void Server::doResBasedOnReq(Request & req, Route & match) {
 		}
 	} else {
 		std::string extension = find_extension(req.path);
-		std::string file = get_file_from_path(req.path, match.path);
-		file = get_file_full_path(file, match.root);
+		std::string temp = req.path.substr(match.path.length());
+		std::string file = get_file_full_path(temp, match.root);
 		if (extension == "") {
 			if (check_if_file_exists(file)) {
 				if (req.method == "GET") {
@@ -206,7 +205,7 @@ void Server::doResBasedOnReq(Request & req, Route & match) {
 			}
 		} else if (extension == match.pythoncgiExtension) {
 			if (check_if_file_exists(file)) {
-				execute_cgi(req, true);
+				execute_cgi(req, false);
 			} else if (check_if_file_is_dir(file) && match.autoindex) {
 				string body = req.res.putAutoIndex(req.path, match.root, file);
 				if (body == "")
@@ -217,7 +216,7 @@ void Server::doResBasedOnReq(Request & req, Route & match) {
 				findCodeHandler(404, req);
 			}
 		} else {
-			if (check_if_file_exists(file)) {
+			if (exist(file)) {
 				if (req.method == "GET") {
 					req.putResponse(match, file);
 				} else if (req.method == "POST") {
@@ -251,24 +250,9 @@ void Server::recvData(struct kevent &ev) {
 		return ;
 	buf[ret] = '\0';
 	Request &req = client[ev.ident];
-	/* check chunked request */
-	if (!req.content.expected) {
-		int reqCode = req.parseRequest(buf);
-		if (reqCode != 200) {
-			findCodeHandler(reqCode, req);
-			return ;
-		}
-		req.content.initialize(buf, req.headers);
-	} else
-		req.content.parseByte(buf);
-	
-	if (!req.content.isFullyParsed)
-	 	return ;
-	int reqCode = req.parseRequest(req.content.raw);
-	if (reqCode != 200) {
-		findCodeHandler(reqCode, req);
-		return ;
-	} 
+
+	req.getContent(buf, *this);
+
 	std::vector<Route> matches;
 	for (routes_t::iterator it = routes.begin(); it != routes.end(); it++ ) {
 		if (req.path.substr(0, it->second.path.length()) == it->second.path) {
@@ -283,19 +267,26 @@ void Server::recvData(struct kevent &ev) {
 			matches.push_back(it->second);
 		}
 	}
+
 	std::sort(matches.begin(), matches.end(), sortByComplex);
 	Route matchingRoute = *(matches.begin());
+
+	if (req.content.raw.size() > matchingRoute.bodySizeLimit) 
+		findCodeHandler(413, req);
+
+	if (!req.content.isFullyParsed)
+	 	return ;
+
+	std::cout << matchingRoute.path << " " << req.path << std::endl;
 	std::vector<std::string> a = matchingRoute.methods;
-	if (std::find(a.begin(), a.end(), req.method) == a.end()) {
+	if (matchingRoute.redirect.length()) {
+		req.redirect(matchingRoute.redirect);
+	} else if (std::find(a.begin(), a.end(), req.method) == a.end()) {
 		findCodeHandler(405, req);
-		return;
 	} else if (req.method == "GET" || req.method == "POST" || req.method == "DELETE") {
 		doResBasedOnReq(req, matchingRoute);
-		return;
-	} else {
+	} else
 		findCodeHandler(501, req);
-		return;
-	}
 	chlist.resize(chlist.size() + 1);
 	EV_SET(&*(chlist.end() - 1), ev.ident, EVFILT_WRITE, EV_ADD, 0, 0, NULL);
 }
@@ -319,17 +310,15 @@ void Server::launch() {
 		evNb = kevent(kq, chlist.data(), chlist.size(), evlist, 1024, NULL);
 		chlist.clear();
 		if (evNb < 0 && errno == EINTR) // protection from CTRL + C (UNIX signal handling)
-			return ;
+			return;
 		for (int i = 0; i < evNb; i++) {
 			struct kevent &ev = evlist[i];
 			if (ev.flags & EV_EOF)
 				disconnect(ev);
 			else if (static_cast<int>(ev.ident) == sockfd)
 				acceptConnection(ev);
-			// else if (ev.flags & EV_CLEAR) {
-			// 	std::cout << "TIMEOUT" << std::endl;
-			//  	setTimeOut(ev);
-			// }
+			else if (ev.flags & EV_CLEAR)
+			 	setTimeOut(ev);
 			else if (ev.filter & EVFILT_READ && !client[ev.ident].res.ready)
 				recvData(ev);
 			else if (ev.filter & EVFILT_WRITE)

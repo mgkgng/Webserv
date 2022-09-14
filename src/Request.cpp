@@ -38,10 +38,16 @@ void Request::Content::parseByte(const_string &data) {
 	if (isChunked) {
 		if (parseChunk(data)) isFullyParsed = true;
 		return;
-	}
+	} 
 	expected -= data.size();
 	raw += data;
-	if (!(expected > 0)) isFullyParsed = true;
+	if (isMultipart) {
+		if (data.find(boundary + "--") != std::string::npos)
+			isFullyParsed = true;
+		return ;
+	}
+	if (!(expected > 0))
+		isFullyParsed = true;
 }
 
 // To parse chunks, we take lines 1 by 1 from the data stringstream
@@ -85,9 +91,9 @@ int Request::parseRequest(string s) {
 		return (400);
 	this->method = head.at(0);
 	if (method != "GET" && method != "POST" && method != "DELETE")
-		return (501);
+		return (501); //TODO
 	this->protocolVer = head.at(2);
-	if (protocolVer != "HTTP/v1.1")
+	if (protocolVer != "HTTP/1.1")
 		return (501);
 	std::vector<string> pq = split(head.at(1), "?");
 	this->path = pq.at(0);
@@ -99,7 +105,6 @@ int Request::parseRequest(string s) {
 			this->attributes.insert(std::pair<string, string>(kv.at(0), kv.at(1)));
 		}
 	}
-
 	// headers
 	std::vector<string>::iterator it;
 	for (it = req.begin() + 1; it != req.end() && it->find(":") != string::npos; it++) {
@@ -108,6 +113,9 @@ int Request::parseRequest(string s) {
 	}
 	while (it != req.end()) // je vais tester
 		this->body += *it++ + "\r\n";
+
+	this->content.initialize(s, this->headers);
+	this->empty = false;
 	return (200);
 }
 
@@ -120,9 +128,6 @@ void Request::redirect(string re) {
 
 void Request::putResponse(Route & route, const_string & file) {
 	this->res.protocolVer = "HTTP/1.1";
-	if (route.redirect.length()) {
-		redirect(route.redirect);
-	}
 	this->res.status = statusCodeToString(Ok);
 	this->putResBody(route, file);
 	this->res.ready = true;
@@ -131,11 +136,12 @@ void Request::putResponse(Route & route, const_string & file) {
 void Request::putResBody(Route & route, const_string & file) {
 	std::ifstream f(file);
 	std::stringstream buf;
+	(void) route;
 
 	buf << f.rdbuf();
 	res.body = buf.str();
 	res.headers["Content-Length"] = std::to_string(res.body.length());
-	res.headers["Content-Type"] = mime(route.index);
+	res.headers["Content-Type"] = mime(file);
 }
 
 void Request::putAutoIndexRes(const_string &page) {
@@ -157,7 +163,20 @@ void Request::putCustomError(int code) {
 	res.ready = true;
 }
 
+void	Request::getContent(string raw, Server & server) {
+	if (this->empty)
+		this->parseRequest(raw);
+	else
+		content.parseByte(raw);
+	if (!content.isMultipart && content.raw.size() > headers.count("Content-Length") ? std::atoi(this->headers["Content-Length"].c_str()) : 0)
+		server.findCodeHandler(413, *this);
+}
+
 void Request::postContent(Server & server, Route & route) {
+	if (!route.uploadable) {
+		server.findCodeHandler(403, *this);
+		return ;
+	}
 	std::vector<string> multiportData = split(this->content.raw, this->content.boundary);
 	std::vector<string> fileData = split(multiportData[2], "\r\n");
 	string fileName = trim(split(fileData[0], ";")[2].substr(11), "\""); // i know it's not perfect but come on
@@ -172,21 +191,18 @@ void Request::postContent(Server & server, Route & route) {
 		}
 	}
 
-	if (route.uploadable) {
-		if (*(route.uploadRoot.rbegin()) != '/')
-			route.uploadRoot.push_back('/');
-		std::ofstream out(route.uploadRoot + fileName); 
-		out << fileContent;
+	if (!end_with(route.uploadRoot, "/"))
+		route.uploadRoot += "/";
+	std::ofstream out(route.uploadRoot + fileName); 
+	out << fileContent;
 
-		res.protocolVer = "HTTP/1.1";
-		res.status = statusCodeToString(Ok);
-		res.body = "file upload success";
-		res.headers["Content-Length"] = std::to_string(res.body.length());
-		res.headers["Content-Type"] = "text/html";
-		res.ready = true;
-	} else {
-		server.findCodeHandler(403, *this);
-	}
+	res.protocolVer = "HTTP/1.1";
+	res.status = statusCodeToString(Ok);
+	res.body = "file upload success";
+	res.headers["Content-Length"] = std::to_string(res.body.length());
+	res.headers["Content-Type"] = "text/html";
+	res.ready = true;
+
 }
 
 void Request::clean() {

@@ -7,8 +7,10 @@
 	"root": "./www/",
 	"uploadable": false,
 	"autoindex": false,
+	"client_body_size": "100000000",
 	"route index": {
-		"path": "/"
+		"path": "/",
+		"autoindex": true
 	},
 	"route post": {
 		"uploadable": true,
@@ -19,7 +21,7 @@
 		"path": "/autoindex",
 		"method": "GET POST DELETE",
 		"autoindex": true,
-		"index": "autoindex.html",
+		"index": "",
 		"root": "./www/autoindex"
 	},
 	"route bonus": {
@@ -28,15 +30,15 @@
 	},
 	"route min-kang": {
 		"path": "/min-kang",
-		"redirect": "https://github.com/mgkgng"
+		"redirect": "http://www.github.com/mgkgng"
 	},
 	"route sspina": {
 		"path": "/sspina",
-		"redirect": "https://github.com/salvatorespina"
+		"redirect": "http://www.github.com/salvatorespina"
 	},
 	"route jrathelo": {
 		"path": "/jrathelo",
-		"redirect": "https://github.com/blenderwizard"
+		"redirect": "http://www.github.com/blenderwizard"
 	},
 	"code 404": {
 		"code": 404,
@@ -44,12 +46,11 @@
 	},
 	"route 404": {
 		"index": "error_404.html",
-		"autoindex": true,
 		"path": "/404",
 		"root": "./www/error_pages"
 	},
 	"server0": {
-		"host": "c4r1p6.42nice.fr",
-		"port": 8080
+		"host": "127.0.0.1",
+		"port": 42069
 	}
 }
