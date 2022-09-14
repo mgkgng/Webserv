@@ -1,14 +1,16 @@
 {
 	"index": "index.html",
-	"allowed_methods": "GET POST",
+	"method": "GET POST",
 	"python_cgi_extension": "py",
 	"perl_cgi_extension": "pl",
 	"upload_root": "./www/cgi/upload",
 	"root": "./www/",
 	"uploadable": false,
 	"autoindex": false,
+	"client_body_size": "100000000",
 	"route index": {
-		"path": "/"
+		"path": "/",
+		"autoindex": true
 	},
 	"route post": {
 		"uploadable": true,
@@ -19,12 +21,24 @@
 		"path": "/autoindex",
 		"method": "GET POST DELETE",
 		"autoindex": true,
-		"index": "autoindex.html",
+		"index": "",
 		"root": "./www/autoindex"
 	},
 	"route bonus": {
 		"path": "/bonus",
 		"index": "bonus.html"
+	},
+	"route min-kang": {
+		"path": "/min-kang",
+		"redirect": "http://www.github.com/mgkgng"
+	},
+	"route sspina": {
+		"path": "/sspina",
+		"redirect": "http://www.github.com/salvatorespina"
+	},
+	"route jrathelo": {
+		"path": "/jrathelo",
+		"redirect": "http://www.github.com/blenderwizard"
 	},
 	"code 404": {
 		"code": 404,
@@ -32,16 +46,15 @@
 	},
 	"route 404": {
 		"index": "error_404.html",
-		"autoindex": true,
 		"path": "/404",
 		"root": "./www/error_pages"
 	},
 	"server0": {
-		"host": "localhost",
-		"port": 8080
+		"host": "127.0.0.1",
+		"port": 42069
 	},
 	"server1": {
-		"host": "localhost",
-		"port": 8090
+		"host": "127.0.0.1",
+		"port": 42071
 	}
 }
