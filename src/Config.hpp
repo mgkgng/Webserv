@@ -85,7 +85,7 @@ class Config {
 					continue;
 					//res.routes = parseRoute(line, lines, dotNb + 1);*/
 				else if (info.at(0) == "redirect")
-					res.redirect = trim(info.at(1), WHITESPACE);
+					res.redirect = trim(info.at(1), WHITESPACE) + ":" + info.at(2);
 				else
 					throw Config::InvalidConfig();
 			}

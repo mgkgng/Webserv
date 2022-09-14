@@ -4,13 +4,11 @@
 
 class Request {
 	private:
-
 	// Struct to help manage the parse and keep a cleaner Request
 	struct Content {
 		string 		raw, boundary;
 		bool		isMultipart, isChunked, isFullyParsed;
 		int			expected;
-
 
 		void initialize(const_string &data, const std::map<string, string> &headers) {
 			std::map<string, string>::const_iterator iter;
@@ -133,18 +131,24 @@ class Request {
 			}
 			while (it != req.end()) // je vais tester
 				this->body += *it++ + "\r\n";
-			
 			return (200);
 		}
 
-		// void redirect(string re) {
-			
-		// }
+		void redirect(string re) {
+			this->res.protocolVer = "HTTP/1.1";
+			this->res.status = statusCodeToString(MovedPermanently);
+			this->res.headers["Location"] = re;
+			this->res.ready = true;
+		}
 
 		void putResponse(std::map<string, Route> routes) {
 			this->res.protocolVer = "HTTP/1.1";
 			std::map<string, Route>::iterator it = routes.find(this->path);
 			if (it != routes.end()) {
+				if (routes[this->path].redirect.length()) {
+					redirect(routes[this->path].redirect);
+					return ;
+				}
 				this->res.status = statusCodeToString(Ok);
 				this->putResBody(routes[path]);
 			} else if (exist(this->root + this->path)) {
