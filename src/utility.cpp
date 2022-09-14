@@ -1,4 +1,5 @@
 #include "utility.hpp"
+#include "statusCodes.hpp"
 
 bool exist(const string& fname) {
   struct stat buffer;
@@ -54,12 +55,6 @@ string to_upper_string(string str) {
     return (str);
 }
 
-template<typename T> string to_string(const T &status_code) {  
-	std::ostringstream in_string;
-	in_string << status_code;
-	return (in_string.str());
-}
-
 string replace_all_occurrency(string s, const_string &to_replace, const_string &replace) {
     size_t  current = 0;
     while (true)
@@ -70,26 +65,6 @@ string replace_all_occurrency(string s, const_string &to_replace, const_string &
         current = found + replace.size();
     }
     return (s);
-}
-
-template<typename Elem, typename Type> bool is_found_in(Elem elem, size_t n, Type first, ...) {
-        va_list         args;
-        va_start(args, first);
-
-        while (n--)
-        {
-            if (elem == first) {
-                va_end(args);
-                return (true);
-            }
-            first = va_arg(args, Type);
-        }
-        va_end(args);
-        return (false);
-}
-
-template<typename T> bool includes(std::vector<T> vec, T elem) {
-    return (std::find(vec.begin(), vec.end(), elem) != vec.end()) ? true : false;
 }
 
 string	file_to_string(const_string &filename) {
@@ -131,10 +106,6 @@ std::string trim(const std::string & s) {
 	return rtrim(ltrim(s));
 }
 
-bool sortByComplex::operator() (const Route & struct1, const Route & struct2) {
-    return (struct1.path.length() > struct2.path.length());
-}
-
 bool check_if_file_exists(const std::string name) {
 	std::fstream f(name.c_str());
 	bool ret = f.good();
@@ -147,4 +118,8 @@ bool check_if_file_is_dir(const std::string name) {
    if (stat(name.c_str(), &statbuf) != 0)
        return 0;
    return S_ISDIR(statbuf.st_mode);
+}
+
+std::string statusCodeToString(int statCode) {
+	return (std::to_string(statCode) + " " + statusCode.getError(statCode));
 }

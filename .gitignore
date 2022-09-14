@@ -38,3 +38,5 @@ webserv
 *.dSYM
 .DS_Store
 *test*
+
+*.tmp

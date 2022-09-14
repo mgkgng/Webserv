@@ -1,7 +1,26 @@
 #include "ReqRes.hpp"
 #include "cgi.hpp"
+#include "utility.hpp"
 #include "statusCodes.hpp"
+
 #include <vector>
+#include <stdarg.h>
+
+bool is_found_in(const char* elem, size_t n, const char* first, ...) {
+        va_list         args;
+        va_start(args, first);
+
+        while (n--)
+        {
+            if (elem == first) {
+                va_end(args);
+                return (true);
+            }
+            first = va_arg(args, const char*);
+        }
+        va_end(args);
+        return (false);
+}
 
 char **CGI_Environment::env_to_execve() const {
 	char **env_execveable = new char *[variable.size() + 1];
@@ -18,9 +37,9 @@ void CGI_Environment::name_formatter(string & name) {
 }
 
 void CGI_Environment::is_special_case(string &name) {
-    if (is_found_in(name, 5, "ACCEPT", "ACCEPT_LANGUAGE", "USER_AGENT", "COOKIE", "REFERER"))
+    if (is_found_in(name.c_str(), 5, "ACCEPT", "ACCEPT_LANGUAGE", "USER_AGENT", "COOKIE", "REFERER"))
 		name = "HTTP_" + name;
-	else if (is_found_in(name, 1, "HOST"))
+	else if (is_found_in(name.c_str(), 1, "HOST"))
 		name = "REMOTE_" + name;
 }
 

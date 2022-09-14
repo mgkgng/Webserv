@@ -1,7 +1,6 @@
 #include <string>
 #include <iostream>
 
-#include "statusCodes.hpp"
 #include "Server.hpp"
 #include "Config.hpp"
 #include "JSON.hpp"

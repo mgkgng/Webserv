@@ -106,8 +106,3 @@ struct StatusCode {
 };
 
 const StatusCode statusCode;
-
-std::string statusCodeToString(int statCode)
-{
-	return (to_string(statCode) + " " + statusCode.getError(statCode));
-}

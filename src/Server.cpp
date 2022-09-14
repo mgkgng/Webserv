@@ -5,6 +5,13 @@
 #include <arpa/inet.h>
 #include <string>
 
+struct sortByComplex { 
+	bool operator() (const Route & struct1, const Route & struct2) {
+    	return (struct1.path.length() > struct2.path.length());
+	}
+}	sortByComplex;
+
+
 void Server::init_server() {
 	struct hostent *hp;
 

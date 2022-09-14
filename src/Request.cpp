@@ -25,7 +25,7 @@ void Request::Content::initialize(const_string &data, const std::map<string, str
 	// Check if the Request is chunked
 	if ((iter = headers.find("Transfer-Encoding")) != headers.end()) {
 		std::vector<string> fields = split(iter->second, ", ");
-		if (includes(fields, string("chunked")))
+		if (std::find(fields.begin(), fields.end(), string("chunked")) != fields.end())
 			isChunked = true;
 	}
 	parseByte(data);
@@ -148,7 +148,7 @@ void Request::putAutoIndexRes(const_string &page) {
 }
 
 void Request::putCustomError(int code) {
-	string	file = replace_all_occurrency(replace_all_occurrency(custom_error, "$NAME", statusCodeToString(code)), "$CODE", to_string(code));
+	string	file = replace_all_occurrency(replace_all_occurrency(custom_error, "$NAME", statusCodeToString(code)), "$CODE", std::to_string(code));
 	res.protocolVer = "HTTP/1.1";
 	res.status = statusCodeToString(code);
 	res.body = file;

@@ -67,14 +67,7 @@ string to_lower_string(string str);
 
 string to_upper_string(string str);
 
-// http://www.cplusplus.com/articles/D9j2Nwbp/
-template<typename T> string to_string(const T &status_code);
-
 string replace_all_occurrency(string s, const_string &to_replace, const_string &replace);
-
-template<typename Elem, typename Type> bool is_found_in(Elem elem, size_t n, Type first, ...);
-
-template<typename T> bool includes(std::vector<T> vec, T elem);
 
 // AUTOINDEX
 // Basically, the entire template page is turned into a string
@@ -98,10 +91,8 @@ std::string rtrim(const std::string &s);
 
 std::string trim(const std::string & s);
 
-struct sortByComplex { 
-	bool operator() (const Route & struct1, const Route & struct2);
-}	sortByComplex;
-
 bool check_if_file_exists(const std::string name);
 
 bool check_if_file_is_dir(const std::string name);
+
+std::string statusCodeToString(int statCode);
