@@ -278,8 +278,7 @@ class Server {
 			if (req.method == "POST") {
 				req.postContent(req, *this);				
 			} else if (req.method == "DELETE") {
-<<<<<<< HEAD
-				if (!remove(("www" + req.path).c_str())) {
+				if (!remove((this->root + req.path).c_str())) {
 					findCodeHandler(204, req);
 					return ;
 				} else {
@@ -287,17 +286,8 @@ class Server {
 					return ;
 				}
 			} else if (is_CGI(req.path)) {
-				if (exist("www" + req.path))
-					return;
-=======
-				if (!remove((this->root + req.path).c_str()))
-					req.putCustomError(204);
-				else
-					req.putCustomError(500);
-			} else if (is_CGI(req.path)) {
 				if (exist(this->root + req.path))
-					execute_cgi(req);
->>>>>>> origin/avant
+					return;
 				else
 					findCodeHandler(404, req);
 			} else if (is_autoindex_on(req.path, this->routes)) {
