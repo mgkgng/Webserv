@@ -74,6 +74,7 @@ class Server {
 			Request	&req = client[ev.ident];
 			string	res = req.res.getStr();	
 
+			std::cout << " i'm in send "<< std::endl;
 			/* send */
 			size_t bits = send(ev.ident, res.c_str() + req.res.sendBits , res.length(), MSG_DONTWAIT);
 			req.res.sendBits += bits;
@@ -167,8 +168,10 @@ class Server {
 						disconnect(ev);
 					else if (static_cast<int>(ev.ident) == sockfd)
 						acceptConnection(ev);
-					// else if (ev.flags & EV_CLEAR)
-					// 	setTimeOut(ev);
+					else if (ev.flags & EV_CLEAR) {
+						std::cout << "TIMEOUT" << std::endl;
+					 	setTimeOut(ev);
+					}
 					else if (ev.filter & EVFILT_READ && !client[ev.ident].res.ready)
 						recvData(ev);
 					else if (ev.filter & EVFILT_WRITE)
