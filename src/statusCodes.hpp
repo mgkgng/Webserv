@@ -4,7 +4,6 @@
 
 // https://www.restapitutorial.com/httpstatuscodes.html
 enum StatusCodes {
-
 	None = 0, Incomplete = 1,
 	// Starting with 100, we have the informational status codes
 	Continue = 100, SwitchingProtocols, Processing, EarlyHints,

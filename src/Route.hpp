@@ -4,11 +4,16 @@ using std::string;
 
 class Route {
 	public:
+<<<<<<< HEAD
 		string				index, root, redirect, pythoncgiExtension, perlcgiExtension, cgiPath, rootFile, uploadRoot, path;
+=======
+		string				index, root, redirect, cgiExtension, cgiPath;
+>>>>>>> origin/avant
 		unsigned int		bodySizeLimit;
 		std::vector<string>	methods;
 		bool				autoindex, uploadable;
 
+<<<<<<< HEAD
 		Route() : autoindex(false) {}
 		Route(bool autoindex, string & rootFile, bool uploadable, string & uploadRoot, string & index, string & root, string & path, string & redirect, unsigned int bodySizeLimit, std::vector<string> & methods, string & pythoncgiExtension, string & perlcgiExtension) : 
 			index(index),
@@ -23,6 +28,9 @@ class Route {
 			methods(methods),
 			autoindex(autoindex), 
 			uploadable(uploadable) {}
+=======
+		Route() : index(""), root(""), redirect(""), cgiExtension(""), cgiPath(""), bodySizeLimit(INT32_MAX), autoindex(false) {}
+>>>>>>> origin/avant
 		~Route() {}
 };
 
