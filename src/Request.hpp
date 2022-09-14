@@ -93,7 +93,7 @@ class Request {
 	};
 
 	public:
-		string 						method, path, protocolVer, body, file;
+		string 						method, path, protocolVer, body, file, root;
 		std::map<string, string>	attributes, headers;
 		Content						content;
 		Response					res;
@@ -102,7 +102,7 @@ class Request {
 		Request() : method(""), path(""), protocolVer(""), body(""), file("") {
 			this->content = Content();
 		}
-		Request(uintptr_t id) : ident(id) { this->content = Content(); }
+		explicit Request(uintptr_t id, string root="") : method(""), path(""), protocolVer(""), body(""), file(""), root(root), ident(id) { this->content = Content(); }
 		~Request() {}
 
 		int parseRequest(string s) {
@@ -135,22 +135,21 @@ class Request {
 				this->body += *it++ + "\r\n";
 			
 			return (200);
-			// std::cout << this->body << std::endl;
 		}
 
-		void putResponse(std::map<string, Route> routes) {
+		// void redirect(string re) {
+			
+		// }
 
+		void putResponse(std::map<string, Route> routes) {
 			this->res.protocolVer = "HTTP/1.1";
 			std::map<string, Route>::iterator it = routes.find(this->path);
 			if (it != routes.end()) {
 				this->res.status = statusCodeToString(Ok);
 				this->putResBody(routes[path]);
-			} else if (exist("www" + path)) {
+			} else if (exist(this->root + this->path)) {
 				this->res.status = statusCodeToString(Ok);
-				this->putResBody("www" + path);
-			} else if (exist("www/cgi" + split(path, "?").at(0))) {
-				this->res.status = statusCodeToString(Ok);
-				this->putResBody("www/cgi" + split(path, "?").at(0), true);
+				this->putResBody(this->root + path);
 			} else
 				putCustomError(404);
 			this->res.ready = true;
@@ -166,14 +165,14 @@ class Request {
 			res.headers["Content-Type"] = mime(route.index);
 		}
 
-		void	putResBody(string fName, bool cgi = false) {
+		void	putResBody(string fName) {
 			std::ifstream f(fName);
 			std::stringstream buf;
 
 			buf << f.rdbuf();
 			res.body = buf.str();
 			res.headers["Content-Length"] = std::to_string(res.body.length());
-			res.headers["Content-Type"] = (!cgi) ? mime(fName) : split(this->headers["Accept"], ",").at(0);
+			res.headers["Content-Type"] = mime(fName);
 		}
 
 		void	putAutoIndexRes(const_string &page) {
@@ -191,7 +190,7 @@ class Request {
 			res.status = statusCodeToString(code);
 			res.body = file;
 			res.headers["Content-Length"] = std::to_string(res.body.length());
-			res.headers["Content-Type"] = split(this->headers["Accept"], ",").at(0);
+			res.headers["Content-Type"] = "text/html";
 			res.ready = true;
 		}
 

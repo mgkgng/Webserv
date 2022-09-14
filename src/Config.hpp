@@ -46,10 +46,13 @@ class Config {
 					res.serverName = trim(info.at(1), WHITESPACE);
 				else if (info.at(0) == "maxbodysize")
 					res.maxBodySize = trim(info.at(1), WHITESPACE);
-				else if (info.at(0) == "route")
-					res.routes[trim(info.at(1), WHITESPACE)] = parseRoute(line, lines, 1);
-				else if (info.at(0) == "error")
-					continue;
+				else if (info.at(0) == "root")
+					res.root = trim(info.at(1), WHITESPACE);
+				else if (info.at(0) == "route") {
+					string routeName = trim(info.at(1), WHITESPACE);
+					res.routes[routeName] = parseRoute(line, lines, 1);
+					res.routes[routeName].routeName = routeName;
+				}
 				else
 					throw Config::InvalidConfig();
 			}

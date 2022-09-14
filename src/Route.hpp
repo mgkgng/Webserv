@@ -4,17 +4,18 @@ using std::string;
 
 class Route {
 	public:
-		string				index, root, redirect, cgiExtension, cgiPath;
+		string				routeName, index, root, redirect, cgiExtension, cgiPath;
 		unsigned int		bodySizeLimit;
 		std::vector<string>	methods;
 		bool				autoindex;
 
-		Route() : autoindex(false) {}
+		Route() : routeName(""), index(""), root(""), redirect(""), cgiExtension(""), cgiPath(""), bodySizeLimit(INT32_MAX), autoindex(false) {}
 		~Route() {}
 };
 
 std::ostream &operator<<(std::ostream &os, Route &route)
 {
+	os << "routeName: " << route.routeName << std::endl;
 	os << "index: " << route.index << std::endl;
 	os << "root: " << route.root << std::endl;
 	os << "bodysize limit: " << route.bodySizeLimit << std::endl;
